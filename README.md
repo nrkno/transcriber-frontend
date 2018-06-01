@@ -1,5 +1,7 @@
 # Transcriber
 
+Transcriber is a web app using Google speech-to-text API for transcribing audio files. Transcoding, transcription and database is handled by Cloud functions and Firebase, while React JS is used for the web frontend.
+
 ## Tech overview
 
 * [React JS](https://reactjs.org)
@@ -8,14 +10,14 @@
 * [Cloud Speech-to-text](https://cloud.google.com/speech-to-text/)
 * [Cloud Realtime Database](https://firebase.google.com/docs/database/)
 
-# Frontend
-
-See [README](frontend)
-
 # Backend
 
-See [README](backend)
+See [README](backend).
+
+# Frontend
+
+See [README](frontend).
 
 ## License
 
-Transcriber is [MIT licensed](license).
+Transcriber is MIT licensed.

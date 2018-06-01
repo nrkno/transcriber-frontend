@@ -1,0 +1,34 @@
+{
+  "name": "transcriber-backend",
+  "scripts": {
+    "lint": "tslint --project tsconfig.json",
+    "serve": "npm run build && firebase serve --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "build": "tsc"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "@google-cloud/speech": "^1.5.0",
+    "ffmpeg-static": "^2.3.0",
+    "firebase-admin": "^5.12.1",
+    "firebase-functions": "^1.0.3",
+    "fluent-ffmpeg": "^2.1.2"
+  },
+  "devDependencies": {
+    "@types/ffmpeg-static": "^2.0.0",
+    "@types/fluent-ffmpeg": "^2.1.6",
+    "tslint": "^5.10.0",
+    "tslint-config-prettier": "^1.13.0",
+    "typescript": "^2.5.3"
+  },
+  "private": true,
+  "contributors": [
+    "Anders Evjen <anders.evjen@nrk.no>",
+    "Øystein Pettersen <oystein.pettersen@nrk.no>",
+    "Andreas Schjønhaug <andreas@schjonhaug.com>",
+    "Thomas Ulsrød <thomas.ulsrod@nrk.no>"
+  ]
+}

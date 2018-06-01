@@ -1,4 +1,4 @@
-# First time set up
+# Set up
 
 * Create two [Firebase projects](https://console.firebase.google.com/), one for development and another for production.
 * Turn on the Firebase Realtime Database and Storage.

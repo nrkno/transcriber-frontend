@@ -1,4 +1,4 @@
-# First time set up
+# Set up
 
 * Follow the steps in setting up the backend.
 * In the Firebase Console, Choose "Add Firebase to your web project" copy the values of `apiKey`, `databaseURL`, and the name of your uploads bucket and paste them in to `.env.development` and `.env.production`.

@@ -39,7 +39,7 @@ function saveResult(speechRecognitionResults, id) {
             database
                 .ref(`/transcripts/${id}/text`)
                 .push(JSON.parse(JSON.stringify(words)));
-            const percent = Math.round((index + 1) / speechRecognitionResults.length * 100);
+            const percent = Math.round(((index + 1) / speechRecognitionResults.length) * 100);
             if (index + 1 < speechRecognitionResults.length) {
                 yield updateTranscript(id, {
                     "progress/percent": percent
@@ -228,7 +228,7 @@ exports.transcription = functions.database
             throw Error("Transcript missing");
         }
         const languageCode = transcript.audioFile.languageCode;
-        console.log(`Deployed 28. mai 11:12 - Start transcription of id ${id} with ${languageCode} `);
+        console.log(`Deployed 05.06.2018 08:20 - Start transcription of id ${id} with ${languageCode} `);
         // First, check if status is "uploaded", otherwise, cancel
         if (transcript.progress.status !== enums_1.Status.Uploaded) {
             console.error("Transcript already processed");
@@ -255,8 +255,8 @@ exports.transcription = functions.database
     }
 }));
 process.on("unhandledRejection", (reason, promise) => {
-    console.log("Unhandled Rejection at: Promise", promise, "reason:", reason);
-    console.log(reason.stack);
+    console.error("Unhandled Rejection at: Promise", promise, "reason:", reason);
+    console.error(reason.stack);
     // application specific logging, throwing an error, or other logic here
 });
 //# sourceMappingURL=index.js.map

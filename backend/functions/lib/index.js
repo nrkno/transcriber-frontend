@@ -68,9 +68,14 @@ function trans(operation, id) {
             operation.on("progress", (longRunningRecognizeMetadata, apiResponse) => __awaiter(this, void 0, void 0, function* () {
                 const percent = longRunningRecognizeMetadata.progressPercent;
                 if (percent !== undefined) {
-                    yield updateTranscript(id, {
-                        "progress/percent": percent
-                    });
+                    try {
+                        yield updateTranscript(id, {
+                            "progress/percent": percent
+                        });
+                    }
+                    catch (error) {
+                        console.error(error);
+                    }
                 }
                 console.log("progress", longRunningRecognizeMetadata, apiResponse);
             }));
@@ -115,7 +120,7 @@ function hoursMinutesSecondsToSeconds(duration) {
 }
 function updateTranscript(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield database.ref(`/transcripts/${id}`).update(Object.assign({}, data));
+        return database.ref(`/transcripts/${id}`).update(Object.assign({}, data));
     });
 }
 /////////////////
@@ -124,7 +129,7 @@ function updateTranscript(id, data) {
 /**
  * Utility method to convert audio to mono channel using FFMPEG.
  */
-function reencodeAsync(tempFilePath, targetTempFilePath, id) {
+function reencode(tempFilePath, targetTempFilePath, id) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
             const command = ffmpeg(tempFilePath)
@@ -189,7 +194,7 @@ function transcodeAudio(languageCode, id) {
         yield uploadsBucket.file(id).download({ destination: tempFilePath });
         console.log("Audio downloaded locally to", tempFilePath);
         // Convert the audio to mono channel using FFMPEG.
-        yield reencodeAsync(tempFilePath, targetTempFilePath, id);
+        yield reencode(tempFilePath, targetTempFilePath, id);
         console.log("Output audio created at", targetTempFilePath);
         // Getting the bucket reference from Google Cloud Runtime Configuration API
         const transcodedBucketReference = functions.config().bucket.transcoded;
@@ -228,11 +233,10 @@ exports.transcription = functions.database
             throw Error("Transcript missing");
         }
         const languageCode = transcript.audioFile.languageCode;
-        console.log(`Deployed 05.06.2018 08:20 - Start transcription of id ${id} with ${languageCode} `);
+        console.log(`Deployed 16:10 - Start transcription of id ${id} with ${languageCode} `);
         // First, check if status is "uploaded", otherwise, cancel
         if (transcript.progress.status !== enums_1.Status.Uploaded) {
-            console.error("Transcript already processed");
-            return null;
+            throw new Error("Transcript already processed");
         }
         // 1. Transcode
         const gcsUri = yield transcodeAudio(languageCode, id);
@@ -251,12 +255,11 @@ exports.transcription = functions.database
                 status: "failed"
             }
         });
-        return null;
+        throw error;
     }
 }));
 process.on("unhandledRejection", (reason, promise) => {
-    console.error("Unhandled Rejection at: Promise", promise, "reason:", reason);
-    console.error(reason.stack);
-    // application specific logging, throwing an error, or other logic here
+    console.error(new Error(`Unhandled Rejection at: Promise: ${promise} with reason: ${reason.stack ||
+        reason}`));
 });
 //# sourceMappingURL=index.js.map

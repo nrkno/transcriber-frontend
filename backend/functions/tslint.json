@@ -1,7 +1,7 @@
 {
   "extends": ["tslint:recommended", "tslint-config-prettier"], // https://github.com/palantir/tslint/blob/master/src/configs/recommended.ts
   "rules": {
-    "semicolon": [true, "never"],
+    "semicolon": [false, "never"],
     "no-console": false,
     "await-promise": true, //Warns for an awaited value that is not a Promise.
     "no-return-await": true, // Disallows unnecessary return await.

@@ -2,7 +2,6 @@ import * as speech from "@google-cloud/speech"
 import * as ffmpegStatic from "ffmpeg-static"
 import * as admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import { ObjectMetadata } from "firebase-functions/lib/providers/storage"
 import * as ffmpeg from "fluent-ffmpeg"
 import * as fs from "fs"
 import * as os from "os"
@@ -79,11 +78,14 @@ async function trans(operation, id: string) {
       async (longRunningRecognizeMetadata, apiResponse) => {
         const percent = longRunningRecognizeMetadata.progressPercent
         if (percent !== undefined) {
-          await updateTranscript(id, {
-            "progress/percent": percent
-          })
+          try {
+            await updateTranscript(id, {
+              "progress/percent": percent
+            })
+          } catch (error) {
+            console.error(error)
+          }
         }
-
         console.log("progress", longRunningRecognizeMetadata, apiResponse)
       }
     )
@@ -138,7 +140,7 @@ function hoursMinutesSecondsToSeconds(duration: string): number {
 }
 
 async function updateTranscript(id: string, data: object) {
-  await database.ref(`/transcripts/${id}`).update({ ...data })
+  return database.ref(`/transcripts/${id}`).update({ ...data })
 }
 
 /////////////////
@@ -148,7 +150,7 @@ async function updateTranscript(id: string, data: object) {
 /**
  * Utility method to convert audio to mono channel using FFMPEG.
  */
-async function reencodeAsync(
+async function reencode(
   tempFilePath: string,
   targetTempFilePath: string,
   id: string
@@ -223,7 +225,7 @@ async function transcodeAudio(languageCode: string, id: string) {
   console.log("Audio downloaded locally to", tempFilePath)
 
   // Convert the audio to mono channel using FFMPEG.
-  await reencodeAsync(tempFilePath, targetTempFilePath, id)
+  await reencode(tempFilePath, targetTempFilePath, id)
 
   console.log("Output audio created at", targetTempFilePath)
 
@@ -280,14 +282,13 @@ exports.transcription = functions.database
       const languageCode = transcript.audioFile.languageCode
 
       console.log(
-        `Deployed 05.06.2018 08:20 - Start transcription of id ${id} with ${languageCode} `
+        `Deployed 16:10 - Start transcription of id ${id} with ${languageCode} `
       )
 
       // First, check if status is "uploaded", otherwise, cancel
 
       if (transcript.progress.status !== Status.Uploaded) {
-        console.error("Transcript already processed")
-        return null
+        throw new Error("Transcript already processed")
       }
 
       // 1. Transcode
@@ -318,12 +319,15 @@ exports.transcription = functions.database
         }
       })
 
-      return null
+      throw error
     }
   })
 
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at: Promise", promise, "reason:", reason)
-  console.error(reason.stack)
-  // application specific logging, throwing an error, or other logic here
+process.on("unhandledRejection", (reason: any, promise: Promise<any>) => {
+  console.error(
+    new Error(
+      `Unhandled Rejection at: Promise: ${promise} with reason: ${reason.stack ||
+        reason}`
+    )
+  )
 })

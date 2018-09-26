@@ -56,26 +56,25 @@ async function saveResult(speechRecognitionResults: any, id: string) {
 
 async function trans(operation, id: string) {
   return new Promise((resolve, reject) => {
-    // Adding a listener for the "complete" event starts polling for the
-    // completion of the operation.
-    operation.on(
-      "complete",
-      (
-        longRunningRecognizeResponse,
-        longRunningRecognizeMetadata,
-        finalApiResponse
-      ) => {
-        const speechRecognitionResults = longRunningRecognizeResponse.results
+    operation
+      .on(
+        "complete",
+        (
+          longRunningRecognizeResponse,
+          longRunningRecognizeMetadata,
+          finalApiResponse
+        ) => {
+          // Adding a listener for the "complete" event starts polling for the
+          // completion of the operation.
 
-        resolve(speechRecognitionResults)
-      }
-    )
+          const speechRecognitionResults = longRunningRecognizeResponse.results
+          resolve(speechRecognitionResults)
+        }
+      )
+      .on("progress", async (longRunningRecognizeMetadata, apiResponse) => {
+        // Adding a listener for the "progress" event causes the callback to be
+        // called on any change in metadata when the operation is polled.
 
-    // Adding a listener for the "progress" event causes the callback to be
-    // called on any change in metadata when the operation is polled.
-    operation.on(
-      "progress",
-      async (longRunningRecognizeMetadata, apiResponse) => {
         const percent = longRunningRecognizeMetadata.progressPercent
         if (percent !== undefined) {
           try {
@@ -87,13 +86,11 @@ async function trans(operation, id: string) {
           }
         }
         console.log("progress", longRunningRecognizeMetadata, apiResponse)
-      }
-    )
-
-    // Adding a listener for the "error" event handles any errors found during polling.
-    operation.on("error", (error: Error) => {
-      reject(error)
-    })
+      })
+      .on("error", (error: Error) => {
+        // Adding a listener for the "error" event handles any errors found during polling.
+        reject(error)
+      })
   })
 }
 
@@ -156,7 +153,7 @@ async function reencode(
   id: string
 ) {
   return new Promise((resolve, reject) => {
-    const command = ffmpeg(tempFilePath)
+    ffmpeg(tempFilePath)
       .setFfmpegPath(ffmpegStatic.path)
       .audioChannels(1)
       .audioFrequency(16000)
@@ -282,7 +279,7 @@ exports.transcription = functions.database
       const languageCode = transcript.audioFile.languageCode
 
       console.log(
-        `Deployed 16:10 - Start transcription of id ${id} with ${languageCode} `
+        `Deployed 10:36 - Start transcription of id ${id} with ${languageCode} `
       )
 
       // First, check if status is "uploaded", otherwise, cancel

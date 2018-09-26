@@ -57,15 +57,16 @@ function saveResult(speechRecognitionResults, id) {
 function trans(operation, id) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
-            // Adding a listener for the "complete" event starts polling for the
-            // completion of the operation.
-            operation.on("complete", (longRunningRecognizeResponse, longRunningRecognizeMetadata, finalApiResponse) => {
+            operation
+                .on("complete", (longRunningRecognizeResponse, longRunningRecognizeMetadata, finalApiResponse) => {
+                // Adding a listener for the "complete" event starts polling for the
+                // completion of the operation.
                 const speechRecognitionResults = longRunningRecognizeResponse.results;
                 resolve(speechRecognitionResults);
-            });
-            // Adding a listener for the "progress" event causes the callback to be
-            // called on any change in metadata when the operation is polled.
-            operation.on("progress", (longRunningRecognizeMetadata, apiResponse) => __awaiter(this, void 0, void 0, function* () {
+            })
+                .on("progress", (longRunningRecognizeMetadata, apiResponse) => __awaiter(this, void 0, void 0, function* () {
+                // Adding a listener for the "progress" event causes the callback to be
+                // called on any change in metadata when the operation is polled.
                 const percent = longRunningRecognizeMetadata.progressPercent;
                 if (percent !== undefined) {
                     try {
@@ -78,9 +79,9 @@ function trans(operation, id) {
                     }
                 }
                 console.log("progress", longRunningRecognizeMetadata, apiResponse);
-            }));
-            // Adding a listener for the "error" event handles any errors found during polling.
-            operation.on("error", (error) => {
+            }))
+                .on("error", (error) => {
+                // Adding a listener for the "error" event handles any errors found during polling.
                 reject(error);
             });
         });
@@ -132,7 +133,7 @@ function updateTranscript(id, data) {
 function reencode(tempFilePath, targetTempFilePath, id) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
-            const command = ffmpeg(tempFilePath)
+            ffmpeg(tempFilePath)
                 .setFfmpegPath(ffmpegStatic.path)
                 .audioChannels(1)
                 .audioFrequency(16000)
@@ -233,7 +234,7 @@ exports.transcription = functions.database
             throw Error("Transcript missing");
         }
         const languageCode = transcript.audioFile.languageCode;
-        console.log(`Deployed 16:10 - Start transcription of id ${id} with ${languageCode} `);
+        console.log(`Deployed 10:36 - Start transcription of id ${id} with ${languageCode} `);
         // First, check if status is "uploaded", otherwise, cancel
         if (transcript.progress.status !== enums_1.Status.Uploaded) {
             throw new Error("Transcript already processed");

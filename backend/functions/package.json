@@ -8,9 +8,9 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "build": "tsc"
+    "build": "webpack --mode development"
   },
-  "main": "lib/index.js",
+  "main": "dist/app.bundle.js",
   "dependencies": {
     "@google-cloud/speech": "^2.1.0",
     "ffmpeg-static": "^2.3.0",
@@ -19,11 +19,20 @@
     "fluent-ffmpeg": "^2.1.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.1.0",
+    "@babel/core": "^7.1.0",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-typescript": "^7.1.0",
     "@types/ffmpeg-static": "^2.0.0",
     "@types/fluent-ffmpeg": "^2.1.7",
-    "tslint": "^5.11.0",
+    "babel-loader": "^8.0.2",
     "tslint-config-prettier": "^1.15.0",
-    "typescript": "^3.0.3"
+    "typescript": "^3.0.3",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.1",
+    "webpack-node-externals": "^1.7.2"
   },
   "private": true,
   "contributors": [

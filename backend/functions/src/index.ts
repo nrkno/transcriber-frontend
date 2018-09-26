@@ -1,11 +1,11 @@
-import * as speech from "@google-cloud/speech"
-import * as ffmpegStatic from "ffmpeg-static"
-import * as admin from "firebase-admin"
+import speech from "@google-cloud/speech"
+import ffmpeg_static from "ffmpeg-static"
+import admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import * as ffmpeg from "fluent-ffmpeg"
-import * as fs from "fs"
-import * as os from "os"
-import * as path from "path"
+import ffmpeg from "fluent-ffmpeg"
+import fs from "fs"
+import os from "os"
+import path from "path"
 import { Status } from "./enums"
 import { ITranscription } from "./interfaces"
 
@@ -153,8 +153,8 @@ async function reencode(
   id: string
 ) {
   return new Promise((resolve, reject) => {
-    ffmpeg(tempFilePath)
-      .setFfmpegPath(ffmpegStatic.path)
+    const x = ffmpeg(tempFilePath)
+      .setFfmpegPath(ffmpeg_static.path)
       .audioChannels(1)
       .audioFrequency(16000)
       .format("flac")
@@ -279,7 +279,7 @@ exports.transcription = functions.database
       const languageCode = transcript.audioFile.languageCode
 
       console.log(
-        `Deployed 10:36 - Start transcription of id ${id} with ${languageCode} `
+        `Deployed 15:31 - Start transcription of id ${id} with ${languageCode} `
       )
 
       // First, check if status is "uploaded", otherwise, cancel

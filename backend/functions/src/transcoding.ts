@@ -36,6 +36,7 @@ async function reencode(tempFilePath: string, targetTempFilePath: string, id: st
             "audioFile/durationInSeconds": durationInSeconds,
           })
         } catch (error) {
+          console.log("Error in transcoding on('codecData')")
           console.error(error)
         }
       })

@@ -30,6 +30,7 @@ async function trans(operation, id: string) {
               "progress/percent": percent,
             })
           } catch (error) {
+            console.log("Error in on.('progress')")
             console.error(error)
           }
         }

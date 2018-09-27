@@ -23,7 +23,7 @@ exports.transcription = functions.database.ref("/transcripts/{id}").onCreate(asy
 
     const languageCode = transcript.audioFile.languageCode
 
-    console.log(`Deployed 15:37 - Start transcription of id ${id} with ${languageCode} `)
+    console.log(`Deployed 15:47 - Start transcription of id ${id} with ${languageCode} `)
 
     // First, check if status is "uploaded", otherwise, cancel
 
@@ -45,6 +45,7 @@ exports.transcription = functions.database.ref("/transcripts/{id}").onCreate(asy
 
     console.log("End transcribing", id)
   } catch (error) {
+    console.log("Error in main function")
     console.error(error)
 
     await updateTranscript(id, {

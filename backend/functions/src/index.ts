@@ -1,17 +1,12 @@
 import speech from "@google-cloud/speech"
-import ffmpeg_static from "ffmpeg-static"
-import admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import ffmpeg from "fluent-ffmpeg"
-import fs from "fs"
-import os from "os"
-import path from "path"
+import { database, timestamp } from "./database"
 import { Status } from "./enums"
+import { updateTranscript } from "./helpers"
 import { ITranscription } from "./interfaces"
+import { transcode } from "./transcoding"
 
-admin.initializeApp(functions.config().firebase)
 const client = new speech.v1p1beta1.SpeechClient()
-const database = admin.database()
 
 ///////////////////
 // TRANSCRIPTION //
@@ -25,7 +20,7 @@ async function saveResult(speechRecognitionResults: any, id: string) {
       percent: 0,
       status: "saving"
     },
-    "timestamps/transcribedAt": admin.database.ServerValue.TIMESTAMP
+    "timestamps/transcribedAt": timestamp
   })
 
   // Flattening the structure
@@ -48,7 +43,7 @@ async function saveResult(speechRecognitionResults: any, id: string) {
     } else {
       await updateTranscript(id, {
         progress: { status: "success" },
-        "timestamps/savedAt": admin.database.ServerValue.TIMESTAMP
+        "timestamps/savedAt": timestamp
       })
     }
   }
@@ -99,7 +94,7 @@ async function transcribe(id: string, gcsUri: string, languageCode: string) {
 
   await updateTranscript(id, {
     progress: { status: "transcribing", percent: 0 },
-    "timestamps/transcodedAt": admin.database.ServerValue.TIMESTAMP
+    "timestamps/transcodedAt": timestamp
   })
 
   const request = {
@@ -125,145 +120,6 @@ async function transcribe(id: string, gcsUri: string, languageCode: string) {
   return speechRecognitionResults
 }
 
-/////////////
-// HELPERS //
-/////////////
-
-function hoursMinutesSecondsToSeconds(duration: string): number {
-  const [hours, minutes, seconds] = duration.split(":")
-
-  // minutes are worth 60 seconds. Hours are worth 60 minutes.
-  return Number(hours) * 60 * 60 + Number(minutes) * 60 + Number(seconds)
-}
-
-async function updateTranscript(id: string, data: object) {
-  return database.ref(`/transcripts/${id}`).update({ ...data })
-}
-
-/////////////////
-// TRANSCODING //
-/////////////////
-
-/**
- * Utility method to convert audio to mono channel using FFMPEG.
- */
-async function reencode(
-  tempFilePath: string,
-  targetTempFilePath: string,
-  id: string
-) {
-  return new Promise((resolve, reject) => {
-    const x = ffmpeg(tempFilePath)
-      .setFfmpegPath(ffmpeg_static.path)
-      .audioChannels(1)
-      .audioFrequency(16000)
-      .format("flac")
-      .on("error", err => {
-        reject(err)
-      })
-      .on("end", () => {
-        resolve()
-      })
-      .on("codecData", async data => {
-        // Saving duration to database
-        const durationInSeconds = hoursMinutesSecondsToSeconds(data.duration)
-        try {
-          await updateTranscript(id, {
-            "audioFile/durationInSeconds": durationInSeconds
-          })
-        } catch (error) {
-          console.error(error)
-        }
-      })
-      .save(targetTempFilePath)
-  })
-}
-
-/**
- * When an audio is uploaded in the Storage bucket We generate a mono channel audio automatically using
- * node-fluent-ffmpeg.
- */
-
-async function transcodeAudio(languageCode: string, id: string) {
-  // Getting the bucket reference from Google Cloud Runtime Configuration API
-
-  const uploadsBucketReference = functions.config().bucket.uploads
-
-  if (uploadsBucketReference === undefined) {
-    throw Error("Environment variable 'bucket.upload' not set up")
-  }
-  const uploadsBucket = admin.storage().bucket(uploadsBucketReference)
-
-  // Write status to Firebase
-  await updateTranscript(id, {
-    progress: { status: "transcoding" }
-  })
-
-  /*const fileBucket = objectMetaData.bucket // The Storage bucket that contains the file.
-  const contentType = objectMetaData.contentType // File content type.
-
-  // Exit if this is triggered on a file that is not an audio.
-  if (contentType === undefined || !contentType.startsWith("audio/")) {
-    throw Error("Uploaded file is not audio")
-  }
-*/
-  // Get the file name.
-  const fileName = path.basename(id)
-
-  // Download file from uploads bucket.
-  const tempFilePath = path.join(os.tmpdir(), fileName)
-  // We add a '.flac' suffix to target audio file name. That's where we'll upload the converted audio.
-  const targetTempFileName = fileName.replace(/\.[^/.]+$/, "") + ".flac"
-  const targetTempFilePath = path.join(os.tmpdir(), targetTempFileName)
-  const targetStorageFilePath = path.join(path.dirname(id), targetTempFileName)
-
-  await uploadsBucket.file(id).download({ destination: tempFilePath })
-
-  console.log("Audio downloaded locally to", tempFilePath)
-
-  // Convert the audio to mono channel using FFMPEG.
-  await reencode(tempFilePath, targetTempFilePath, id)
-
-  console.log("Output audio created at", targetTempFilePath)
-
-  // Getting the bucket reference from Google Cloud Runtime Configuration API
-  const transcodedBucketReference = functions.config().bucket.transcoded
-
-  if (transcodedBucketReference === undefined) {
-    throw Error("Environment variable 'bucket.transcoded' not set up")
-  }
-
-  const transcodedBucket = admin.storage().bucket(transcodedBucketReference)
-
-  // Uploading the audio to transcoded bucket.
-  const [transcodedFile] = await transcodedBucket.upload(targetTempFilePath, {
-    destination: targetStorageFilePath,
-    resumable: false
-  })
-
-  console.log("Output audio uploaded to", targetStorageFilePath)
-
-  // Once the audio has been uploaded delete the local file to free up disk space.
-  fs.unlinkSync(tempFilePath)
-  fs.unlinkSync(targetTempFilePath)
-
-  console.log("Temporary files removed.", targetTempFilePath)
-
-  // Finally, transcribe the transcoded audio file
-
-  console.log(transcodedFile)
-
-  if (transcodedFile.metadata === undefined) {
-    throw new Error("Metadata missing on transcoded file")
-  }
-
-  const bucket = (transcodedFile.metadata as any).bucket
-  const name = (transcodedFile.metadata as any).name
-
-  const gcsUri = `gs://${bucket}/${name}`
-
-  return gcsUri
-}
 exports.transcription = functions.database
   .ref("/transcripts/{id}")
   .onCreate(async (dataSnapshot, eventContext) => {
@@ -279,7 +135,7 @@ exports.transcription = functions.database
       const languageCode = transcript.audioFile.languageCode
 
       console.log(
-        `Deployed 15:31 - Start transcription of id ${id} with ${languageCode} `
+        `Deployed 10:58 - Start transcription of id ${id} with ${languageCode} `
       )
 
       // First, check if status is "uploaded", otherwise, cancel
@@ -290,7 +146,7 @@ exports.transcription = functions.database
 
       // 1. Transcode
 
-      const gcsUri = await transcodeAudio(languageCode, id)
+      const gcsUri = await transcode(id)
 
       // 2. Transcribe
 

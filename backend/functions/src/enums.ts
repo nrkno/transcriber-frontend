@@ -4,5 +4,5 @@ export enum Status {
   Transcribing = "transcribing",
   Saving = "saving",
   Success = "success",
-  Failed = "failed"
+  Failed = "failed",
 }

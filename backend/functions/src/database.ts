@@ -1,3 +1,8 @@
+/**
+ * @file Sets up Firebase
+ * @author Andreas Schjønhaug
+ */
+
 import admin from "firebase-admin"
 import * as functions from "firebase-functions"
 

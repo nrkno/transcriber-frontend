@@ -15,11 +15,7 @@ import { hoursMinutesSecondsToSeconds, updateTranscript } from "./helpers"
 /**
  * Utility method to convert audio to mono channel using FFMPEG.
  */
-async function reencode(
-  tempFilePath: string,
-  targetTempFilePath: string,
-  id: string
-) {
+async function reencode(tempFilePath: string, targetTempFilePath: string, id: string) {
   return new Promise((resolve, reject) => {
     ffmpeg(tempFilePath)
       .setFfmpegPath(ffmpeg_static.path)
@@ -37,7 +33,7 @@ async function reencode(
         const durationInSeconds = hoursMinutesSecondsToSeconds(data.duration)
         try {
           await updateTranscript(id, {
-            "audioFile/durationInSeconds": durationInSeconds
+            "audioFile/durationInSeconds": durationInSeconds,
           })
         } catch (error) {
           console.error(error)
@@ -63,7 +59,7 @@ export async function transcode(id: string) {
 
   // Write status to Firebase
   await updateTranscript(id, {
-    progress: { status: "transcoding" }
+    progress: { status: "transcoding" },
   })
 
   /*const fileBucket = objectMetaData.bucket // The Storage bucket that contains the file.
@@ -105,7 +101,7 @@ export async function transcode(id: string) {
   // Uploading the audio to transcoded bucket.
   const [transcodedFile] = await transcodedBucket.upload(targetTempFilePath, {
     destination: targetStorageFilePath,
-    resumable: false
+    resumable: false,
   })
 
   console.log("Output audio uploaded to", targetStorageFilePath)

@@ -4,8 +4,8 @@
  */
 
 import * as functions from "firebase-functions"
+import database from "./database"
 import { Status } from "./enums"
-import { updateTranscript } from "./helpers"
 import { ITranscription } from "./interfaces"
 import { saveResult } from "./persistence"
 import { transcode } from "./transcoding"
@@ -23,7 +23,7 @@ exports.transcription = functions.database.ref("/transcripts/{id}").onCreate(asy
 
     const languageCode = transcript.audioFile.languageCode
 
-    console.log(`Deployed 15:47 - Start transcription of id ${id} with ${languageCode} `)
+    console.log(`Deployed 13:57 - Start transcription of id ${id} with ${languageCode} `)
 
     // First, check if status is "uploaded", otherwise, cancel
 
@@ -33,28 +33,28 @@ exports.transcription = functions.database.ref("/transcripts/{id}").onCreate(asy
 
     // 1. Transcode
 
+    await database.updateStatus(id, Status.Transcoding)
     const gcsUri = await transcode(id)
 
     // 2. Transcribe
 
+    await database.updateStatus(id, Status.Transcribing)
     const speechRecognitionResults = await transcribe(id, gcsUri, languageCode)
 
     // 3. Save transcription
 
+    await database.updateStatus(id, Status.Saving)
     await saveResult(speechRecognitionResults, id)
 
+    // 4. Done
+
+    await database.updateStatus(id, Status.Success)
     console.log("End transcribing", id)
   } catch (error) {
     console.log("Error in main function")
     console.error(error)
 
-    await updateTranscript(id, {
-      error: JSON.parse(JSON.stringify(error)),
-      progress: {
-        percent: null,
-        status: "failed",
-      },
-    })
+    await database.errorOccured(id, error)
 
     throw error
   }

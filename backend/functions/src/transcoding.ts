@@ -9,13 +9,14 @@ import ffmpeg from "fluent-ffmpeg"
 import fs from "fs"
 import os from "os"
 import path from "path"
-import { storage } from "./database"
-import { hoursMinutesSecondsToSeconds, updateTranscript } from "./helpers"
+import database from "./database"
+import { hoursMinutesSecondsToSeconds } from "./helpers"
+import { storage } from "./storage"
 
 /**
  * Utility method to convert audio to mono channel using FFMPEG.
  */
-async function reencode(tempFilePath: string, targetTempFilePath: string, id: string) {
+async function reencodeToMono(tempFilePath: string, targetTempFilePath: string, id: string) {
   return new Promise((resolve, reject) => {
     ffmpeg(tempFilePath)
       .setFfmpegPath(ffmpeg_static.path)
@@ -32,9 +33,7 @@ async function reencode(tempFilePath: string, targetTempFilePath: string, id: st
         // Saving duration to database
         const durationInSeconds = hoursMinutesSecondsToSeconds(data.duration)
         try {
-          await updateTranscript(id, {
-            "audioFile/durationInSeconds": durationInSeconds,
-          })
+          await database.setDurationInSeconds(id, durationInSeconds)
         } catch (error) {
           console.log("Error in transcoding on('codecData')")
           console.error(error)
@@ -57,11 +56,6 @@ export async function transcode(id: string) {
     throw Error("Environment variable 'bucket.upload' not set up")
   }
   const uploadsBucket = storage.bucket(uploadsBucketReference)
-
-  // Write status to Firebase
-  await updateTranscript(id, {
-    progress: { status: "transcoding" },
-  })
 
   /*const fileBucket = objectMetaData.bucket // The Storage bucket that contains the file.
     const contentType = objectMetaData.contentType // File content type.
@@ -86,7 +80,7 @@ export async function transcode(id: string) {
   console.log("Audio downloaded locally to", tempFilePath)
 
   // Convert the audio to mono channel using FFMPEG.
-  await reencode(tempFilePath, targetTempFilePath, id)
+  await reencodeToMono(tempFilePath, targetTempFilePath, id)
 
   console.log("Output audio created at", targetTempFilePath)
 
@@ -121,10 +115,12 @@ export async function transcode(id: string) {
     throw new Error("Metadata missing on transcoded file")
   }
 
-  const bucket = (transcodedFile.metadata as any).bucket
-  const name = (transcodedFile.metadata as any).name
+  const bucket = transcodedFile.metadata.bucket
+  const name = transcodedFile.metadata.name
 
-  const gcsUri = `gs://${bucket}/${name}`
+  if (bucket === undefined || name === undefined) {
+    throw new Error("Error in metadata on transcoded file")
+  }
 
-  return gcsUri
+  return `gs://${bucket}/${name}`
 }

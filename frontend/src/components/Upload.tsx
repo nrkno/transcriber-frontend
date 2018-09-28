@@ -1,7 +1,6 @@
 import * as firebase from "firebase"
 import * as React from "react"
 import Dropzone from "react-dropzone"
-import { Link } from "react-router-dom"
 import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
 import { Status } from "../enums"
@@ -74,7 +73,7 @@ class Upload extends React.Component<any, IState> {
       firebase.storage.TaskEvent.STATE_CHANGED,
       (snapshot: firebase.storage.UploadTaskSnapshot) => {
         const uploadProgress = Math.round(
-          snapshot.bytesTransferred / snapshot.totalBytes * 100
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
         )
         this.setState({ uploadProgress })
       },
@@ -170,7 +169,6 @@ class Upload extends React.Component<any, IState> {
               Last opp
             </button>
           </form>
-          <Link to="/changelog"> Endringslogg</Link>
         </div>
       )
     }

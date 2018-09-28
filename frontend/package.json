@@ -3,11 +3,11 @@
   "version": "1.0.1",
   "private": true,
   "dependencies": {
-    "firebase": "^5.5.0",
+    "firebase": "^5.5.2",
     "lodash": "^4.17.11",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-dropzone": "^5.1.0",
+    "react-dropzone": "^5.1.1",
     "react-router-dom": "^4.3.1",
     "react-scripts-ts": "^2.17.0",
     "react-sweet-progress": "^1.1.2"
@@ -21,11 +21,11 @@
   "devDependencies": {
     "@types/jest": "^23.3.2",
     "@types/lodash": "^4.14.116",
-    "@types/node": "^10.10.1",
+    "@types/node": "^10.11.2",
     "@types/react": "^16.4.14",
-    "@types/react-dom": "^16.0.7",
+    "@types/react-dom": "^16.0.8",
     "@types/react-router-dom": "^4.3.1",
-    "typescript": "^3.0.3"
+    "typescript": "^3.1.1"
   },
   "contributors": [
     "Anders Evjen <anders.evjen@nrk.no>",

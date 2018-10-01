@@ -1,4 +1,9 @@
-import * as firebase from "firebase"
+// This import loads the firebase namespace along with all its type information.
+import * as firebase from "firebase/app"
+
+// These imports load individual services into the firebase namespace.
+import "firebase/storage"
+import "firebase/database"
 
 const config = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,

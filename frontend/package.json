@@ -2,6 +2,10 @@
   "name": "transcriber-frontend",
   "version": "1.0.1",
   "private": true,
+  "scripts": {
+    "build": "webpack --mode production",
+    "start": "webpack-dev-server --open --mode development"
+  },
   "dependencies": {
     "firebase": "^5.5.2",
     "lodash": "^4.17.11",
@@ -9,23 +13,29 @@
     "react-dom": "^16.5.2",
     "react-dropzone": "^5.1.1",
     "react-router-dom": "^4.3.1",
-    "react-scripts-ts": "^2.17.0",
     "react-sweet-progress": "^1.1.2"
   },
-  "scripts": {
-    "start": "react-scripts-ts start",
-    "build": "react-scripts-ts build",
-    "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
-  },
   "devDependencies": {
+    "@babel/core": "^7.1.2",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.1.0",
     "@types/jest": "^23.3.2",
     "@types/lodash": "^4.14.116",
-    "@types/node": "^10.11.2",
     "@types/react": "^16.4.14",
     "@types/react-dom": "^16.0.8",
     "@types/react-router-dom": "^4.3.1",
-    "typescript": "^3.1.1"
+    "babel-loader": "^8.0.4",
+    "css-loader": "^1.0.0",
+    "dotenv-webpack": "^1.5.7",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "style-loader": "^0.23.0",
+    "typescript": "^3.1.1",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.9"
   },
   "contributors": [
     "Anders Evjen <anders.evjen@nrk.no>",

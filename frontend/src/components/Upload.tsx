@@ -1,4 +1,4 @@
-import * as firebase from "firebase/app"
+import firebase from "firebase/app"
 import * as React from "react"
 import Dropzone from "react-dropzone"
 import { Progress } from "react-sweet-progress"

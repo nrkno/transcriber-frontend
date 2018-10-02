@@ -1,8 +1,9 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin")
-const Dotenv = require("dotenv-webpack")
+const CleanWebpackPlugin = require("clean-webpack-plugin")
+
 module.exports = {
   output: {
-    filename: "[name].js"
+    filename: "[name].bundle.js"
   },
   module: {
     rules: [
@@ -31,11 +32,7 @@ module.exports = {
     extensions: [".ts", ".tsx", ".js", ".jsx"]
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: "./public/index.html" }),
-    new Dotenv()
-  ],
-  devServer: {
-    publicPath: "/",
-    historyApiFallback: true
-  }
+    new CleanWebpackPlugin(["dist"]),
+    new HtmlWebpackPlugin({ template: "./public/index.html" })
+  ]
 }

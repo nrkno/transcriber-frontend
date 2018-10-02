@@ -3,8 +3,8 @@
   "version": "1.0.1",
   "private": true,
   "scripts": {
-    "build": "webpack --mode production",
-    "start": "webpack-dev-server --open --mode development"
+    "build": "webpack --config webpack.prod.js",
+    "start": "webpack-dev-server --open --config webpack.dev.js"
   },
   "dependencies": {
     "firebase": "^5.5.2",
@@ -27,6 +27,7 @@
     "@types/react-dom": "^16.0.8",
     "@types/react-router-dom": "^4.3.1",
     "babel-loader": "^8.0.4",
+    "clean-webpack-plugin": "^0.1.19",
     "css-loader": "^1.0.0",
     "dotenv-webpack": "^1.5.7",
     "html-loader": "^0.5.5",
@@ -35,7 +36,8 @@
     "typescript": "^3.1.1",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.9"
+    "webpack-dev-server": "^3.1.9",
+    "webpack-merge": "^4.1.4"
   },
   "contributors": [
     "Anders Evjen <anders.evjen@nrk.no>",

@@ -15,3 +15,19 @@ npm start
 ```sh
 firebase deploy
 ```
+
+# Browsers targeted
+
+```sh
+npx browserslist ">0.25% in my stats, not IE > 0"
+
+chrome 69
+chrome 68
+chrome 67
+edge 17
+edge 16
+firefox 61
+ios_saf 11.3-11.4
+safari 11.1
+safari 11
+```

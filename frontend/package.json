@@ -6,6 +6,7 @@
     "build": "webpack --config webpack.prod.js",
     "start": "webpack-dev-server --open --config webpack.dev.js"
   },
+  "browserslist": ">0.25% in my stats, not IE > 0",
   "dependencies": {
     "firebase": "^5.5.2",
     "lodash": "^4.17.11",

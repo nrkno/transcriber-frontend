@@ -25,7 +25,7 @@ To track events to [Google Analytics](https://analytics.google.com/analytics/web
 - Upload
   - Wrong file format
 
-## Result page
+## Transcript page
 
 - Transcription
 

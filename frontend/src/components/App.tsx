@@ -2,12 +2,12 @@ import * as React from "react"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
 import "../css/App.css"
 import ReactGA from "react-ga"
-import Result from "./Result"
+import Transcript from "./Transcript"
 import Upload from "./Upload"
 import createHistory from "history/createBrowserHistory"
 
 ReactGA.initialize(process.env.GOOGLE_ANALYTICS_PROPERTY_ID, {
-  debug: process.env.NODE_ENV === "development"
+  debug: process.env.NODE_ENV === "development",
 })
 
 const history = createHistory()
@@ -22,14 +22,11 @@ class App extends React.Component {
       <BrowserRouter>
         <div className="App">
           <header>
-            <h1>
-              NRK transkribering{" "}
-              {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}
-            </h1>
+            <h1>NRK transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</h1>
           </header>
           <Switch>
             <Route exact={true} path="/" component={Upload} />
-            <Route path="/:id" component={Result} />
+            <Route path="/transcripts/:id" component={Transcript} />
           </Switch>
         </div>
       </BrowserRouter>

@@ -14,7 +14,7 @@ interface IState {
   transcription?: ITranscription
 }
 
-class Result extends React.Component<RouteComponentProps<any>, IState> {
+class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   private playerRef = React.createRef<Player>()
   constructor(props: any) {
     super(props)
@@ -124,4 +124,4 @@ class Result extends React.Component<RouteComponentProps<any>, IState> {
   }
 }
 
-export default Result
+export default Transcript

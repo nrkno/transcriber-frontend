@@ -22,13 +22,11 @@ class Upload extends React.Component<any, IState> {
       dropzoneMessage: "Klikk for å velge, eller slipp lydfil her",
       file: undefined,
       languageCode: "nb-NO",
-      uploadProgress: 0
+      uploadProgress: 0,
     }
   }
 
-  public handleLanguageChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  public handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     this.setState({ languageCode: event.target.value })
   }
   public handleFileDrop = (acceptedFiles: [File], rejectedFiles: [File]) => {
@@ -37,7 +35,7 @@ class Upload extends React.Component<any, IState> {
 
       ReactGA.event({
         category: "Upload",
-        action: "Wrong file format"
+        action: "Wrong file format",
       })
     } else {
       // Take the first file
@@ -64,8 +62,8 @@ class Upload extends React.Component<any, IState> {
     const metadata = {
       contentType: file.type,
       customMetadata: {
-        languageCode
-      }
+        languageCode,
+      },
     }
 
     const uploadTask = firebaseApp.storage
@@ -76,15 +74,13 @@ class Upload extends React.Component<any, IState> {
     uploadTask.on(
       firebase.storage.TaskEvent.STATE_CHANGED,
       (snapshot: firebase.storage.UploadTaskSnapshot) => {
-        const uploadProgress = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        )
+        const uploadProgress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
         this.setState({ uploadProgress })
       },
       error => {
         ReactGA.exception({
           description: error.message,
-          fatal: false
+          fatal: false,
         })
 
         /*FIXME https://firebase.google.com/docs/storage/web/handle-errors
@@ -111,25 +107,25 @@ class Upload extends React.Component<any, IState> {
               audioFile: {
                 languageCode,
                 name: file.name,
-                url: downloadURL
+                url: downloadURL,
               },
               progress: { status: Status.Analysing },
               timestamps: {
-                analysing: firebase.database.ServerValue.TIMESTAMP
-              }
+                analysing: firebase.database.ServerValue.TIMESTAMP,
+              },
             })
 
             .then(success => {
-              this.props.history.push(`/${id}`)
+              this.props.history.push(`/transcripts/${id}`)
             })
             .catch((error: Error) => {
               ReactGA.exception({
                 description: error.message,
-                fatal: false
+                fatal: false,
               })
             })
         })
-      }
+      },
     )
   }
 
@@ -146,7 +142,7 @@ class Upload extends React.Component<any, IState> {
                 border: "10px solid #f6f6f6",
                 borderRadius: "50%",
                 height: "132px",
-                width: "132px"
+                width: "132px",
               }}
               onDrop={this.handleFileDrop}
             >
@@ -155,24 +151,17 @@ class Upload extends React.Component<any, IState> {
                   marginTop: "50%",
                   padding: "0 10px",
                   textAlign: "center",
-                  transform: "translateY(-50%)"
+                  transform: "translateY(-50%)",
                 }}
               >
                 {this.state.dropzoneMessage}
               </div>
             </Dropzone>
-            <select
-              value={this.state.languageCode}
-              onChange={this.handleLanguageChange}
-            >
+            <select value={this.state.languageCode} onChange={this.handleLanguageChange}>
               <option value="nb-NO">Norsk</option>
               <option value="en-US">Engelsk</option>
             </select>
-            <button
-              className="nrk-button"
-              disabled={this.state.file == null}
-              type="submit"
-            >
+            <button className="nrk-button" disabled={this.state.file == null} type="submit">
               Last opp
             </button>
           </form>
@@ -185,11 +174,7 @@ class Upload extends React.Component<any, IState> {
       <div className="wrapper">
         <div className="dropForm">
           <p>Laster opp</p>
-          <Progress
-            type="circle"
-            percent={this.state.uploadProgress}
-            status={status}
-          />
+          <Progress type="circle" percent={this.state.uploadProgress} status={status} />
         </div>
       </div>
     )

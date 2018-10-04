@@ -3,7 +3,8 @@ const CleanWebpackPlugin = require("clean-webpack-plugin")
 
 module.exports = {
   output: {
-    filename: "[name].bundle.js"
+    filename: "[name].bundle.js",
+    publicPath: "/",
   },
   module: {
     rules: [
@@ -11,28 +12,25 @@ module.exports = {
         test: /\.tsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader"
-        }
+          loader: "babel-loader",
+        },
       },
       {
         test: /\.css$/,
-        use: [{ loader: "style-loader" }, { loader: "css-loader" }]
+        use: [{ loader: "style-loader" }, { loader: "css-loader" }],
       },
       {
         test: /\.html$/,
         use: [
           {
-            loader: "html-loader"
-          }
-        ]
-      }
-    ]
+            loader: "html-loader",
+          },
+        ],
+      },
+    ],
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".jsx"]
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
-  plugins: [
-    new CleanWebpackPlugin(["dist"]),
-    new HtmlWebpackPlugin({ template: "./public/index.html" })
-  ]
+  plugins: [new CleanWebpackPlugin(["dist"]), new HtmlWebpackPlugin({ template: "./public/index.html" })],
 }

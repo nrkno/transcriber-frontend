@@ -5,6 +5,7 @@ import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
 import { Status } from "../enums"
 import firebaseApp from "../firebaseApp"
+import ReactGA from "react-ga"
 
 interface IState {
   file?: File
@@ -33,6 +34,11 @@ class Upload extends React.Component<any, IState> {
   public handleFileDrop = (acceptedFiles: [File], rejectedFiles: [File]) => {
     if (rejectedFiles.length > 0) {
       this.setState({ dropzoneMessage: "Filen har feil format" })
+
+      ReactGA.event({
+        category: "Upload",
+        action: "Wrong file format"
+      })
     } else {
       // Take the first file
       const [file] = acceptedFiles
@@ -48,8 +54,6 @@ class Upload extends React.Component<any, IState> {
     if (file === undefined) {
       return
     }
-
-    console.log(file)
 
     const id = firebaseApp.db.ref(`/transcripts/`).push().key
 
@@ -78,7 +82,11 @@ class Upload extends React.Component<any, IState> {
         this.setState({ uploadProgress })
       },
       error => {
-        console.error(error)
+        ReactGA.exception({
+          description: error.message,
+          fatal: false
+        })
+
         /*FIXME https://firebase.google.com/docs/storage/web/handle-errors
         
         switch (error.code) {
@@ -96,9 +104,6 @@ class Upload extends React.Component<any, IState> {
         }*/
       },
       () => {
-        console.log("doing firebase stuff")
-        console.log(id)
-
         uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
           firebaseApp.db
             .ref(`/transcripts/${id}`)
@@ -108,18 +113,20 @@ class Upload extends React.Component<any, IState> {
                 name: file.name,
                 url: downloadURL
               },
-              progress: { status: Status.Uploaded },
+              progress: { status: Status.Analysing },
               timestamps: {
-                uploadedAt: firebase.database.ServerValue.TIMESTAMP
+                analysing: firebase.database.ServerValue.TIMESTAMP
               }
             })
 
             .then(success => {
               this.props.history.push(`/${id}`)
             })
-            .catch(error => {
-              console.log("error during upload")
-              console.error(error)
+            .catch((error: Error) => {
+              ReactGA.exception({
+                description: error.message,
+                fatal: false
+              })
             })
         })
       }

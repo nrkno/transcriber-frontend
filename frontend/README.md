@@ -16,6 +16,35 @@ npm start
 firebase deploy
 ```
 
+# Google Analytics
+
+To track events to [Google Analytics](https://analytics.google.com/analytics/web), enter your `GOOGLE_ANALYTICS_PROPERTY_ID` in the correspoindg `.env` file. The following events are tracked:
+
+## Upload page
+
+- Upload
+  - Wrong file format
+
+## Result page
+
+- Transcription
+
+  - Not found
+
+- Process
+
+  - Analysing
+  - Transcoding
+  - Transcribing
+  - Saving
+  - Success
+  - Failed
+
+- Player
+  - Play button pressed
+  - Pause button pressed
+  - Volume changed
+
 # Browsers targeted
 
 ```sh

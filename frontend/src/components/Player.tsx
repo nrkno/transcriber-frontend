@@ -1,5 +1,6 @@
 import * as React from "react"
 import secondsToTime from "../secondsToTime"
+import ReactGA from "react-ga"
 
 interface IState {
   currentTime: number
@@ -22,25 +23,35 @@ class Player extends React.Component<IProps, IState> {
       currentTime: 0,
       duration: 0,
       isPlaying: false,
-      progress: 0
+      progress: 0,
     }
   }
 
-  public handleDurationChange = (
-    event: React.ChangeEvent<HTMLAudioElement>
-  ) => {
+  public handleDurationChange = (event: React.ChangeEvent<HTMLAudioElement>) => {
     this.setState({ duration: this.audioRef.current!.duration })
   }
   public handlePlay = (event: React.FormEvent<HTMLButtonElement>) => {
     this.audioRef.current!.play()
     this.setState({ isPlaying: true })
+    ReactGA.event({
+      category: "Player",
+      action: "Play button pressed",
+    })
   }
   public handlePause = (event: React.FormEvent<HTMLButtonElement>) => {
     this.audioRef.current!.pause()
     this.setState({ isPlaying: false })
+    ReactGA.event({
+      category: "Player",
+      action: "Pause button pressed",
+    })
   }
   public handleVolume = (event: React.FormEvent<HTMLInputElement>) => {
     this.audioRef.current!.volume = Number(event.currentTarget.value)
+    ReactGA.event({
+      category: "Player",
+      action: "Volume changed",
+    })
   }
   public handleTimeUpdate = (event: React.ChangeEvent<HTMLAudioElement>) => {
     const currentTime = event.target.currentTime
@@ -56,12 +67,7 @@ class Player extends React.Component<IProps, IState> {
   public render() {
     return (
       <div>
-        <audio
-          ref={this.audioRef}
-          onDurationChange={this.handleDurationChange}
-          src={this.props.fileUrl}
-          onTimeUpdate={this.handleTimeUpdate}
-        />
+        <audio ref={this.audioRef} onDurationChange={this.handleDurationChange} src={this.props.fileUrl} onTimeUpdate={this.handleTimeUpdate} />
         <div id="player">
           {!this.state.isPlaying ? (
             <button onClick={this.handlePlay}>
@@ -77,28 +83,20 @@ class Player extends React.Component<IProps, IState> {
             </button>
           )}
 
-          <div className="currentTime">
-            {secondsToTime(this.state.currentTime)}
-          </div>
+          <div className="currentTime">{secondsToTime(this.state.currentTime)}</div>
           <div className="timer-wrapper">
             <div className="timer-background">
               <div
                 className="timer-current"
                 style={{
-                  transform: `translateX(-${100 - this.state.progress * 100}%)`
+                  transform: `translateX(-${100 - this.state.progress * 100}%)`,
                 }}
               />
             </div>
           </div>
           <div className="duration">{secondsToTime(this.state.duration)}</div>
           <div className="volume">
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              onChange={this.handleVolume}
-            />
+            <input type="range" min="0" max="1" step="0.1" onChange={this.handleVolume} />
           </div>
         </div>
       </div>

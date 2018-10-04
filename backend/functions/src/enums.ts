@@ -1,5 +1,5 @@
 export enum Status {
-  Uploaded = "uploaded",
+  Analysing = "analysing",
   Transcoding = "transcoding",
   Transcribing = "transcribing",
   Saving = "saving",

@@ -23,7 +23,7 @@ exports.transcription = functions.database.ref("/transcripts/{id}").onCreate(asy
 
     const languageCode = transcript.audioFile.languageCode
 
-    console.log(`Deployed 16:46 - Start transcription of id ${id} with ${languageCode} `)
+    console.log(`Deployed 15:16 - Start transcription of id ${id} with ${languageCode} `)
 
     // First, check if status is "analysing", otherwise, cancel
 

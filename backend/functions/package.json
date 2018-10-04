@@ -12,15 +12,15 @@
   },
   "main": "dist/app.bundle.js",
   "dependencies": {
-    "@google-cloud/speech": "^2.1.0",
+    "@google-cloud/speech": "^2.1.1",
     "ffmpeg-static": "^2.3.0",
     "firebase-admin": "^6.0.0",
     "firebase-functions": "^2.0.5",
     "fluent-ffmpeg": "^2.1.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.1.0",
-    "@babel/core": "^7.1.0",
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
     "@babel/plugin-proposal-class-properties": "^7.1.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/preset-env": "^7.1.0",
@@ -31,7 +31,7 @@
     "tslint-config-prettier": "^1.15.0",
     "typescript": "^3.1.1",
     "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.1",
+    "webpack-cli": "^3.1.2",
     "webpack-node-externals": "^1.7.2"
   },
   "private": true,

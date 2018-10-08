@@ -1,17 +1,14 @@
 {
   "presets": [
     [
-      "@babel/env",
+      "@babel/preset-env",
       {
         "targets": {
           "node": "6.14.0"
         }
       }
     ],
-    "@babel/typescript"
+    "@babel/preset-typescript"
   ],
-  "plugins": [
-    "@babel/proposal-class-properties",
-    "@babel/proposal-object-rest-spread"
-  ]
+  "plugins": ["@babel/proposal-class-properties", "@babel/proposal-object-rest-spread"]
 }

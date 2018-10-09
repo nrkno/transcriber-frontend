@@ -15,7 +15,6 @@ if (!admin.apps.length) {
   admin.app()
 }
 const realtimeDatabase = admin.database()
-export const storage = admin.storage()
 
 const database = (() => {
   const updateTranscript = async (id: string, transcription: object) => {

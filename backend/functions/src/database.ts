@@ -6,6 +6,7 @@
 import admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import { Status } from "./enums"
+import serializeError from "serialize-error"
 
 // Only initialise the app once
 if (!admin.apps.length) {
@@ -52,7 +53,7 @@ const database = (() => {
 
   const errorOccured = async (id: string, error: Error) => {
     const data = {
-      error: JSON.parse(JSON.stringify(error)),
+      error: serializeError(error),
       progress: {
         percent: null,
         status: "failed",

@@ -17,7 +17,7 @@ interface ITranscription {
 interface IWord {
   word: string
   endTime: ITime
-  startTime: ITime
+  startTime?: ITime
 }
 
 interface ITime {

@@ -1,14 +1,14 @@
-const result = require("dotenv").config({ path: "./src/test/.env" })
+import dotenv from "dotenv"
+const result = dotenv.config({ path: "./src/test/.env" })
 if (result.error) {
   throw result.error
 }
+
+import firebaseFunctionsTest from "firebase-functions-test"
+firebaseFunctionsTest({
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+})
 import admin from "firebase-admin"
-require("firebase-functions-test")(
-  {
-    databaseURL: process.env.FIREBASE_DATABASE_URL,
-  },
-  process.env.GOOGLE_APPLICATION_CREDENTIALS,
-)
 import serializeError from "serialize-error"
 import database from "../database"
 import { Status } from "../enums"

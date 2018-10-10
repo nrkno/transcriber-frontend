@@ -1,13 +1,13 @@
-const result = require("dotenv").config({ path: "./src/test/.env" })
+import dotenv from "dotenv"
+const result = dotenv.config({ path: "./src/test/.env" })
 if (result.error) {
   throw result.error
 }
-const test = require("firebase-functions-test")(
-  {
-    databaseURL: process.env.FIREBASE_DATABASE_URL,
-  },
-  process.env.GOOGLE_APPLICATION_CREDENTIALS,
-)
+
+import firebaseFunctionsTest from "firebase-functions-test"
+const test = firebaseFunctionsTest({
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+})
 test.mockConfig({ bucket: { uploads: process.env.FIREBASE_UPLOADS_BUCKET, transcoded: process.env.FIREBASE_TRANSCODED_BUCKET } })
 
 import * as functions from "firebase-functions"
@@ -45,4 +45,19 @@ it.only("Transcode", async function(done) {
 
     done()
   })
+})
+
+afterAll(async function() {
+  // Delete remote files
+
+  const uploadsBucket = storage.bucket(functions.config().bucket.uploads)
+  await uploadsBucket.file("test").delete()
+
+  const transcodedBucket = storage.bucket(functions.config().bucket.transcoded)
+  await transcodedBucket.file("test.flac").delete()
+
+  // Delete local file
+
+  const tempFilePath = path.join(os.tmpdir(), "test")
+  fs.unlinkSync(tempFilePath)
 })

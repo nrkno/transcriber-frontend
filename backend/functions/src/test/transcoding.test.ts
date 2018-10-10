@@ -18,7 +18,7 @@ import path from "path"
 import { storage } from "../storage"
 import { transcode } from "../transcoding"
 
-it.only("Transcode", async function(done) {
+it.only("Transcode", async done => {
   // First, we upload the a stereo mp3 file to the uploads bucket
 
   const fileId = "test"
@@ -47,7 +47,7 @@ it.only("Transcode", async function(done) {
   })
 })
 
-afterAll(async function() {
+afterAll(async () => {
   // Delete remote files
 
   const uploadsBucket = storage.bucket(functions.config().bucket.uploads)

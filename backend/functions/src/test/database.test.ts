@@ -14,7 +14,7 @@ import database from "../database"
 import { Status } from "../enums"
 import { IWord } from "../interfaces"
 
-test("Set duration in seconds", async function() {
+test("Set duration in seconds", async () => {
   expect.assertions(1)
   await database.setDurationInSeconds("test", 1234)
   const dataSnapshot = await admin
@@ -26,7 +26,7 @@ test("Set duration in seconds", async function() {
   expect(value).toBe(1234)
 })
 
-test("Update status", async function() {
+test("Update status", async () => {
   expect.assertions(1)
   await database.updateStatus("test", Status.Analysing)
   const dataSnapshot = await admin
@@ -38,7 +38,7 @@ test("Update status", async function() {
   expect(value).toBe(Status.Analysing)
 })
 
-test("Update percent", async function() {
+test("Update percent", async () => {
   expect.assertions(1)
   await database.updatePercent("test", 50)
   const dataSnapshot = await admin
@@ -50,7 +50,7 @@ test("Update percent", async function() {
   expect(value).toBe(50)
 })
 
-test("Add words", async function() {
+test("Add words", async () => {
   expect.assertions(2)
 
   const words1: IWord[] = [
@@ -112,7 +112,7 @@ test("Add words", async function() {
   expect(words.pop()).toEqual(words1)
 })
 
-test("Error occured", async function() {
+test("Error occured", async () => {
   expect.assertions(1)
 
   const error = new Error("Something went wrong!")
@@ -130,7 +130,7 @@ test("Error occured", async function() {
   expect(value).toEqual(serializedError)
 })
 
-afterAll(async function() {
+afterAll(async () => {
   // Delete all data in "transcripts/test"
 
   await admin
@@ -139,5 +139,5 @@ afterAll(async function() {
     .set("")
 
   // Remove connection, this is needed for the async functions and Jest to work
-  admin.app().delete()
+  await admin.app().delete()
 })

@@ -5,8 +5,8 @@
 
 import admin from "firebase-admin"
 import * as functions from "firebase-functions"
-import { Status } from "./enums"
 import serializeError from "serialize-error"
+import { Status } from "./enums"
 
 // Only initialise the app once
 if (!admin.apps.length) {

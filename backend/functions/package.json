@@ -31,6 +31,7 @@
     "@types/jest": "^23.3.5",
     "@types/serialize-error": "^2.1.0",
     "babel-loader": "^8.0.4",
+    "dotenv": "^6.1.0",
     "firebase-functions-test": "^0.1.4",
     "jest": "^23.6.0",
     "serialize-error": "^3.0.0",

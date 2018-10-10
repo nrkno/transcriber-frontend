@@ -1,15 +1,17 @@
+const result = require("dotenv").config({ path: "./src/test/.env" })
+if (result.error) {
+  throw result.error
+}
 import admin from "firebase-admin"
 require("firebase-functions-test")(
   {
-    databaseURL: "https://nrk-transkribering-development.firebaseio.com",
-    projectId: "nrk-transkribering-development",
-    storageBucket: "nrk-transkribering-development.appspot.com",
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
   },
-  "./src/test/serviceAccountKey.json",
+  process.env.GOOGLE_APPLICATION_CREDENTIALS,
 )
+import serializeError from "serialize-error"
 import database from "../database"
 import { Status } from "../enums"
-import serializeError from "serialize-error"
 import { IWord } from "../interfaces"
 
 test("Set duration in seconds", async function() {
@@ -51,7 +53,7 @@ test("Update percent", async function() {
 test("Add words", async function() {
   expect.assertions(2)
 
-  const words1: Array<IWord> = [
+  const words1: IWord[] = [
     {
       endTime: {
         nanos: 300000000,
@@ -72,7 +74,7 @@ test("Add words", async function() {
     },
   ]
 
-  const words2: Array<IWord> = [
+  const words2: IWord[] = [
     {
       endTime: {
         nanos: 300000000,

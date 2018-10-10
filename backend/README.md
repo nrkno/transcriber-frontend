@@ -9,10 +9,14 @@
 - Turn on Google Speech API in the [Google Cloud console](https://console.cloud.google.com).
 - After deploying the cloud function for the first time, you might want to increase the memory allocation to 2 GB and the timeout to 540 seconds.
 
-## Linting
+## Testing
 
-```sh
-npm run-script lint --prefix function
+Create a `.env` file in the `test` folder with the following attributes:
+
+```
+FIREBASE_DATABASE_URL = https:...
+FIREBASE_UPLOADS_BUCKET = name-of-uploads-bucket
+FIREBASE_TRANSCODED_BUCKET = name-of-transcoded-bucket
 ```
 
 ## Deployment

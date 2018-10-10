@@ -11,7 +11,7 @@
 
 ## Testing
 
-To run the tests, you need a service account. See [Initialize SDK in online mode](https://firebase.google.com/docs/functions/unit-testing#initializing), and save the file as `serviceAccountKey.json` in the `test` folder. You also need to create a `.env` file the following attributes:
+Create a `.env` file in the `test` folder with the following attributes:
 
 ```
 FIREBASE_DATABASE_URL = https:...

@@ -1,6 +1,11 @@
 import firebase from "firebase/app"
 import * as React from "react"
-import Dropzone from "react-dropzone"
+//import Dropzone from "react-dropzone"
+// Testing not working with normal import right now, see https://github.com/react-dropzone/react-dropzone/issues/554
+let Dropzone = require("react-dropzone")
+if ("default" in Dropzone) {
+  Dropzone = Dropzone.default
+}
 import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
 import { Status } from "../enums"

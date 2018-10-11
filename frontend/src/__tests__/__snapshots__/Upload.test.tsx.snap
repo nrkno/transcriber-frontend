@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders correctly 1`] = `
+<div
+  className="wrapper"
+>
+  <form
+    className="dropForm"
+    onSubmit={[Function]}
+  >
+    <p>
+      Last opp lydfil
+    </p>
+    <div
+      aria-disabled={false}
+      className=""
+      onClick={[Function]}
+      onDragEnter={[Function]}
+      onDragLeave={[Function]}
+      onDragOver={[Function]}
+      onDragStart={[Function]}
+      onDrop={[Function]}
+      style={
+        Object {
+          "border": "10px solid #f6f6f6",
+          "borderRadius": "50%",
+          "height": "132px",
+          "position": "relative",
+          "width": "132px",
+        }
+      }
+    >
+      <div
+        style={
+          Object {
+            "marginTop": "50%",
+            "padding": "0 10px",
+            "textAlign": "center",
+            "transform": "translateY(-50%)",
+          }
+        }
+      >
+        Klikk for å velge, eller slipp lydfil her
+      </div>
+      <input
+        accept="audio/*"
+        autoComplete="off"
+        disabled={false}
+        multiple={true}
+        onChange={[Function]}
+        style={
+          Object {
+            "bottom": 0,
+            "left": 0,
+            "opacity": 0.00001,
+            "pointerEvents": "none",
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          }
+        }
+        type="file"
+      />
+    </div>
+    <select
+      onChange={[Function]}
+      value="nb-NO"
+    >
+      <option
+        value="nb-NO"
+      >
+        Norsk
+      </option>
+      <option
+        value="en-US"
+      >
+        Engelsk
+      </option>
+    </select>
+    <button
+      className="nrk-button"
+      disabled={true}
+      type="submit"
+    >
+      Last opp
+    </button>
+  </form>
+</div>
+`;

@@ -11,8 +11,8 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "outDir": "./dist"
   },
-  "exclude": ["node_modules", "scripts", "acceptance-tests", "webpack", "jest", "src/setupTests.ts", "dist"],
-  "include": [["*.ts"]]
+  "exclude": ["node_modules", "scripts", "acceptance-tests", "webpack", "jest", "src/setupTests.ts", "dist"]
 }

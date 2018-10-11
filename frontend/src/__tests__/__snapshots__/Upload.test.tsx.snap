@@ -63,6 +63,7 @@ exports[`renders correctly 1`] = `
       />
     </div>
     <select
+      data-testid="languages"
       onChange={[Function]}
       value="nb-NO"
     >
@@ -79,6 +80,7 @@ exports[`renders correctly 1`] = `
     </select>
     <button
       className="nrk-button"
+      data-testid="submit"
       disabled={true}
       type="submit"
     >

@@ -162,11 +162,11 @@ class Upload extends React.Component<any, IState> {
                 {this.state.dropzoneMessage}
               </div>
             </Dropzone>
-            <select value={this.state.languageCode} onChange={this.handleLanguageChange}>
+            <select data-testid="languages" value={this.state.languageCode} onChange={this.handleLanguageChange}>
               <option value="nb-NO">Norsk</option>
               <option value="en-US">Engelsk</option>
             </select>
-            <button className="nrk-button" disabled={this.state.file == null} type="submit">
+            <button data-testid="submit" className="nrk-button" disabled={this.state.file == null} type="submit">
               Last opp
             </button>
           </form>

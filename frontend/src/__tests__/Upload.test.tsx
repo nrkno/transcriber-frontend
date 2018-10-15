@@ -1,3 +1,4 @@
+jest.mock("react-ga")
 import firebaseMock from "firebase-mock"
 jest.mock("../firebaseApp", () => {
   return firebaseMock

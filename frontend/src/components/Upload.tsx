@@ -36,7 +36,7 @@ class Upload extends React.Component<any, IState> {
   }
   public handleFileDrop = (acceptedFiles: [File], rejectedFiles: [File]) => {
     if (rejectedFiles.length > 0) {
-      this.setState({ dropzoneMessage: "Filen har feil format" })
+      this.setState({ dropzoneMessage: "Filen har feil format", file: undefined })
 
       ReactGA.event({
         category: "Upload",
@@ -166,7 +166,7 @@ class Upload extends React.Component<any, IState> {
               <option value="nb-NO">Norsk</option>
               <option value="en-US">Engelsk</option>
             </select>
-            <button data-testid="submit" className="nrk-button" disabled={this.state.file == null} type="submit">
+            <button className="nrk-button" disabled={this.state.file == undefined} type="submit">
               Last opp
             </button>
           </form>

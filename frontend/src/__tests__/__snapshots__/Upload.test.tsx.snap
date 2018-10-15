@@ -80,7 +80,6 @@ exports[`renders correctly 1`] = `
     </select>
     <button
       className="nrk-button"
-      data-testid="submit"
       disabled={true}
       type="submit"
     >

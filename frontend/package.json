@@ -9,11 +9,11 @@
   },
   "browserslist": ">0.25% in my stats, not IE > 0",
   "dependencies": {
-    "firebase": "^5.5.3",
+    "firebase": "^5.5.4",
     "lodash": "^4.17.11",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-dropzone": "^6.0.2",
+    "react-dropzone": "^6.2.2",
     "react-ga": "^2.5.3",
     "react-router-dom": "^4.3.1",
     "react-sweet-progress": "^1.1.2"
@@ -44,7 +44,7 @@
     "style-loader": "^0.23.1",
     "ts-jest": "^23.10.4",
     "ts-lint": "^4.5.1",
-    "typescript": "^3.1.2",
+    "typescript": "^3.1.3",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.9",

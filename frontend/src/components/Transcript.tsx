@@ -46,7 +46,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   }
 
   public componentDidMount() {
-    database.ref(`/transcripts/${this.props.match.params.id}`).on("value", dataSnapshot => {
+    database.ref(`/transcripts/${this.props.match.params.id}`).on("value", async dataSnapshot => {
       if (dataSnapshot !== null) {
         this.setState({
           transcription: dataSnapshot.val(),

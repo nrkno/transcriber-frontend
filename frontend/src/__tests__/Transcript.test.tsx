@@ -1,12 +1,11 @@
+const firebaseMock = require("firebase-mock")
+const mockDatabase = new firebaseMock.MockFirebase()
 jest.mock("../firebaseApp", () => {
-  const firebasemock = require("firebase-mock")
-  const mockdatabase = new firebasemock.MockFirebase()
-  const mockstorage = new firebasemock.MockStorage()
-
-  const mocksdk = new firebasemock.MockFirebaseSdk(
+  const mockStorage = new firebaseMock.MockStorage()
+  const mockSdk = new firebaseMock.MockFirebaseSdk(
     // use null if your code does not use RTDB
     (path: string) => {
-      return path ? mockdatabase.child(path) : mockdatabase
+      return path ? mockDatabase.child(path) : mockDatabase
     },
     // use null if your code does not use AUTHENTICATION
     () => {
@@ -18,7 +17,7 @@ jest.mock("../firebaseApp", () => {
     },
     // use null if your code does not use STORAGE
     () => {
-      return mockstorage
+      return mockStorage
     },
     // use null if your code does not use MESSAGING
     () => {
@@ -27,27 +26,64 @@ jest.mock("../firebaseApp", () => {
   )
 
   // return the mock to match the export api
-  return { database: mocksdk.database(), storage: mocksdk.storage }
+  return { database: mockSdk.database(), storage: mockSdk.storage }
 })
 
 import * as React from "react"
 import Transcript from "../components/Transcript"
 import * as TestRenderer from "react-test-renderer"
-import { waitForElement, render } from "react-testing-library"
+import { waitForElement, render, /*wait, */ cleanup } from "react-testing-library"
+// import { Status } from "../enums"
+
 jest.mock("react-ga")
 
 test("renders correctly", () => {
   const mock: any = jest.fn()
-  const match = { params: { id: "test" }, isExact: false, path: "", url: "" }
+  const match = { params: { id: "" }, isExact: false, path: "", url: "" }
   const testRenderer = TestRenderer.create(<Transcript match={match} location={mock} history={mock} />)
   expect(testRenderer.toJSON()).toMatchSnapshot()
 })
 
 test("show loading text", async () => {
   const mock: any = jest.fn()
-  const match = { params: { id: "test" }, isExact: false, path: "", url: "" }
+  const match = { params: { id: "" }, isExact: false, path: "", url: "" }
 
   const { getByText } = render(<Transcript match={match} location={mock} history={mock} />)
 
   await waitForElement(() => getByText("Laster inn transkripsjon"))
+})
+
+test("show transcription not found on invalid id", async () => {
+  const mock: any = jest.fn()
+  const match = { params: { id: "" }, isExact: false, path: "", url: "" }
+
+  const { getByText } = render(<Transcript match={match} location={mock} history={mock} />)
+
+  mockDatabase.ref.child("/transcripts").push() //Pushing empty object, will result in transaction === null
+  mockDatabase.ref.flush()
+
+  await waitForElement(() => getByText("Fant ikke transkripsjonen"))
+})
+/*
+test("show transcription error", async () => {
+  const mock: any = jest.fn()
+  const match = { params: { id: "" }, isExact: false, path: "", url: "" }
+
+  const { getByText } = render(<Transcript match={match} location={mock} history={mock} />)
+  const transcript: any = {
+    audioFile: { url: "", name: "" },
+    progress: {
+      status: Status.Analysing,
+    },
+    //error: { message: "TEST" },
+  }
+  mockDatabase.ref.child("/transcripts").push(transcript)
+  mockDatabase.ref.flush()
+
+  await wait(() => getByText("Analyserer"))
+})
+*/
+// automatically unmount and cleanup DOM after the test is finished.
+afterEach(() => {
+  cleanup()
 })

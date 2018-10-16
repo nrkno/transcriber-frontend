@@ -9,7 +9,7 @@ if ("default" in Dropzone) {
 import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
 import { Status } from "../enums"
-import firebaseApp from "../firebaseApp"
+import { database, storage } from "../firebaseApp"
 import ReactGA from "react-ga"
 
 interface IState {
@@ -58,7 +58,7 @@ class Upload extends React.Component<any, IState> {
       return
     }
 
-    const id = firebaseApp.db.ref(`/transcripts/`).push().key
+    const id = database.ref(`/transcripts/`).push().key
 
     if (id === null) {
       return
@@ -71,7 +71,7 @@ class Upload extends React.Component<any, IState> {
       },
     }
 
-    const uploadTask = firebaseApp.storage
+    const uploadTask = storage
       .ref()
       .child(id)
       .put(file, metadata)
@@ -106,7 +106,7 @@ class Upload extends React.Component<any, IState> {
       },
       () => {
         uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
-          firebaseApp.db
+          database
             .ref(`/transcripts/${id}`)
             .set({
               audioFile: {

@@ -2,7 +2,7 @@ import { flatten } from "lodash"
 import * as React from "react"
 import { RouteComponentProps } from "react-router"
 import { Status, SweetProgressStatus } from "../enums"
-import firebaseApp from "../firebaseApp"
+import { database } from "../firebaseApp"
 import { ITime, ITranscription } from "../interfaces"
 import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
@@ -46,7 +46,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   }
 
   public componentDidMount() {
-    firebaseApp.db.ref(`/transcripts/${this.props.match.params.id}`).on("value", dataSnapshot => {
+    database.ref(`/transcripts/${this.props.match.params.id}`).on("value", dataSnapshot => {
       if (dataSnapshot !== null) {
         this.setState({
           transcription: dataSnapshot.val(),

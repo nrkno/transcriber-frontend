@@ -23,8 +23,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
       transcription: undefined,
     }
   }
-
-  componentDidUpdate(/*prevProps, */ prevState: IState /*, snapshot*/) {
+  componentDidUpdate(_prevProps: any, prevState: IState /*, _snapshot*/) {
     if (this.state.transcription && this.state.transcription.progress && this.state.transcription.progress.status) {
       // Log errors
       if (this.state.transcription.progress.status === Status.Failed && this.state.transcription.error) {

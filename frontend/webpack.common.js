@@ -3,7 +3,7 @@ const CleanWebpackPlugin = require("clean-webpack-plugin")
 
 module.exports = {
   output: {
-    filename: "[name].bundle.js",
+    filename: "[name].[contenthash].js",
     publicPath: "/",
   },
   module: {

@@ -24,14 +24,19 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     }
   }
 
-  componentDidUpdate(prevProps, prevState: IState, snapshot) {
-    // Logging progress status and errors to GA
-    if (prevState.transcription === undefined || prevState.transcription.progress.status !== this.state.transcription.progress.status) {
+  componentDidUpdate(/*prevProps, */ prevState: IState /*, snapshot*/) {
+    if (this.state.transcription && this.state.transcription.progress && this.state.transcription.progress.status) {
+      // Log errors
       if (this.state.transcription.progress.status === Status.Failed && this.state.transcription.error) {
         ReactGA.exception({
-          description: this.state.transcription.error,
+          description: this.state.transcription.error.message,
         })
-      } else {
+      }
+      // Logging progress status
+      else if (
+        prevState.transcription === undefined ||
+        (prevState.transcription && prevState.transcription.progress && prevState.transcription.progress.status && prevState.transcription.progress.status !== this.state.transcription.progress.status)
+      ) {
         ReactGA.event({
           category: "Progress",
           action: this.state.transcription.progress.status,
@@ -75,7 +80,6 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
       return <TranscriptionProgress message={"Fant ikke transkripsjonen"} status={SweetProgressStatus.Error} />
     } else {
       const progress = transcription.progress!
-      const error = transcription.error
 
       switch (progress.status) {
         case Status.Analysing:
@@ -115,7 +119,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
           )
 
         case Status.Failed:
-          return <TranscriptionProgress message={error!.details} status={SweetProgressStatus.Error} />
+          const error = transcription.error
+          return <TranscriptionProgress message={error!.message} status={SweetProgressStatus.Error} />
 
         default:
           return <TranscriptionProgress message={"Noe gikk galt!"} status={SweetProgressStatus.Error} />

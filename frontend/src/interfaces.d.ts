@@ -5,14 +5,13 @@ interface ITranscription {
     url: string
     name: string
   }
-  text?: {[key: string]:  IWord}
-  error?: IError
+  text?: { [key: string]: IWord }
+  error?: Error
   progress?: {
     percent?: number
     status: Status
   }
 }
-
 
 interface IWord {
   word: string
@@ -23,9 +22,4 @@ interface IWord {
 interface ITime {
   nanos: number
   seconds: string
-}
-
-interface IError {
-  code: number
-  details: string
 }

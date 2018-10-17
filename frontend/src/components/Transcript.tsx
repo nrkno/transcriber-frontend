@@ -2,7 +2,7 @@ import { flatten } from "lodash"
 import * as React from "react"
 import { RouteComponentProps } from "react-router"
 import { Status, SweetProgressStatus } from "../enums"
-import { database } from "../firebaseApp"
+import { database, functions } from "../firebaseApp"
 import { ITime, ITranscription } from "../interfaces"
 import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
@@ -55,6 +55,32 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     })
   }
 
+  private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const id = this.props.match.params.id
+    window.location.href = `https://europe-west1-nrk-transkribering-development.cloudfunctions.net/exportToDoc?id=${id}`
+
+    return
+    console.log("HEI exportToDoc")
+
+    fetch("https://europe-west1-nrk-transkribering-development.cloudfunctions.net/exportToDoc").then(function(response) {
+      console.log(response)
+    })
+
+    return
+    var exportToDoc = functions.httpsCallable("exportToDoc2")
+
+    try {
+      const result = await exportToDoc()
+      console.log("Fikk svar")
+
+      console.log(result)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   public handleTimeUpdate = (event: React.ChangeEvent<HTMLAudioElement>) => {
     this.setState({ currentTime: event.target.currentTime })
   }
@@ -98,6 +124,9 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
           // We have a transcription , show it
           const audioFile = transcription.audioFile
           const text = transcription.text!
+
+          console.log(text)
+
           const words = flatten(Object.keys(text).map(key => text[key]))
 
           return (
@@ -107,6 +136,11 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                 <div className="nrk-color-spot warning">
                   ⚠️ Transkribering er i en tidlig utviklingsfase. Transkriberingen er ikke noen fasit, og at kan ikke brukes verbatim i f.eks. artikler el.l. uten at man har gått igjennom teksten for hånd.
                 </div>
+                <form className="dropForm" onSubmit={this.handleExportToWord}>
+                  <button className="nrk-button" type="submit">
+                    Eksporter til Word
+                  </button>
+                </form>
                 <p className="transcription">
                   {words.map((wordObject, i) => {
                     return <Word key={i} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />

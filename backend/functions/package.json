@@ -14,11 +14,13 @@
   "main": "dist/app.bundle.js",
   "dependencies": {
     "@google-cloud/speech": "^2.1.1",
+    "docx": "^4.3.0",
     "ffmpeg-static": "^2.3.0",
     "firebase-admin": "^6.0.0",
     "firebase-functions": "^2.0.5",
-    "serialize-error": "^3.0.0",
-    "fluent-ffmpeg": "^2.1.2"
+    "fluent-ffmpeg": "^2.1.2",
+    "lodash": "^4.17.11",
+    "serialize-error": "^3.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",

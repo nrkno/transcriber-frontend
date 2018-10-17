@@ -61,7 +61,13 @@ const database = (() => {
     return updateTranscript(id, data)
   }
 
-  return { addWords, errorOccured, setDurationInSeconds, updateStatus, updatePercent }
+  const downloadText = async (id: string) => {
+    return realtimeDatabase.ref(`/transcripts/${id}/text`).once("value", dataSnapshot => {
+      dataSnapshot.val()
+    })
+  }
+
+  return { addWords, errorOccured, setDurationInSeconds, updateStatus, updatePercent, downloadText }
 })()
 
 export default database

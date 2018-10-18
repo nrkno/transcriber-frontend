@@ -144,7 +144,7 @@ class Upload extends React.Component<any, IState> {
             <Dropzone
               accept="audio/*"
               style={{
-                border: "10px solid #f6f6f6",
+                border: "10px solid #efefef",
                 borderRadius: "50%",
                 height: "132px",
                 width: "132px",

@@ -22,7 +22,7 @@ exports[`renders correctly 1`] = `
       onDrop={[Function]}
       style={
         Object {
-          "border": "10px solid #f6f6f6",
+          "border": "10px solid #efefef",
           "borderRadius": "50%",
           "height": "132px",
           "position": "relative",

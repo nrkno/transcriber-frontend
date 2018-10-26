@@ -28,7 +28,7 @@ test("Set duration in seconds", async () => {
 
 test("Update status", async () => {
   expect.assertions(1)
-  await database.updateStatus("test", Status.Analysing)
+  await database.setStatus("test", Status.Analysing)
   const dataSnapshot = await admin
     .database()
     .ref("transcripts/test/progress/status")
@@ -40,7 +40,7 @@ test("Update status", async () => {
 
 test("Update percent", async () => {
   expect.assertions(1)
-  await database.updatePercent("test", 50)
+  await database.setPercent("test", 50)
   const dataSnapshot = await admin
     .database()
     .ref("transcripts/test/progress/percent")

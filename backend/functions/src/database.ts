@@ -21,7 +21,7 @@ const database = (() => {
     return realtimeDatabase.ref(`/transcripts/${id}`).update({ ...transcription })
   }
 
-  const updateStatus = async (id: string, status: Status) => {
+  const setStatus = async (id: string, status: Status) => {
     const transcription: any = { "progress/status": status, [`timestamps/${status}`]: admin.database.ServerValue.TIMESTAMP }
 
     // We get completion percentages when transcribing and saving, so setting them to zero.
@@ -34,7 +34,7 @@ const database = (() => {
     return updateTranscript(id, transcription)
   }
 
-  const updatePercent = async (id: string, percent: number) => {
+  const setPercent = async (id: string, percent: number) => {
     const transcription: any = { "progress/percent": percent }
 
     return updateTranscript(id, transcription)
@@ -61,7 +61,13 @@ const database = (() => {
     return updateTranscript(id, data)
   }
 
-  return { addWords, errorOccured, setDurationInSeconds, updateStatus, updatePercent }
+  const getStatus = async (id: string) => {
+    const eventId = await realtimeDatabase.ref(`/transcripts/${id}/progress/status`).once("value")
+
+    return eventId.val()
+  }
+
+  return { addWords, errorOccured, setDurationInSeconds, setStatus, setPercent, getStatus }
 })()
 
 export default database

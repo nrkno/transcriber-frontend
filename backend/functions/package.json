@@ -18,6 +18,7 @@
     "firebase-admin": "^6.1.0",
     "firebase-functions": "^2.1.0",
     "fluent-ffmpeg": "^2.1.2",
+    "passport-azure-ad": "^4.0.0",
     "serialize-error": "^3.0.0"
   },
   "devDependencies": {

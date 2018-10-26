@@ -9,7 +9,7 @@
   },
   "browserslist": ">0.25% in my stats, not IE > 0",
   "dependencies": {
-    "firebase": "^5.5.5",
+    "firebase": "^5.5.6",
     "lodash": "^4.17.11",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
@@ -40,7 +40,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^23.6.0",
     "react-test-renderer": "^16.6.0",
-    "react-testing-library": "^5.2.1",
+    "react-testing-library": "^5.2.3",
     "style-loader": "^0.23.1",
     "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",

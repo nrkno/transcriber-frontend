@@ -34,6 +34,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/preset-env": "^7.1.0",
     "@babel/preset-typescript": "^7.1.0",
+    "@types/cookie-parser": "^1.4.1",
     "@types/dotenv": "^4.0.3",
     "@types/express-session": "^1.15.11",
     "@types/ffmpeg-static": "^2.0.0",

@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions"
 
-export const creds = {
+export const credentials = {
   // Required
   identityMetadata: functions.config().azure_ad.identity_metadata,
   // "https://login.microsoftonline.com/<tenant_name>.onmicrosoft.com/.well-known/openid-configuration",
@@ -75,4 +75,4 @@ export const creds = {
 exports.resourceURL = "https://graph.windows.net"
 
 // The url you need to go to destroy the session with AAD
-exports.destroySessionUrl = "https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=http://localhost:3000"
+export const destroySessionUrl = "https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=http://localhost:3000"

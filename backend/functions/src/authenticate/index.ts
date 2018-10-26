@@ -1,44 +1,17 @@
-/**
- * Copyright (c) Microsoft Corporation
- *  All Rights Reserved
- *  MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the 'Software'), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify,
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
- * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
- * OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-
-"use strict"
-
 /******************************************************************************
  * Module dependencies.
  *****************************************************************************/
 
-const express = require("express")
-const cookieParser = require("cookie-parser")
-const expressSession = require("express-session")
-const bodyParser = require("body-parser")
-const methodOverride = require("method-override")
-const passport = require("passport")
-const util = require("util")
-const config = require("./config")
-
-// Start QuickStart here
-
-const OIDCStrategy = require("passport-azure-ad").OIDCStrategy
+import bodyParser from "body-parser"
+import cookieParser from "cookie-parser"
+import express from "express"
+import expressSession from "express-session"
+import * as functions from "firebase-functions"
+import methodOverride from "method-override"
+import passport from "passport"
+import { OIDCStrategy } from "passport-azure-ad"
+import util from "util"
+import { credentials, destroySessionUrl } from "./credentials"
 
 /******************************************************************************
  * Set up passport in the app
@@ -50,12 +23,12 @@ const OIDCStrategy = require("passport-azure-ad").OIDCStrategy
 // this will be as simple as storing the user ID when serializing, and finding
 // the user by ID when deserializing.
 // -----------------------------------------------------------------------------
-passport.serializeUser(function(user, done) {
+passport.serializeUser((user, done) => {
   done(null, user.oid)
 })
 
-passport.deserializeUser(function(oid, done) {
-  findByOid(oid, function(err, user) {
+passport.deserializeUser((oid, done) => {
+  findByOid(oid, (err, user) => {
     done(err, user)
   })
 })
@@ -63,7 +36,7 @@ passport.deserializeUser(function(oid, done) {
 // array to hold logged in users
 const users = []
 
-const findByOid = function(oid, fn) {
+const findByOid = (oid, fn) => {
   for (let i = 0, len = users.length; i < len; i++) {
     const user = users[i]
     console.info("we are using user: ", user)
@@ -94,32 +67,32 @@ const findByOid = function(oid, fn) {
 passport.use(
   new OIDCStrategy(
     {
-      identityMetadata: config.creds.identityMetadata,
-      clientID: config.creds.clientID,
-      responseType: config.creds.responseType,
-      responseMode: config.creds.responseMode,
-      redirectUrl: config.creds.redirectUrl,
-      allowHttpForRedirectUrl: config.creds.allowHttpForRedirectUrl,
-      clientSecret: config.creds.clientSecret,
-      validateIssuer: config.creds.validateIssuer,
-      isB2C: config.creds.isB2C,
-      issuer: config.creds.issuer,
-      passReqToCallback: config.creds.passReqToCallback,
-      scope: config.creds.scope,
-      loggingLevel: config.creds.loggingLevel,
-      nonceLifetime: config.creds.nonceLifetime,
-      nonceMaxAmount: config.creds.nonceMaxAmount,
-      useCookieInsteadOfSession: config.creds.useCookieInsteadOfSession,
-      cookieEncryptionKeys: config.creds.cookieEncryptionKeys,
-      clockSkew: config.creds.clockSkew,
+      allowHttpForRedirectUrl: credentials.allowHttpForRedirectUrl,
+      clientID: credentials.clientID,
+      clientSecret: credentials.clientSecret,
+      clockSkew: credentials.clockSkew,
+      cookieEncryptionKeys: credentials.cookieEncryptionKeys,
+      identityMetadata: credentials.identityMetadata,
+      isB2C: credentials.isB2C,
+      issuer: credentials.issuer,
+      loggingLevel: credentials.loggingLevel,
+      nonceLifetime: credentials.nonceLifetime,
+      nonceMaxAmount: credentials.nonceMaxAmount,
+      passReqToCallback: credentials.passReqToCallback,
+      redirectUrl: credentials.redirectUrl,
+      responseMode: credentials.responseMode,
+      responseType: credentials.responseType,
+      scope: credentials.scope,
+      useCookieInsteadOfSession: credentials.useCookieInsteadOfSession,
+      validateIssuer: credentials.validateIssuer,
     },
-    function(iss, sub, profile, accessToken, refreshToken, done) {
+    (iss, sub, profile, accessToken, refreshToken, done) => {
       if (!profile.oid) {
         return done(new Error("No oid found"), null)
       }
       // asynchronous verification, for effect...
-      process.nextTick(function() {
-        findByOid(profile.oid, function(err, user) {
+      process.nextTick(() => {
+        findByOid(profile.oid, (err, user) => {
           if (err) {
             return done(err)
           }
@@ -145,7 +118,7 @@ app.set("view engine", "ejs")
 // app.use(express.logger())
 app.use(methodOverride())
 app.use(cookieParser())
-app.use(expressSession({ secret: "keyboard cat", resave: true, saveUninitialized: false }))
+app.use(expressSession({ secret: functions.config().session.secret, resave: true, saveUninitialized: false }))
 app.use(bodyParser.urlencoded({ extended: true }))
 
 // Initialize Passport!  Also use passport.session() middleware, to support
@@ -181,21 +154,21 @@ app.get("/", (req, res) => {
 })
 
 // '/account' is only available to logged in user
-app.get("/account", ensureAuthenticated, function(req, res) {
+app.get("/account", ensureAuthenticated, (req, res) => {
   res.render("account", { user: req.user })
 })
 
 app.get(
   "/login",
-  function(req, res, next) {
+  (req, res, next) => {
     passport.authenticate("azuread-openidconnect", {
-      response: res, // required
-      resourceURL: config.resourceURL, // optional. Provide a value if you want to specify the resource.
-      customState: "my_state", // optional. Provide a value if you want to provide custom state value.
+      // customState: "my_state", // optional. Provide a value if you want to provide custom state value.
       failureRedirect: "/",
+      // resourceURL: config.resourceURL, // optional. Provide a value if you want to specify the resource.
+      response: res, // required
     })(req, res, next)
   },
-  function(req, res) {
+  (req, res) => {
     console.info("Login was called in the Sample")
     res.redirect("/authenticate/")
   },
@@ -207,13 +180,13 @@ app.get(
 // redirected to '/' (home page); otherwise, it passes to the next middleware.
 app.get(
   "/auth/openid/return",
-  function(req, res, next) {
+  (req, res, next) => {
     passport.authenticate("azuread-openidconnect", {
-      response: res, // required
       failureRedirect: "/",
+      response: res, // required
     })(req, res, next)
   },
-  function(req, res) {
+  (req, res) => {
     console.info("We received a return from AzureAD.")
     res.redirect("/authenticate/")
   },
@@ -225,23 +198,23 @@ app.get(
 // redirected to '/' (home page); otherwise, it passes to the next middleware.
 app.post(
   "/auth/openid/return",
-  function(req, res, next) {
+  (req, res, next) => {
     passport.authenticate("azuread-openidconnect", {
-      response: res, // required
       failureRedirect: "/",
+      response: res, // required
     })(req, res, next)
   },
-  function(req, res) {
+  (req, res) => {
     console.info("We received a return from AzureAD.")
     res.redirect("/authenticate/")
   },
 )
 
 // 'logout' route, logout from passport, and destroy the session with AAD.
-app.get("/logout", function(req, res) {
-  req.session.destroy(function(err) {
+app.get("/logout", (req, res) => {
+  req.session.destroy(err => {
     req.logOut()
-    res.redirect(config.destroySessionUrl)
+    res.redirect(destroySessionUrl)
   })
 })
 

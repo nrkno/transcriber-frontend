@@ -2,11 +2,7 @@
   "extends": ["tslint:recommended", "tslint-config-prettier"], // https://github.com/palantir/tslint/blob/master/src/configs/recommended.ts
   "rules": {
     "semicolon": [false, "never"],
-    "no-require-imports": false,
-    "object-literal-sort-keys": false,
-    "no-var-requires": false,
     "no-console": false,
-    "only-arrow-functions": false,
     "await-promise": true, //Warns for an awaited value that is not a Promise.
     "no-return-await": true, // Disallows unnecessary return await.
     "promise-function-async": true, // Requires any function or method that returns a promise to be marked async.

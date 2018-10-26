@@ -4,6 +4,7 @@
  */
 
 import * as functions from "firebase-functions"
+import { app } from "./authenticate"
 import database from "./database"
 import { Status } from "./enums"
 import { ITranscription } from "./interfaces"
@@ -63,6 +64,8 @@ exports.transcription = functions
       throw error
     }
   })
+
+exports.authenticate = functions.region("europe-west1").https.onRequest(app)
 
 process.on("unhandledRejection", (reason: any, promise: Promise<any>) => {
   console.error(new Error(`Unhandled Rejection at: Promise: ${promise} with reason: ${reason.stack || reason}`))

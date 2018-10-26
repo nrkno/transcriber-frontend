@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions"
 
-exports.creds = {
+export const creds = {
   // Required
   identityMetadata: functions.config().azure_ad.identity_metadata,
   // "https://login.microsoftonline.com/<tenant_name>.onmicrosoft.com/.well-known/openid-configuration",

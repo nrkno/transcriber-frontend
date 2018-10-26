@@ -86,6 +86,30 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./src/authenticate/config.ts":
+/*!************************************!*\
+  !*** ./src/authenticate/config.ts ***!
+  \************************************/
+/*! exports provided: creds */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"creds\", function() { return creds; });\n/* harmony import */ var firebase_functions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! firebase-functions */ \"firebase-functions\");\n/* harmony import */ var firebase_functions__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(firebase_functions__WEBPACK_IMPORTED_MODULE_0__);\n\nconst creds = {\n  // Required\n  identityMetadata: firebase_functions__WEBPACK_IMPORTED_MODULE_0__[\"config\"]().azure_ad.identity_metadata,\n  // \"https://login.microsoftonline.com/<tenant_name>.onmicrosoft.com/.well-known/openid-configuration\",\n  // or equivalently: 'https://login.microsoftonline.com/<tenant_guid>/.well-known/openid-configuration'\n  //\n  // or you can use the common endpoint\n  // 'https://login.microsoftonline.com/common/.well-known/openid-configuration'\n  // To use the common endpoint, you have to either set `validateIssuer` to false, or provide the `issuer` value.\n  // Required, the client ID of your app in AAD\n  clientID: firebase_functions__WEBPACK_IMPORTED_MODULE_0__[\"config\"]().azure_ad.client_id,\n  // Required, must be 'code', 'code id_token', 'id_token code' or 'id_token'\n  responseType: \"code id_token\",\n  // Required\n  responseMode: \"form_post\",\n  // Required, the reply URL registered in AAD for your app\n  redirectUrl: firebase_functions__WEBPACK_IMPORTED_MODULE_0__[\"config\"]().azure_ad.redirect_url,\n  // Required if we use http for redirectUrl\n  allowHttpForRedirectUrl: true,\n  // Required if `responseType` is 'code', 'id_token code' or 'code id_token'.\n  // If app key contains '\\', replace it with '\\\\'.\n  clientSecret: firebase_functions__WEBPACK_IMPORTED_MODULE_0__[\"config\"]().azure_ad.client_secret,\n  // Required to set to false if you don't want to validate issuer\n  validateIssuer: true,\n  // Required to set to true if you are using B2C endpoint\n  // This sample is for v1 endpoint only, so we set it to false\n  isB2C: false,\n  // Required if you want to provide the issuer(s) you want to validate instead of using the issuer from metadata\n  issuer: null,\n  // Required to set to true if the `verify` function has 'req' as the first parameter\n  passReqToCallback: false,\n  // Recommended to set to true. By default we save state in express session, if this option is set to true, then\n  // we encrypt state and save it in cookie instead. This option together with { session: false } allows your app\n  // to be completely express session free.\n  useCookieInsteadOfSession: true,\n  // Required if `useCookieInsteadOfSession` is set to true. You can provide multiple set of key/iv pairs for key\n  // rollover purpose. We always use the first set of key/iv pair to encrypt cookie, but we will try every set of\n  // key/iv pair to decrypt cookie. Key can be any string of length 32, and iv can be any string of length 12.\n  cookieEncryptionKeys: [{\n    key: \"12345678901234567890123456789012\",\n    iv: \"123456789012\"\n  }, {\n    key: \"abcdefghijklmnopqrstuvwxyzabcdef\",\n    iv: \"abcdefghijkl\"\n  }],\n  // Optional. The additional scope you want besides 'openid', for example: ['email', 'profile'].\n  scope: null,\n  // Optional, 'error', 'warn' or 'info'\n  loggingLevel: \"info\",\n  // Optional. The lifetime of nonce in session or cookie, the default value is 3600 (seconds).\n  nonceLifetime: null,\n  // Optional. The max amount of nonce saved in session or cookie, the default value is 10.\n  nonceMaxAmount: 5,\n  // Optional. The clock skew allowed in token validation, the default value is 300 seconds.\n  clockSkew: null // Optional.\n  // If you want to get access_token for a specific resource, you can provide the resource here; otherwise,\n  // set the value to null.\n  // Note that in order to get access_token, the responseType must be 'code', 'code id_token' or 'id_token code'.\n\n};\nexports.resourceURL = \"https://graph.windows.net\"; // The url you need to go to destroy the session with AAD\n\nexports.destroySessionUrl = \"https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=http://localhost:3000\";\n\n//# sourceURL=webpack:///./src/authenticate/config.ts?");
+
+/***/ }),
+
+/***/ "./src/authenticate/index.ts":
+/*!***********************************!*\
+  !*** ./src/authenticate/index.ts ***!
+  \***********************************/
+/*! exports provided: app */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* WEBPACK VAR INJECTION */(function(__dirname) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"app\", function() { return app; });\n/**\n * Copyright (c) Microsoft Corporation\n *  All Rights Reserved\n *  MIT License\n *\n * Permission is hereby granted, free of charge, to any person obtaining a copy of this\n * software and associated documentation files (the 'Software'), to deal in the Software\n * without restriction, including without limitation the rights to use, copy, modify,\n * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to\n * permit persons to whom the Software is furnished to do so, subject to the following\n * conditions:\n *\n * The above copyright notice and this permission notice shall be\n * included in all copies or substantial portions of the Software.\n *\n * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,\n * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS\n * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\n * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT\n * OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n */\n\n/******************************************************************************\n * Module dependencies.\n *****************************************************************************/\n\nconst express = __webpack_require__(/*! express */ \"express\");\n\nconst cookieParser = __webpack_require__(/*! cookie-parser */ \"cookie-parser\");\n\nconst expressSession = __webpack_require__(/*! express-session */ \"express-session\");\n\nconst bodyParser = __webpack_require__(/*! body-parser */ \"body-parser\");\n\nconst methodOverride = __webpack_require__(/*! method-override */ \"method-override\");\n\nconst passport = __webpack_require__(/*! passport */ \"passport\");\n\nconst util = __webpack_require__(/*! util */ \"util\");\n\nconst config = __webpack_require__(/*! ./config */ \"./src/authenticate/config.ts\"); // Start QuickStart here\n\n\nconst OIDCStrategy = __webpack_require__(/*! passport-azure-ad */ \"passport-azure-ad\").OIDCStrategy;\n/******************************************************************************\n * Set up passport in the app\n ******************************************************************************/\n// -----------------------------------------------------------------------------\n// To support persistent login sessions, Passport needs to be able to\n// serialize users into and deserialize users out of the session.  Typically,\n// this will be as simple as storing the user ID when serializing, and finding\n// the user by ID when deserializing.\n// -----------------------------------------------------------------------------\n\n\npassport.serializeUser(function (user, done) {\n  done(null, user.oid);\n});\npassport.deserializeUser(function (oid, done) {\n  findByOid(oid, function (err, user) {\n    done(err, user);\n  });\n}); // array to hold logged in users\n\nconst users = [];\n\nconst findByOid = function (oid, fn) {\n  for (let i = 0, len = users.length; i < len; i++) {\n    const user = users[i];\n    console.info(\"we are using user: \", user);\n\n    if (user.oid === oid) {\n      return fn(null, user);\n    }\n  }\n\n  return fn(null, null);\n}; // -----------------------------------------------------------------------------\n// Use the OIDCStrategy within Passport.\n//\n// Strategies in passport require a `verify` function, which accepts credentials\n// (in this case, the `oid` claim in id_token), and invoke a callback to find\n// the corresponding user object.\n//\n// The following are the accepted prototypes for the `verify` function\n// (1) function(iss, sub, done)\n// (2) function(iss, sub, profile, done)\n// (3) function(iss, sub, profile, access_token, refresh_token, done)\n// (4) function(iss, sub, profile, access_token, refresh_token, params, done)\n// (5) function(iss, sub, profile, jwtClaims, access_token, refresh_token, params, done)\n// (6) prototype (1)-(5) with an additional `req` parameter as the first parameter\n//\n// To do prototype (6), passReqToCallback must be set to true in the config.\n// -----------------------------------------------------------------------------\n\n\npassport.use(new OIDCStrategy({\n  identityMetadata: config.creds.identityMetadata,\n  clientID: config.creds.clientID,\n  responseType: config.creds.responseType,\n  responseMode: config.creds.responseMode,\n  redirectUrl: config.creds.redirectUrl,\n  allowHttpForRedirectUrl: config.creds.allowHttpForRedirectUrl,\n  clientSecret: config.creds.clientSecret,\n  validateIssuer: config.creds.validateIssuer,\n  isB2C: config.creds.isB2C,\n  issuer: config.creds.issuer,\n  passReqToCallback: config.creds.passReqToCallback,\n  scope: config.creds.scope,\n  loggingLevel: config.creds.loggingLevel,\n  nonceLifetime: config.creds.nonceLifetime,\n  nonceMaxAmount: config.creds.nonceMaxAmount,\n  useCookieInsteadOfSession: config.creds.useCookieInsteadOfSession,\n  cookieEncryptionKeys: config.creds.cookieEncryptionKeys,\n  clockSkew: config.creds.clockSkew\n}, function (iss, sub, profile, accessToken, refreshToken, done) {\n  if (!profile.oid) {\n    return done(new Error(\"No oid found\"), null);\n  } // asynchronous verification, for effect...\n\n\n  process.nextTick(function () {\n    findByOid(profile.oid, function (err, user) {\n      if (err) {\n        return done(err);\n      }\n\n      if (!user) {\n        // \"Auto-registration\"\n        users.push(profile);\n        return done(null, profile);\n      }\n\n      return done(null, user);\n    });\n  });\n})); // -----------------------------------------------------------------------------\n// Config the app, include middlewares\n// -----------------------------------------------------------------------------\n\nconst app = express();\napp.set(\"views\", __dirname + \"/views\");\napp.set(\"view engine\", \"ejs\"); // app.use(express.logger())\n\napp.use(methodOverride());\napp.use(cookieParser());\napp.use(expressSession({\n  secret: \"keyboard cat\",\n  resave: true,\n  saveUninitialized: false\n}));\napp.use(bodyParser.urlencoded({\n  extended: true\n})); // Initialize Passport!  Also use passport.session() middleware, to support\n// persistent login sessions (recommended).\n\napp.use(passport.initialize());\napp.use(passport.session()); // app.use(app.router)\n\napp.use(express.static(__dirname + \"/../../public\")); // -----------------------------------------------------------------------------\n// Set up the route controller\n//\n// 1. For 'login' route and 'returnURL' route, use `passport.authenticate`.\n// This way the passport middleware can redirect the user to login page, receive\n// id_token etc from returnURL.\n//\n// 2. For the routes you want to check if user is already logged in, use\n// `ensureAuthenticated`. It checks if there is an user stored in session, if not\n// it will call `passport.authenticate` to ask for user to log in.\n// -----------------------------------------------------------------------------\n\nfunction ensureAuthenticated(req, res, next) {\n  if (req.isAuthenticated()) {\n    return next();\n  }\n\n  res.redirect(\"/login\");\n}\n\napp.get(\"/\", (req, res) => {\n  console.log(req);\n  console.log(req.user);\n  res.send(\"Hello World!!! ee\");\n}); // '/account' is only available to logged in user\n\napp.get(\"/account\", ensureAuthenticated, function (req, res) {\n  res.render(\"account\", {\n    user: req.user\n  });\n});\napp.get(\"/login\", function (req, res, next) {\n  passport.authenticate(\"azuread-openidconnect\", {\n    response: res,\n    // required\n    resourceURL: config.resourceURL,\n    // optional. Provide a value if you want to specify the resource.\n    customState: \"my_state\",\n    // optional. Provide a value if you want to provide custom state value.\n    failureRedirect: \"/\"\n  })(req, res, next);\n}, function (req, res) {\n  console.info(\"Login was called in the Sample\");\n  res.redirect(\"/authenticate/\");\n}); // 'GET returnURL'\n// `passport.authenticate` will try to authenticate the content returned in\n// query (such as authorization code). If authentication fails, user will be\n// redirected to '/' (home page); otherwise, it passes to the next middleware.\n\napp.get(\"/auth/openid/return\", function (req, res, next) {\n  passport.authenticate(\"azuread-openidconnect\", {\n    response: res,\n    // required\n    failureRedirect: \"/\"\n  })(req, res, next);\n}, function (req, res) {\n  console.info(\"We received a return from AzureAD.\");\n  res.redirect(\"/authenticate/\");\n}); // 'POST returnURL'\n// `passport.authenticate` will try to authenticate the content returned in\n// body (such as authorization code). If authentication fails, user will be\n// redirected to '/' (home page); otherwise, it passes to the next middleware.\n\napp.post(\"/auth/openid/return\", function (req, res, next) {\n  passport.authenticate(\"azuread-openidconnect\", {\n    response: res,\n    // required\n    failureRedirect: \"/\"\n  })(req, res, next);\n}, function (req, res) {\n  console.info(\"We received a return from AzureAD.\");\n  res.redirect(\"/authenticate/\");\n}); // 'logout' route, logout from passport, and destroy the session with AAD.\n\napp.get(\"/logout\", function (req, res) {\n  req.session.destroy(function (err) {\n    req.logOut();\n    res.redirect(config.destroySessionUrl);\n  });\n});\n\n/* WEBPACK VAR INJECTION */}.call(this, \"/\"))\n\n//# sourceURL=webpack:///./src/authenticate/index.ts?");
+
+/***/ }),
+
 /***/ "./src/database.ts":
 /*!*************************!*\
   !*** ./src/database.ts ***!
@@ -130,7 +154,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var firebase_functions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! firebase-functions */ \"firebase-functions\");\n/* harmony import */ var firebase_functions__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(firebase_functions__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _database__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./database */ \"./src/database.ts\");\n/* harmony import */ var _enums__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./enums */ \"./src/enums.ts\");\n/* harmony import */ var _persistence__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./persistence */ \"./src/persistence.ts\");\n/* harmony import */ var _transcoding__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./transcoding */ \"./src/transcoding.ts\");\n/* harmony import */ var _transcription__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./transcription */ \"./src/transcription.ts\");\nfunction asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }\n\nfunction _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, \"next\", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, \"throw\", err); } _next(undefined); }); }; }\n\n/**\n * @file Google Cloud function\n * @author Andreas Schjønhaug\n */\n\n\n\n\n\n\nexports.transcription = firebase_functions__WEBPACK_IMPORTED_MODULE_0__[\"region\"](\"europe-west1\").database.ref(\"/transcripts/{id}\").onCreate(\n/*#__PURE__*/\nfunction () {\n  var _ref = _asyncToGenerator(function* (dataSnapshot, eventContext) {\n    const id = dataSnapshot.key;\n    console.log(`Deployed 09:08 - Start transcription of id: ${id}`);\n\n    try {\n      // Because of indempotency, we need to fetch the transcript from the server and check if it's already in process\n      const status = yield _database__WEBPACK_IMPORTED_MODULE_1__[\"default\"].getStatus(id);\n\n      if (status !== _enums__WEBPACK_IMPORTED_MODULE_2__[\"Status\"].Analysing) {\n        console.warn(\"Transcript already processed, returning\");\n        return;\n      }\n\n      const transcript = dataSnapshot.val();\n\n      if (transcript === undefined) {\n        throw Error(\"Transcript missing\");\n      }\n\n      const languageCode = transcript.audioFile.languageCode; // 1. Transcode\n\n      yield _database__WEBPACK_IMPORTED_MODULE_1__[\"default\"].setStatus(id, _enums__WEBPACK_IMPORTED_MODULE_2__[\"Status\"].Transcoding);\n      const gcsUri = yield Object(_transcoding__WEBPACK_IMPORTED_MODULE_4__[\"transcode\"])(id); // 2. Transcribe\n\n      yield _database__WEBPACK_IMPORTED_MODULE_1__[\"default\"].setStatus(id, _enums__WEBPACK_IMPORTED_MODULE_2__[\"Status\"].Transcribing);\n      const speechRecognitionResults = yield Object(_transcription__WEBPACK_IMPORTED_MODULE_5__[\"transcribe\"])(id, gcsUri, languageCode); // 3. Save transcription\n\n      yield _database__WEBPACK_IMPORTED_MODULE_1__[\"default\"].setStatus(id, _enums__WEBPACK_IMPORTED_MODULE_2__[\"Status\"].Saving);\n      yield Object(_persistence__WEBPACK_IMPORTED_MODULE_3__[\"saveResult\"])(speechRecognitionResults, id); // 4. Done\n\n      yield _database__WEBPACK_IMPORTED_MODULE_1__[\"default\"].setStatus(id, _enums__WEBPACK_IMPORTED_MODULE_2__[\"Status\"].Success);\n      console.log(\"End transcribing with id: \", id);\n    } catch (error) {\n      console.log(\"Error in main function\");\n      console.error(error);\n      yield _database__WEBPACK_IMPORTED_MODULE_1__[\"default\"].errorOccured(id, error);\n      throw error;\n    }\n  });\n\n  return function (_x, _x2) {\n    return _ref.apply(this, arguments);\n  };\n}());\nprocess.on(\"unhandledRejection\", (reason, promise) => {\n  console.error(new Error(`Unhandled Rejection at: Promise: ${promise} with reason: ${reason.stack || reason}`));\n});\n\n//# sourceURL=webpack:///./src/index.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var firebase_functions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! firebase-functions */ \"firebase-functions\");\n/* harmony import */ var firebase_functions__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(firebase_functions__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _authenticate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./authenticate */ \"./src/authenticate/index.ts\");\n/* harmony import */ var _database__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./database */ \"./src/database.ts\");\n/* harmony import */ var _enums__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./enums */ \"./src/enums.ts\");\n/* harmony import */ var _persistence__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./persistence */ \"./src/persistence.ts\");\n/* harmony import */ var _transcoding__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./transcoding */ \"./src/transcoding.ts\");\n/* harmony import */ var _transcription__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./transcription */ \"./src/transcription.ts\");\nfunction asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }\n\nfunction _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, \"next\", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, \"throw\", err); } _next(undefined); }); }; }\n\n/**\n * @file Google Cloud function\n * @author Andreas Schjønhaug\n */\n\n\n\n\n\n\n\nexports.transcription = firebase_functions__WEBPACK_IMPORTED_MODULE_0__[\"region\"](\"europe-west1\").database.ref(\"/transcripts/{id}\").onCreate(\n/*#__PURE__*/\nfunction () {\n  var _ref = _asyncToGenerator(function* (dataSnapshot, eventContext) {\n    const id = dataSnapshot.key;\n    console.log(`Deployed 09:08 - Start transcription of id: ${id}`);\n\n    try {\n      // Because of indempotency, we need to fetch the transcript from the server and check if it's already in process\n      const status = yield _database__WEBPACK_IMPORTED_MODULE_2__[\"default\"].getStatus(id);\n\n      if (status !== _enums__WEBPACK_IMPORTED_MODULE_3__[\"Status\"].Analysing) {\n        console.warn(\"Transcript already processed, returning\");\n        return;\n      }\n\n      const transcript = dataSnapshot.val();\n\n      if (transcript === undefined) {\n        throw Error(\"Transcript missing\");\n      }\n\n      const languageCode = transcript.audioFile.languageCode; // 1. Transcode\n\n      yield _database__WEBPACK_IMPORTED_MODULE_2__[\"default\"].setStatus(id, _enums__WEBPACK_IMPORTED_MODULE_3__[\"Status\"].Transcoding);\n      const gcsUri = yield Object(_transcoding__WEBPACK_IMPORTED_MODULE_5__[\"transcode\"])(id); // 2. Transcribe\n\n      yield _database__WEBPACK_IMPORTED_MODULE_2__[\"default\"].setStatus(id, _enums__WEBPACK_IMPORTED_MODULE_3__[\"Status\"].Transcribing);\n      const speechRecognitionResults = yield Object(_transcription__WEBPACK_IMPORTED_MODULE_6__[\"transcribe\"])(id, gcsUri, languageCode); // 3. Save transcription\n\n      yield _database__WEBPACK_IMPORTED_MODULE_2__[\"default\"].setStatus(id, _enums__WEBPACK_IMPORTED_MODULE_3__[\"Status\"].Saving);\n      yield Object(_persistence__WEBPACK_IMPORTED_MODULE_4__[\"saveResult\"])(speechRecognitionResults, id); // 4. Done\n\n      yield _database__WEBPACK_IMPORTED_MODULE_2__[\"default\"].setStatus(id, _enums__WEBPACK_IMPORTED_MODULE_3__[\"Status\"].Success);\n      console.log(\"End transcribing with id: \", id);\n    } catch (error) {\n      console.log(\"Error in main function\");\n      console.error(error);\n      yield _database__WEBPACK_IMPORTED_MODULE_2__[\"default\"].errorOccured(id, error);\n      throw error;\n    }\n  });\n\n  return function (_x, _x2) {\n    return _ref.apply(this, arguments);\n  };\n}());\nexports.authenticate = firebase_functions__WEBPACK_IMPORTED_MODULE_0__[\"region\"](\"europe-west1\").https.onRequest(_authenticate__WEBPACK_IMPORTED_MODULE_1__[\"app\"]);\nprocess.on(\"unhandledRejection\", (reason, promise) => {\n  console.error(new Error(`Unhandled Rejection at: Promise: ${promise} with reason: ${reason.stack || reason}`));\n});\n\n//# sourceURL=webpack:///./src/index.ts?");
 
 /***/ }),
 
@@ -193,6 +217,50 @@ eval("module.exports = require(\"@google-cloud/speech\");\n\n//# sourceURL=webpa
 
 /***/ }),
 
+/***/ "body-parser":
+/*!******************************!*\
+  !*** external "body-parser" ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("module.exports = require(\"body-parser\");\n\n//# sourceURL=webpack:///external_%22body-parser%22?");
+
+/***/ }),
+
+/***/ "cookie-parser":
+/*!********************************!*\
+  !*** external "cookie-parser" ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("module.exports = require(\"cookie-parser\");\n\n//# sourceURL=webpack:///external_%22cookie-parser%22?");
+
+/***/ }),
+
+/***/ "express":
+/*!**************************!*\
+  !*** external "express" ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("module.exports = require(\"express\");\n\n//# sourceURL=webpack:///external_%22express%22?");
+
+/***/ }),
+
+/***/ "express-session":
+/*!**********************************!*\
+  !*** external "express-session" ***!
+  \**********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("module.exports = require(\"express-session\");\n\n//# sourceURL=webpack:///external_%22express-session%22?");
+
+/***/ }),
+
 /***/ "ffmpeg-static":
 /*!********************************!*\
   !*** external "ffmpeg-static" ***!
@@ -248,6 +316,17 @@ eval("module.exports = require(\"fs\");\n\n//# sourceURL=webpack:///external_%22
 
 /***/ }),
 
+/***/ "method-override":
+/*!**********************************!*\
+  !*** external "method-override" ***!
+  \**********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("module.exports = require(\"method-override\");\n\n//# sourceURL=webpack:///external_%22method-override%22?");
+
+/***/ }),
+
 /***/ "os":
 /*!*********************!*\
   !*** external "os" ***!
@@ -256,6 +335,28 @@ eval("module.exports = require(\"fs\");\n\n//# sourceURL=webpack:///external_%22
 /***/ (function(module, exports) {
 
 eval("module.exports = require(\"os\");\n\n//# sourceURL=webpack:///external_%22os%22?");
+
+/***/ }),
+
+/***/ "passport":
+/*!***************************!*\
+  !*** external "passport" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("module.exports = require(\"passport\");\n\n//# sourceURL=webpack:///external_%22passport%22?");
+
+/***/ }),
+
+/***/ "passport-azure-ad":
+/*!************************************!*\
+  !*** external "passport-azure-ad" ***!
+  \************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("module.exports = require(\"passport-azure-ad\");\n\n//# sourceURL=webpack:///external_%22passport-azure-ad%22?");
 
 /***/ }),
 
@@ -278,6 +379,17 @@ eval("module.exports = require(\"path\");\n\n//# sourceURL=webpack:///external_%
 /***/ (function(module, exports) {
 
 eval("module.exports = require(\"serialize-error\");\n\n//# sourceURL=webpack:///external_%22serialize-error%22?");
+
+/***/ }),
+
+/***/ "util":
+/*!***********************!*\
+  !*** external "util" ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("module.exports = require(\"util\");\n\n//# sourceURL=webpack:///external_%22util%22?");
 
 /***/ })
 

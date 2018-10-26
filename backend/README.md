@@ -33,6 +33,7 @@ azure_ad.identity_metadata="https://..."
 azure_ad.redirect_url="http://..."
 bucket.transcoded="name-of-transcoded-bucket"
 bucket.uploads="name-of-uploads-bucket"
+session.secret=""
 
 ```
 Check current environment variables

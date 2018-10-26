@@ -113,9 +113,6 @@ passport.use(
 // -----------------------------------------------------------------------------
 const app = express()
 
-app.set("views", __dirname + "/views")
-app.set("view engine", "ejs")
-// app.use(express.logger())
 app.use(methodOverride())
 app.use(cookieParser())
 app.use(expressSession({ secret: functions.config().session.secret, resave: true, saveUninitialized: false }))
@@ -125,8 +122,6 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // persistent login sessions (recommended).
 app.use(passport.initialize())
 app.use(passport.session())
-// app.use(app.router)
-app.use(express.static(__dirname + "/../../public"))
 
 // -----------------------------------------------------------------------------
 // Set up the route controller
@@ -147,10 +142,9 @@ function ensureAuthenticated(req, res, next) {
 }
 
 app.get("/", (req, res) => {
-  console.log(req)
   console.log(req.user)
 
-  res.send("Hello World!!! ee")
+  res.send(`Hello World!!! ${req.user.upn} ${req.user.oid}`)
 })
 
 // '/account' is only available to logged in user

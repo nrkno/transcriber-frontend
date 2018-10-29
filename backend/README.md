@@ -8,6 +8,7 @@
 - Set up environment variables
 - Turn on Google Speech API in the [Google Cloud console](https://console.cloud.google.com).
 - After deploying the cloud function for the first time, you might want to increase the memory allocation to 2 GB and the timeout to 540 seconds.
+- On the default service account, add the ["Service Account Token Creator"](https://firebase.google.com/docs/auth/admin/create-custom-tokens#service_account_does_not_have_required_permissions) role.
 
 ## Setting up environment variables
 

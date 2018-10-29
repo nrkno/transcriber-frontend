@@ -4,6 +4,7 @@
 
 import bodyParser from "body-parser"
 import cookieParser from "cookie-parser"
+import cors, { CorsOptions, CorsOptionsDelegate } from "cors"
 import express from "express"
 import expressSession from "express-session"
 import * as functions from "firebase-functions"
@@ -11,8 +12,8 @@ import methodOverride from "method-override"
 import passport from "passport"
 import { OIDCStrategy } from "passport-azure-ad"
 import util from "util"
+import { auth } from "./auth"
 import { credentials, destroySessionUrl } from "./credentials"
-
 /******************************************************************************
  * Set up passport in the app
  ******************************************************************************/
@@ -113,6 +114,25 @@ passport.use(
 // -----------------------------------------------------------------------------
 const app = express()
 
+// CORS
+const whitelist = ["http://localhost:8080", "https://login.microsoftonline.com"]
+const corsOptionsDelegate: CorsOptionsDelegate = (req, callback) => {
+  let corsOptions: CorsOptions
+  let origin: req.header("Origin")
+  if (whitelist.indexOf(origin) !== -1) {
+    console.log(`Found origin: ${origin}`)
+
+    corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
+  } else {
+    console.log(`Did not find origin: ${origin}`)
+
+    corsOptions = { origin: false } // disable CORS for this request
+  }
+  callback(null, corsOptions) // callback expects two parameters: error and options
+}
+app.use(cors(corsOptionsDelegate))
+app.options("*", cors(corsOptionsDelegate))
+
 app.use(methodOverride())
 app.use(cookieParser())
 app.use(expressSession({ secret: functions.config().session.secret, resave: true, saveUninitialized: false }))
@@ -152,7 +172,7 @@ app.get("/account", ensureAuthenticated, (req, res) => {
   res.render("account", { user: req.user })
 })
 
-app.get(
+app.post(
   "/login",
   (req, res, next) => {
     passport.authenticate("azuread-openidconnect", {
@@ -181,7 +201,7 @@ app.get(
     })(req, res, next)
   },
   (req, res) => {
-    console.info("We received a return from AzureAD.")
+    console.info("We received a GET return from AzureAD.")
     res.redirect("/authenticate/")
   },
 )
@@ -198,8 +218,15 @@ app.post(
       response: res, // required
     })(req, res, next)
   },
-  (req, res) => {
-    console.info("We received a return from AzureAD.")
+  async (req, res) => {
+    console.info("We received a POST return from AzureAD.")
+
+    const user = req.user
+    const token = await auth.createCustomToken(user.oid)
+
+    console.log("token")
+    console.log(token)
+
     res.redirect("/authenticate/")
   },
 )

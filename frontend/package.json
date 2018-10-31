@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "test": "jest",
-    "start": "webpack-dev-server --open --config webpack.dev.js"
+    "dev": "webpack-dev-server --open --config webpack.dev.js"
   },
   "browserslist": ">0.25% in my stats, not IE > 0",
   "dependencies": {

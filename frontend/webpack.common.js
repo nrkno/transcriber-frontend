@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const CleanWebpackPlugin = require("clean-webpack-plugin")
+const Dotenv = require("dotenv-webpack")
 
 module.exports = {
   output: {
@@ -32,5 +33,11 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
-  plugins: [new CleanWebpackPlugin(["dist"]), new HtmlWebpackPlugin({ template: "./public/index.html" })],
+  plugins: [
+    new CleanWebpackPlugin(["dist"]),
+    new HtmlWebpackPlugin({ template: "./public/index.html" }),
+    new Dotenv({
+      path: ".env",
+    }),
+  ],
 }

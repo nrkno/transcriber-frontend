@@ -6,18 +6,18 @@
 import * as functions from "firebase-functions"
 import database from "./database"
 import { Status } from "./enums"
-import { ITranscription } from "./interfaces"
+import { ITranscript } from "./interfaces"
 import { saveResult } from "./persistence"
 import { transcode } from "./transcoding"
 import { transcribe } from "./transcription"
 
 exports.transcription = functions
   .region("europe-west1")
-  .database.ref("/transcripts/{id}")
-  .onCreate(async (dataSnapshot, eventContext) => {
-    const id = dataSnapshot.key
+  .firestore.document("users/{userId}/transcripts/{transcriptId}")
+  .onCreate(async (documentSnapshot, eventContext) => {
+    const id = documentSnapshot.id
 
-    console.log(`Deployed 09:08 - Start transcription of id: ${id}`)
+    console.log(`Deployed 14:53 - Start transcription of id: ${id}`)
 
     try {
       // Because of indempotency, we need to fetch the transcript from the server and check if it's already in process
@@ -27,13 +27,13 @@ exports.transcription = functions
         return
       }
 
-      const transcript = dataSnapshot.val() as ITranscription
+      const transcript = documentSnapshot.data() as ITranscript
 
       if (transcript === undefined) {
         throw Error("Transcript missing")
       }
 
-      const languageCode = transcript.audioFile.languageCode
+      const languageCode = transcript.languageCode
 
       // 1. Transcode
 

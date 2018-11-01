@@ -1,10 +1,10 @@
+import createHistory from "history/createBrowserHistory"
 import * as React from "react"
+import ReactGA from "react-ga"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
 import "../css/App.css"
-import ReactGA from "react-ga"
 import Transcript from "./Transcript"
 import Upload from "./Upload"
-import createHistory from "history/createBrowserHistory"
 
 ReactGA.initialize(process.env.GOOGLE_ANALYTICS_PROPERTY_ID, {
   debug: process.env.NODE_ENV === "development",

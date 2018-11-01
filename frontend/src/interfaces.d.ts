@@ -1,22 +1,36 @@
 import { Status } from "./enums"
 
-interface ITranscription {
-  audioFile: {
-    url: string
-    name: string
-  }
-  text?: { [key: string]: IWord }
-  error?: Error
+interface ITranscript {
+  durationInSeconds?: number
+  languageCode?: string
+  url?: string
+  name?: string
+  results?: Array<IResult>
+  error?: any
   progress?: {
     percent?: number
-    status: Status
+    status?: Status
   }
+  timestamps?: {
+    analysing?: string
+    transcoding?: string
+    transcribing?: string
+    saving?: string
+    success?: string
+    failed?: string
+  }
+}
+
+interface IResult {
+  confidence: number
+  transcript: string
+  words: Array<IWord>
 }
 
 interface IWord {
   word: string
   endTime: ITime
-  startTime: ITime
+  startTime?: ITime
 }
 
 interface ITime {

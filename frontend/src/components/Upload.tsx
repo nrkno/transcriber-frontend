@@ -1,16 +1,16 @@
 import firebase from "firebase/app"
 import * as React from "react"
-//import Dropzone from "react-dropzone"
+// import Dropzone from "react-dropzone"
 // Testing not working with normal import right now, see https://github.com/react-dropzone/react-dropzone/issues/554
 let Dropzone = require("react-dropzone")
 if ("default" in Dropzone) {
   Dropzone = Dropzone.default
 }
+import ReactGA from "react-ga"
 import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
 import { Status } from "../enums"
 import { database, storage } from "../firebaseApp"
-import ReactGA from "react-ga"
 
 interface IState {
   file?: File
@@ -39,8 +39,8 @@ class Upload extends React.Component<any, IState> {
       this.setState({ dropzoneMessage: "Filen har feil format", file: undefined })
 
       ReactGA.event({
-        category: "Upload",
         action: "Wrong file format",
+        category: "Upload",
       })
     } else {
       // Take the first file
@@ -58,17 +58,11 @@ class Upload extends React.Component<any, IState> {
       return
     }
 
-    const id = database.ref(`/transcripts/`).push().key
-
-    if (id === null) {
-      return
-    }
+    const transcriptRef = database.collection("users/aaaa/transcripts").doc()
+    const id = transcriptRef.id
 
     const metadata = {
       contentType: file.type,
-      customMetadata: {
-        languageCode,
-      },
     }
 
     const uploadTask = storage
@@ -107,17 +101,15 @@ class Upload extends React.Component<any, IState> {
       () => {
         uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
           database
-            .ref(`/transcripts/${id}`)
+            .doc(`users/aaaa/transcripts/${id}`)
             .set({
-              audioFile: {
-                languageCode,
-                name: file.name,
-                url: downloadURL,
-              },
+              languageCode,
+              name: file.name,
               progress: { status: Status.Analysing },
               timestamps: {
-                analysing: firebase.database.ServerValue.TIMESTAMP,
+                analysing: firebase.firestore.FieldValue.serverTimestamp(),
               },
+              url: downloadURL,
             })
 
             .then(success => {
@@ -166,7 +158,7 @@ class Upload extends React.Component<any, IState> {
               <option value="nb-NO">Norsk</option>
               <option value="en-US">Engelsk</option>
             </select>
-            <button className="nrk-button" disabled={this.state.file == undefined} type="submit">
+            <button className="nrk-button" disabled={this.state.file === undefined} type="submit">
               Last opp
             </button>
           </form>

@@ -1,17 +1,32 @@
+import admin from "firebase-admin"
+
 import { Status } from "./enums"
 
-interface ITranscription {
-  audioFile: {
-    languageCode: string
-    url: string
-    name: string
+interface ITranscript {
+  durationInSeconds?: number
+  languageCode?: string
+  url?: string
+  name?: string
+  results?: Array<IResult>
+  error?: any
+  progress?: {
+    percent?: number | admin.firestore.FieldValue
+    status?: Status
   }
-  text?: { [key: string]: IWord }
-  error?: IError
-  progress: {
-    percent?: number
-    status: Status
+  timestamps?: {
+    analysing?: string
+    transcoding?: string
+    transcribing?: string
+    saving?: string
+    success?: string
+    failed?: string
   }
+}
+
+interface IResult {
+  confidence: number
+  transcript: string
+  words: Array<IWord>
 }
 
 interface IWord {
@@ -23,9 +38,4 @@ interface IWord {
 interface ITime {
   nanos: number
   seconds: string
-}
-
-interface IError {
-  code: number
-  details: string
 }

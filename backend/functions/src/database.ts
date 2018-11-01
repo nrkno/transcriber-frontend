@@ -7,67 +7,75 @@ import admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import serializeError from "serialize-error"
 import { Status } from "./enums"
-
+import { IResult, ITranscript } from "./interfaces"
 // Only initialise the app once
 if (!admin.apps.length) {
   admin.initializeApp(functions.config().firebase)
 } else {
   admin.app()
 }
-const realtimeDatabase = admin.database()
+
+const db = admin.firestore()
+const settings = { timestampsInSnapshots: true }
+db.settings(settings)
 
 const database = (() => {
-  const updateTranscript = async (id: string, transcription: object) => {
-    return realtimeDatabase.ref(`/transcripts/${id}`).update({ ...transcription })
+  const updateTranscript = async (id: string, transcript: ITranscript) => {
+    console.log("Updating status")
+    console.log(transcript)
+
+    return db.doc(`users/aaaa/transcripts/${id}`).set({ ...transcript }, { merge: true })
   }
 
   const setStatus = async (id: string, status: Status) => {
-    const transcription: any = { "progress/status": status, [`timestamps/${status}`]: admin.database.ServerValue.TIMESTAMP }
+    const transcript: ITranscript = { progress: { status }, timestamps: { [`${status}`]: admin.firestore.Timestamp.now() } }
 
     // We get completion percentages when transcribing and saving, so setting them to zero.
     if (status === Status.Transcribing || status === Status.Saving) {
-      transcription["progress/percent"] = 0
+      transcript.progress!.percent = 0
     } else {
-      transcription["progress/percent"] = null
+      transcript.progress!.percent = admin.firestore.FieldValue.delete()
     }
 
-    return updateTranscript(id, transcription)
+    return updateTranscript(id, transcript)
   }
 
   const setPercent = async (id: string, percent: number) => {
-    const transcription: any = { "progress/percent": percent }
+    const transcript: ITranscript = { progress: { percent } }
 
-    return updateTranscript(id, transcription)
+    return updateTranscript(id, transcript)
   }
 
-  const addWords = async (id: string, words: any) => {
-    return realtimeDatabase.ref(`/transcripts/${id}/text`).push(JSON.parse(JSON.stringify(words)))
+  const addResult = async (id: string, result: IResult) => {
+    return db.collection(`users/aaaa/transcripts/${id}/results`).add(result.toJSON())
   }
 
   const setDurationInSeconds = async (id: string, seconds: number) => {
-    const transcription = { "audioFile/durationInSeconds": seconds }
+    const transcript: ITranscript = { durationInSeconds: seconds }
 
-    return updateTranscript(id, transcription)
+    return updateTranscript(id, transcript)
   }
 
   const errorOccured = async (id: string, error: Error) => {
-    const data = {
+    const transcript: ITranscript = {
       error: serializeError(error),
       progress: {
-        percent: null,
-        status: "failed",
+        percent: undefined,
+        status: Status.Failed,
       },
     }
-    return updateTranscript(id, data)
+    return updateTranscript(id, transcript)
   }
 
   const getStatus = async (id: string) => {
-    const eventId = await realtimeDatabase.ref(`/transcripts/${id}/progress/status`).once("value")
+    const doc = await db.doc(`users/aaaa/transcripts/${id}`).get()
 
-    return eventId.val()
+    const transcript = doc.data() as ITranscript
+
+    return transcript.progress.status
   }
 
-  return { addWords, errorOccured, setDurationInSeconds, setStatus, setPercent, getStatus }
+  return { addResult, errorOccured, setDurationInSeconds, setStatus, setPercent, getStatus }
 })()
 
 export default database

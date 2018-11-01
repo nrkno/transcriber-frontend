@@ -1,17 +1,17 @@
 import { flatten } from "lodash"
 import * as React from "react"
+import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"
 import { Status, SweetProgressStatus } from "../enums"
 import { database } from "../firebaseApp"
-import { ITime, ITranscription } from "../interfaces"
+import { IResult, ITime, ITranscript } from "../interfaces"
 import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
 import Word from "./Word"
-import ReactGA from "react-ga"
 
 interface IState {
   currentTime: number
-  transcription?: ITranscription
+  transcript?: ITranscript
 }
 
 class Transcript extends React.Component<RouteComponentProps<any>, IState> {
@@ -20,39 +20,51 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     super(props)
     this.state = {
       currentTime: 0,
-      transcription: undefined,
+      transcript: undefined,
     }
   }
-  componentDidUpdate(_prevProps: any, prevState: IState /*, _snapshot*/) {
-    if (this.state.transcription && this.state.transcription.progress && this.state.transcription.progress.status) {
+  public componentDidUpdate(_prevProps: any, prevState: IState /*, _snapshot*/) {
+    if (this.state.transcript && this.state.transcript.progress && this.state.transcript.progress.status) {
       // Log errors
-      if (this.state.transcription.progress.status === Status.Failed && this.state.transcription.error) {
+      if (this.state.transcript.progress.status === Status.Failed && this.state.transcript.error) {
         ReactGA.exception({
-          description: this.state.transcription.error.message,
+          description: this.state.transcript.error.message,
         })
       }
+
+      /*FIXME
       // Logging progress status
-      else if (
-        prevState.transcription === undefined ||
-        (prevState.transcription && prevState.transcription.progress && prevState.transcription.progress.status && prevState.transcription.progress.status !== this.state.transcription.progress.status)
-      ) {
+      else if (prevState.transcript === undefined || (prevState.transcript && prevState.transcript.progress && prevState.transcript.progress.status && prevState.transcript.progress.status !== this.state.transcription.progress.status)) {
         ReactGA.event({
+          action: this.state.transcript.progress.status,
           category: "Progress",
-          action: this.state.transcription.progress.status,
           nonInteraction: true,
         })
       }
+      */
     }
   }
 
-  public componentDidMount() {
-    database.ref(`/transcripts/${this.props.match.params.id}`).on("value", async dataSnapshot => {
+  public async componentDidMount() {
+    database.doc(`users/aaaa/transcripts/${this.props.match.params.id}`).onSnapshot(documentSnapshot => {
+      console.log(documentSnapshot)
+
+      const transcript = documentSnapshot.data() as ITranscript
+
+      this.setState({
+        transcript,
+      })
+    })
+
+    console.log(`users/aaaa/transcripts/${this.props.match.params.id}/results`)
+
+    /*database.ref(`/transcripts/${this.props.match.params.id}`).on("value", async dataSnapshot => {
       if (dataSnapshot !== null) {
         this.setState({
           transcription: dataSnapshot.val(),
         })
       }
-    })
+    })*/
   }
 
   public handleTimeUpdate = (event: React.ChangeEvent<HTMLAudioElement>) => {
@@ -64,7 +76,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   }
 
   public render() {
-    const transcription = this.state.transcription
+    const transcription = this.state.transcript
 
     // Loading from Firebase
     if (transcription === undefined) {
@@ -73,8 +85,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     // Transcription not found
     else if (transcription === null) {
       ReactGA.event({
-        category: "Transcription",
         action: "Not found",
+        category: "Transcription",
       })
       return <TranscriptionProgress message={"Fant ikke transkripsjonen"} status={SweetProgressStatus.Error} />
     } else {
@@ -96,14 +108,33 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
         case Status.Success:
           // We have a transcription , show it
-          const audioFile = transcription.audioFile
-          const text = transcription.text!
-          const words = flatten(Object.keys(text).map(key => text[key]))
+
+          // Read results
+
+          database
+            .collection(`users/aaaa/transcripts/${this.props.match.params.id}/results`)
+            .get()
+            .then(querySnapshot => {
+              querySnapshot.forEach(doc => {
+                // doc.data() is never undefined for query doc snapshots
+                console.log(doc.id, " => ", doc.data())
+
+                const result = doc.data() as IResult
+
+                const words = result.words
+              })
+            })
+
+          const results = transcription.results!
+
+          console.log(results)
+
+          const words = flatten(Object.keys(results).map(key => results[key]))
 
           return (
             <div className="wrapper">
               <div className="result">
-                <h2>{audioFile.name}</h2>
+                <h2>{transcription.name}</h2>
                 <div className="nrk-color-spot warning">
                   ⚠️ Transkribering er i en tidlig utviklingsfase. Transkriberingen er ikke noen fasit, og at kan ikke brukes verbatim i f.eks. artikler el.l. uten at man har gått igjennom teksten for hånd.
                 </div>
@@ -112,7 +143,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                     return <Word key={i} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
                   })}
                 </p>
-                <Player ref={this.playerRef} fileUrl={audioFile.url} handleTimeUpdate={this.handleTimeUpdate} />
+                <Player ref={this.playerRef} fileUrl={transcription.url!} handleTimeUpdate={this.handleTimeUpdate} />
               </div>
             </div>
           )

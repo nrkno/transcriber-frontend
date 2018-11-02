@@ -21,9 +21,6 @@ db.settings(settings)
 
 const database = (() => {
   const updateTranscript = async (id: string, transcript: ITranscript) => {
-    console.log("Updating status")
-    console.log(transcript)
-
     return db.doc(`users/aaaa/transcripts/${id}`).set({ ...transcript }, { merge: true })
   }
 
@@ -47,7 +44,15 @@ const database = (() => {
   }
 
   const addResult = async (id: string, result: IResult) => {
-    return db.collection(`users/aaaa/transcripts/${id}/results`).add(result.toJSON())
+    // We insert the start time of the first word, it will be used to sort the results
+
+    const startTime = parseInt(result.words[0].startTime.seconds, 10) || 0
+
+    const resultWithStartTimeInSeconds = { ...result, startTime }
+
+    const data = JSON.parse(JSON.stringify(resultWithStartTimeInSeconds))
+
+    return db.collection(`users/aaaa/transcripts/${id}/results`).add(data)
   }
 
   const setDurationInSeconds = async (id: string, seconds: number) => {

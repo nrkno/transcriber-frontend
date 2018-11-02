@@ -17,7 +17,7 @@ exports.transcription = functions
   .onCreate(async (documentSnapshot, eventContext) => {
     const id = documentSnapshot.id
 
-    console.log(`Deployed 14:53 - Start transcription of id: ${id}`)
+    console.log(`Deployed 10:43 - Start transcription of id: ${id}`)
 
     try {
       // Because of indempotency, we need to fetch the transcript from the server and check if it's already in process

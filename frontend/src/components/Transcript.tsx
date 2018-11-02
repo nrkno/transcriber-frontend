@@ -106,17 +106,13 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
             database
               .collection(`users/aaaa/transcripts/${this.props.match.params.id}/results`)
+              .orderBy("startTime")
               .get()
               .then(querySnapshot => {
                 querySnapshot.forEach(doc => {
-                  // doc.data() is never undefined for query doc snapshots
-                  console.log(doc.id, " => ", doc.data())
                   const result = doc.data() as IResult
 
                   transcript.results.push(result)
-
-                  console.log(transcript.results)
-                  console.log("SETTER STATE")
 
                   this.setState({
                     transcript,
@@ -125,25 +121,24 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
               })
           }
 
-          const words = flatten(transcript.results.map(result => result.words))
-
-          console.log("words")
-          console.log(words)
-
-          // const words = flatten(Object.keys(results).map(key => results[key]))
-
           return (
             <div className="wrapper">
-              <div className="result">
+              <div className="results">
                 <h2>{transcript.name}</h2>
                 <div className="nrk-color-spot warning">
                   ⚠️ Transkribering er i en tidlig utviklingsfase. Transkriberingen er ikke noen fasit, og at kan ikke brukes verbatim i f.eks. artikler el.l. uten at man har gått igjennom teksten for hånd.
                 </div>
-                <p className="transcription">
-                  {words.map((wordObject, i) => {
-                    return <Word key={i} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
-                  })}
-                </p>
+
+                {transcript.results.map((result, i) => {
+                  return (
+                    <p className="result" key={i}>
+                      {result.words.map((wordObject, j) => {
+                        return <Word key={j} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
+                      })}
+                    </p>
+                  )
+                })}
+
                 <Player ref={this.playerRef} fileUrl={transcript.url!} handleTimeUpdate={this.handleTimeUpdate} />
               </div>
             </div>

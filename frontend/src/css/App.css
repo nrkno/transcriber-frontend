@@ -70,16 +70,8 @@ header h1 {
 
 #player .timer-current {
   background: #4e54c8; /* fallback for old browsers */
-  background: -webkit-linear-gradient(
-    to right,
-    #8f94fb,
-    #4e54c8
-  ); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(
-    to right,
-    #8f94fb,
-    #4e54c8
-  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: -webkit-linear-gradient(to right, #8f94fb, #4e54c8); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #8f94fb, #4e54c8); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
   height: 100%;
   transition: 1s ease;
 }
@@ -183,21 +175,21 @@ input[type="range"]:focus::-ms-fill-upper {
   background: #4e54c8;
 }
 
-.result {
+.results {
   padding: 16px;
 }
 
-.result h2 {
+.results h2 {
   font-weight: 500;
   font-size: 32px;
 }
 
-.result h3 {
+.results h3 {
   font-size: 16px;
   margin: 0;
 }
 
-.result p {
+.results p {
   font-size: 24px;
   margin-top: 0.5rem;
   padding: 48px 32px;

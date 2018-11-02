@@ -1,4 +1,3 @@
-import { flatten } from "lodash"
 import * as React from "react"
 import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"

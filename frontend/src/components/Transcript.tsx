@@ -32,16 +32,14 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         })
       }
 
-      /*FIXME
       // Logging progress status
-      else if (prevState.transcript === undefined || (prevState.transcript && prevState.transcript.progress && prevState.transcript.progress.status && prevState.transcript.progress.status !== this.state.transcription.progress.status)) {
+      else if (prevState.transcript === undefined || (prevState.transcript && prevState.transcript.progress && prevState.transcript.progress.status && prevState.transcript.progress.status !== this.state.transcript.progress.status)) {
         ReactGA.event({
           action: this.state.transcript.progress.status,
           category: "Progress",
           nonInteraction: true,
         })
       }
-      */
     }
   }
 
@@ -55,16 +53,6 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         transcript,
       })
     })
-
-    console.log(`users/aaaa/transcripts/${this.props.match.params.id}/results`)
-
-    /*database.ref(`/transcripts/${this.props.match.params.id}`).on("value", async dataSnapshot => {
-      if (dataSnapshot !== null) {
-        this.setState({
-          transcription: dataSnapshot.val(),
-        })
-      }
-    })*/
   }
 
   public handleTimeUpdate = (event: React.ChangeEvent<HTMLAudioElement>) => {
@@ -76,21 +64,21 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   }
 
   public render() {
-    const transcription = this.state.transcript
+    const transcript = this.state.transcript
 
     // Loading from Firebase
-    if (transcription === undefined) {
+    if (transcript === undefined) {
       return <TranscriptionProgress message={"Laster inn transkripsjon"} status={SweetProgressStatus.Active} symbol={"⏳"} />
     }
     // Transcription not found
-    else if (transcription === null) {
+    else if (transcript === null) {
       ReactGA.event({
         action: "Not found",
         category: "Transcription",
       })
       return <TranscriptionProgress message={"Fant ikke transkripsjonen"} status={SweetProgressStatus.Error} />
     } else {
-      const progress = transcription.progress!
+      const progress = transcript.progress!
 
       switch (progress.status) {
         case Status.Analysing:
@@ -111,30 +99,43 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
           // Read results
 
-          database
-            .collection(`users/aaaa/transcripts/${this.props.match.params.id}/results`)
-            .get()
-            .then(querySnapshot => {
-              querySnapshot.forEach(doc => {
-                // doc.data() is never undefined for query doc snapshots
-                console.log(doc.id, " => ", doc.data())
+          if (transcript.results === undefined) {
+            console.log(transcript.results)
 
-                const result = doc.data() as IResult
+            transcript.results = Array<IResult>()
 
-                const words = result.words
+            database
+              .collection(`users/aaaa/transcripts/${this.props.match.params.id}/results`)
+              .get()
+              .then(querySnapshot => {
+                querySnapshot.forEach(doc => {
+                  // doc.data() is never undefined for query doc snapshots
+                  console.log(doc.id, " => ", doc.data())
+                  const result = doc.data() as IResult
+
+                  transcript.results.push(result)
+
+                  console.log(transcript.results)
+                  console.log("SETTER STATE")
+
+                  this.setState({
+                    transcript,
+                  })
+                })
               })
-            })
+          }
 
-          const results = transcription.results!
+          const words = flatten(transcript.results.map(result => result.words))
 
-          console.log(results)
+          console.log("words")
+          console.log(words)
 
-          const words = flatten(Object.keys(results).map(key => results[key]))
+          // const words = flatten(Object.keys(results).map(key => results[key]))
 
           return (
             <div className="wrapper">
               <div className="result">
-                <h2>{transcription.name}</h2>
+                <h2>{transcript.name}</h2>
                 <div className="nrk-color-spot warning">
                   ⚠️ Transkribering er i en tidlig utviklingsfase. Transkriberingen er ikke noen fasit, og at kan ikke brukes verbatim i f.eks. artikler el.l. uten at man har gått igjennom teksten for hånd.
                 </div>
@@ -143,13 +144,13 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                     return <Word key={i} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
                   })}
                 </p>
-                <Player ref={this.playerRef} fileUrl={transcription.url!} handleTimeUpdate={this.handleTimeUpdate} />
+                <Player ref={this.playerRef} fileUrl={transcript.url!} handleTimeUpdate={this.handleTimeUpdate} />
               </div>
             </div>
           )
 
         case Status.Failed:
-          const error = transcription.error
+          const error = transcript.error
           return <TranscriptionProgress message={error!.message} status={SweetProgressStatus.Error} />
 
         default:

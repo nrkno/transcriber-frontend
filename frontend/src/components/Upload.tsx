@@ -1,16 +1,16 @@
 import firebase from "firebase/app"
 import * as React from "react"
-//import Dropzone from "react-dropzone"
+// import Dropzone from "react-dropzone"
 // Testing not working with normal import right now, see https://github.com/react-dropzone/react-dropzone/issues/554
 let Dropzone = require("react-dropzone")
 if ("default" in Dropzone) {
   Dropzone = Dropzone.default
 }
+import ReactGA from "react-ga"
 import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
 import { Status } from "../enums"
 import { database, storage } from "../firebaseApp"
-import ReactGA from "react-ga"
 
 interface IState {
   file?: File
@@ -137,40 +137,42 @@ class Upload extends React.Component<any, IState> {
   public render() {
     if (this.state.uploadProgress === 0) {
       return (
-        <div className="wrapper">
-          <form className="dropForm" onSubmit={this.handleSubmit}>
-            <p>Last opp lydfil</p>
+        <main>
+          <div className="dropForm">
+            <form className="org-shadow-m formX" onSubmit={this.handleSubmit}>
+              <p>Last opp lydfil</p>
 
-            <Dropzone
-              accept="audio/*"
-              style={{
-                border: "10px solid #efefef",
-                borderRadius: "50%",
-                height: "132px",
-                width: "132px",
-              }}
-              onDrop={this.handleFileDrop}
-            >
-              <div
+              <Dropzone
+                accept="audio/*"
                 style={{
-                  marginTop: "50%",
-                  padding: "0 10px",
-                  textAlign: "center",
-                  transform: "translateY(-50%)",
+                  border: "10px solid #efefef",
+                  borderRadius: "50%",
+                  height: "132px",
+                  width: "132px",
                 }}
+                onDrop={this.handleFileDrop}
               >
-                {this.state.dropzoneMessage}
-              </div>
-            </Dropzone>
-            <select data-testid="languages" value={this.state.languageCode} onChange={this.handleLanguageChange}>
-              <option value="nb-NO">Norsk</option>
-              <option value="en-US">Engelsk</option>
-            </select>
-            <button className="nrk-button" disabled={this.state.file == undefined} type="submit">
-              Last opp
-            </button>
-          </form>
-        </div>
+                <div
+                  style={{
+                    marginTop: "50%",
+                    padding: "0 10px",
+                    textAlign: "center",
+                    transform: "translateY(-50%)",
+                  }}
+                >
+                  {this.state.dropzoneMessage}
+                </div>
+              </Dropzone>
+              <select data-testid="languages" value={this.state.languageCode} onChange={this.handleLanguageChange}>
+                <option value="nb-NO">Norsk</option>
+                <option value="en-US">Engelsk</option>
+              </select>
+              <button className="nrk-button" disabled={this.state.file === undefined} type="submit">
+                Last opp
+              </button>
+            </form>
+          </div>
+        </main>
       )
     }
 

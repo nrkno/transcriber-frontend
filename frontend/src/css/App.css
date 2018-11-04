@@ -1,22 +1,34 @@
+html {
+  /* border-box box model allows us to add padding and border to our elements without increasing their size */
+  box-sizing: border-box;
+}
+
+/*
+  We inherit box-sizing: border-box; from our <html> selector
+  Apparently this is a bit better than applying box-sizing: border-box; directly to the * selector
+*/
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+.container {
+  display: grid;
+  grid-template-rows: 64px 1fr auto;
+}
+
 .active {
   background: yellow;
   border-radius: 3px;
 }
 
 header {
-  height: 64px;
-  background: #3d2351;
-  display: flex;
-  align-items: center;
+  display: grid;
   padding: 0px 16px;
-}
-
-header h1 {
-  color: white;
-  margin: 0;
-  padding: 0;
-  font-weight: 400;
-  font-size: 24px;
+  grid-template-columns: 1fr;
+  grid-auto-flow: column;
+  align-items: center;
 }
 
 .wrapper {
@@ -70,16 +82,8 @@ header h1 {
 
 #player .timer-current {
   background: #4e54c8; /* fallback for old browsers */
-  background: -webkit-linear-gradient(
-    to right,
-    #8f94fb,
-    #4e54c8
-  ); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(
-    to right,
-    #8f94fb,
-    #4e54c8
-  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: -webkit-linear-gradient(to right, #8f94fb, #4e54c8); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #8f94fb, #4e54c8); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
   height: 100%;
   transition: 1s ease;
 }

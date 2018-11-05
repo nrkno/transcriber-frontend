@@ -1,5 +1,5 @@
-import { flatten } from "lodash"
 import * as React from "react"
+import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"
 import { Status, SweetProgressStatus } from "../enums"
 import { database } from "../firebaseApp"
@@ -7,7 +7,6 @@ import { ITime, ITranscription } from "../interfaces"
 import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
 import Word from "./Word"
-import ReactGA from "react-ga"
 
 interface IState {
   currentTime: number
@@ -23,7 +22,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
       transcription: undefined,
     }
   }
-  componentDidUpdate(_prevProps: any, prevState: IState /*, _snapshot*/) {
+  public componentDidUpdate(_prevProps: any, prevState: IState /*, _snapshot*/) {
     if (this.state.transcription && this.state.transcription.progress && this.state.transcription.progress.status) {
       // Log errors
       if (this.state.transcription.progress.status === Status.Failed && this.state.transcription.error) {
@@ -98,23 +97,39 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
           // We have a transcription , show it
           const audioFile = transcription.audioFile
           const text = transcription.text!
-          const words = flatten(Object.keys(text).map(key => text[key]))
 
           return (
-            <div className="wrapper">
-              <div className="result">
+            <>
+              <main>
                 <h2>{audioFile.name}</h2>
-                <div className="nrk-color-spot warning">
-                  ⚠️ Transkribering er i en tidlig utviklingsfase. Transkriberingen er ikke noen fasit, og at kan ikke brukes verbatim i f.eks. artikler el.l. uten at man har gått igjennom teksten for hånd.
-                </div>
-                <p className="transcription">
-                  {words.map((wordObject, i) => {
-                    return <Word key={i} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
+                <div className="results">
+                  {Object.values(text).map((result, i) => {
+                    let seconds = 0
+
+                    if (result[0].startTime && result[0].startTime.seconds) {
+                      seconds = parseInt(result[0].startTime.seconds, 10)
+                    }
+
+                    const startTime = new Date(seconds * 1000).toISOString().substr(11, 8)
+
+                    return (
+                      <>
+                        <div className="startTime">{startTime}</div>
+
+                        <div key={i} className="result">
+                          {Object.values(result).map((wordObject, j) => {
+                            {
+                              return <Word key={j} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
+                            }
+                          })}
+                        </div>
+                      </>
+                    )
                   })}
-                </p>
-                <Player ref={this.playerRef} fileUrl={audioFile.url} handleTimeUpdate={this.handleTimeUpdate} />
-              </div>
-            </div>
+                </div>
+              </main>
+              <Player ref={this.playerRef} fileUrl={audioFile.url} handleTimeUpdate={this.handleTimeUpdate} />
+            </>
           )
 
         case Status.Failed:

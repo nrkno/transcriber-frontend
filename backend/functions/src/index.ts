@@ -3,11 +3,11 @@
  * @author Andreas Schjønhaug
  */
 
-import { Document, Packer, Paragraph } from "docx"
 import * as functions from "firebase-functions"
 import serializeError from "serialize-error"
 import database from "./database"
 import { Status } from "./enums"
+import exportToDoc from "./exportToDoc"
 import { ITranscription } from "./interfaces"
 import { saveResult } from "./persistence"
 import { transcode } from "./transcoding"
@@ -74,51 +74,7 @@ exports.exportToDoc = functions.region("europe-west1").https.onRequest(async (re
       throw new Error("ID missing")
     }
 
-    console.log(request.query.id)
-
-    const text = await database.downloadText(request.query.id)
-
-    const results = text.val()
-
-    console.log("results")
-    console.log(results)
-
-    const doc = new Document()
-
-    Object.values(results).map((result, i) => {
-      console.log("result, i")
-      console.log(result, i)
-
-      let seconds = 0
-
-      if (result[0].startTime && result[0].startTime.seconds) {
-        seconds = parseInt(result[0].startTime.seconds, 10)
-      }
-
-      const startTime = new Date(seconds * 1000).toISOString().substr(11, 8)
-
-      console.log("startTime")
-      console.log(startTime)
-
-      if (i > 0) {
-        doc.addParagraph(new Paragraph(startTime))
-      }
-
-      const words = Object.values(result)
-        .map(word => word.word)
-        .join(" ")
-
-      console.log("words")
-      console.log(words)
-
-      doc.addParagraph(new Paragraph(words))
-    })
-
-    const packer = new Packer()
-
-    const b64string = await packer.toBase64String(doc)
-    response.setHeader("Content-Disposition", "attachment; filename=Transcript.docx")
-    response.send(Buffer.from(b64string, "base64"))
+    await exportToDoc(request.query.id, response)
   } catch (error) {
     // Handle the error
     console.log(error)

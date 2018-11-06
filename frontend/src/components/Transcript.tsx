@@ -1,13 +1,12 @@
-import { flatten } from "lodash"
 import * as React from "react"
+import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"
 import { Status, SweetProgressStatus } from "../enums"
-import { database, functions } from "../firebaseApp"
+import { database } from "../firebaseApp"
 import { ITime, ITranscription } from "../interfaces"
 import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
 import Word from "./Word"
-import ReactGA from "react-ga"
 
 interface IState {
   currentTime: number
@@ -23,7 +22,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
       transcription: undefined,
     }
   }
-  componentDidUpdate(_prevProps: any, prevState: IState /*, _snapshot*/) {
+
+  public componentDidUpdate(_prevProps: any, prevState: IState /*, _snapshot*/) {
     if (this.state.transcription && this.state.transcription.progress && this.state.transcription.progress.status) {
       // Log errors
       if (this.state.transcription.progress.status === Status.Failed && this.state.transcription.error) {
@@ -37,8 +37,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         (prevState.transcription && prevState.transcription.progress && prevState.transcription.progress.status && prevState.transcription.progress.status !== this.state.transcription.progress.status)
       ) {
         ReactGA.event({
-          category: "Progress",
           action: this.state.transcription.progress.status,
+          category: "Progress",
           nonInteraction: true,
         })
       }
@@ -53,32 +53,6 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         })
       }
     })
-  }
-
-  private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    const id = this.props.match.params.id
-    window.location.href = `https://europe-west1-nrk-transkribering-development.cloudfunctions.net/exportToDoc?id=${id}`
-
-    return
-    console.log("HEI exportToDoc")
-
-    fetch("https://europe-west1-nrk-transkribering-development.cloudfunctions.net/exportToDoc").then(function(response) {
-      console.log(response)
-    })
-
-    return
-    var exportToDoc = functions.httpsCallable("exportToDoc2")
-
-    try {
-      const result = await exportToDoc()
-      console.log("Fikk svar")
-
-      console.log(result)
-    } catch (error) {
-      console.log(error)
-    }
   }
 
   public handleTimeUpdate = (event: React.ChangeEvent<HTMLAudioElement>) => {
@@ -125,30 +99,48 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
           const audioFile = transcription.audioFile
           const text = transcription.text!
 
-          console.log(text)
-
-          const words = flatten(Object.keys(text).map(key => text[key]))
-
           return (
-            <div className="wrapper">
-              <div className="result">
-                <h2>{audioFile.name}</h2>
-                <div className="nrk-color-spot warning">
-                  ⚠️ Transkribering er i en tidlig utviklingsfase. Transkriberingen er ikke noen fasit, og at kan ikke brukes verbatim i f.eks. artikler el.l. uten at man har gått igjennom teksten for hånd.
-                </div>
-                <form className="dropForm" onSubmit={this.handleExportToWord}>
-                  <button className="nrk-button" type="submit">
-                    Eksporter til Word
-                  </button>
-                </form>
-                <p className="transcription">
-                  {words.map((wordObject, i) => {
-                    return <Word key={i} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
+            <>
+              <main id="transcript">
+                <div className="results">
+                  <div className="meta">
+                    <h1 className="org-text-xl">{audioFile.name}</h1>
+                    <form onSubmit={this.handleExportToWord}>
+                      <button className="org-btn" type="submit">
+                        <svg width="20" height="20" focusable="false" aria-hidden="true">
+                          <use xlink={true} href="#icon-download" />
+                        </svg>{" "}
+                        Last ned som Word
+                      </button>
+                    </form>
+                  </div>
+                  {Object.values(text).map((result, i) => {
+                    let seconds = 0
+
+                    if (result[0].startTime && result[0].startTime.seconds) {
+                      seconds = parseInt(result[0].startTime.seconds, 10)
+                    }
+
+                    const startTime = new Date(seconds * 1000).toISOString().substr(11, 8)
+
+                    return (
+                      <>
+                        <div className="startTime">{i !== 0 ? startTime : ""}</div>
+
+                        <div key={i} className="result">
+                          {Object.values(result).map((wordObject, j) => {
+                            {
+                              return <Word key={j} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
+                            }
+                          })}
+                        </div>
+                      </>
+                    )
                   })}
-                </p>
-                <Player ref={this.playerRef} fileUrl={audioFile.url} handleTimeUpdate={this.handleTimeUpdate} />
-              </div>
-            </div>
+                </div>
+              </main>
+              <Player ref={this.playerRef} fileUrl={audioFile.url} handleTimeUpdate={this.handleTimeUpdate} />
+            </>
           )
 
         case Status.Failed:
@@ -158,6 +150,32 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         default:
           return <TranscriptionProgress message={"Noe gikk galt!"} status={SweetProgressStatus.Error} />
       }
+    }
+  }
+
+  private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const id = this.props.match.params.id
+    window.location.href = `https://europe-west1-nrk-transkribering-development.cloudfunctions.net/exportToDoc?id=${id}`
+
+    return
+    console.log("HEI exportToDoc")
+
+    fetch("https://europe-west1-nrk-transkribering-development.cloudfunctions.net/exportToDoc").then(function(response) {
+      console.log(response)
+    })
+
+    return
+    const exportToDoc = functions.httpsCallable("exportToDoc2")
+
+    try {
+      const result = await exportToDoc()
+      console.log("Fikk svar")
+
+      console.log(result)
+    } catch (error) {
+      console.log(error)
     }
   }
 }

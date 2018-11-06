@@ -1,16 +1,16 @@
 import firebase from "firebase/app"
 import * as React from "react"
-//import Dropzone from "react-dropzone"
+// import Dropzone from "react-dropzone"
 // Testing not working with normal import right now, see https://github.com/react-dropzone/react-dropzone/issues/554
 let Dropzone = require("react-dropzone")
 if ("default" in Dropzone) {
   Dropzone = Dropzone.default
 }
+import ReactGA from "react-ga"
 import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
 import { Status } from "../enums"
 import { database, storage } from "../firebaseApp"
-import ReactGA from "react-ga"
 
 interface IState {
   file?: File
@@ -39,8 +39,8 @@ class Upload extends React.Component<any, IState> {
       this.setState({ dropzoneMessage: "Filen har feil format", file: undefined })
 
       ReactGA.event({
-        category: "Upload",
         action: "Wrong file format",
+        category: "Upload",
       })
     } else {
       // Take the first file
@@ -137,14 +137,14 @@ class Upload extends React.Component<any, IState> {
   public render() {
     if (this.state.uploadProgress === 0) {
       return (
-        <div className="wrapper">
+        <main id="progress">
           <form className="dropForm" onSubmit={this.handleSubmit}>
             <p>Last opp lydfil</p>
 
             <Dropzone
               accept="audio/*"
               style={{
-                border: "10px solid #f6f6f6",
+                border: "10px solid #efefef",
                 borderRadius: "50%",
                 height: "132px",
                 width: "132px",
@@ -162,26 +162,29 @@ class Upload extends React.Component<any, IState> {
                 {this.state.dropzoneMessage}
               </div>
             </Dropzone>
-            <select data-testid="languages" value={this.state.languageCode} onChange={this.handleLanguageChange}>
-              <option value="nb-NO">Norsk</option>
-              <option value="en-US">Engelsk</option>
-            </select>
-            <button className="nrk-button" disabled={this.state.file == undefined} type="submit">
+            <label className="org-label">
+              Språk
+              <select data-testid="languages" value={this.state.languageCode} onChange={this.handleLanguageChange}>
+                <option value="nb-NO">Norsk</option>
+                <option value="en-US">Engelsk</option>
+              </select>
+            </label>
+            <button className="org-btn org-btn--primary" disabled={this.state.file === undefined} type="submit">
               Last opp
             </button>
           </form>
-        </div>
+        </main>
       )
     }
 
     const status = this.state.uploadProgress < 100 ? "active" : "success"
     return (
-      <div className="wrapper">
+      <main id="progress">
         <div className="dropForm">
           <p>Laster opp</p>
           <Progress type="circle" percent={this.state.uploadProgress} status={status} />
         </div>
-      </div>
+      </main>
     )
   }
 }

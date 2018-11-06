@@ -25,7 +25,7 @@ async function trans(operation, id: string) {
         const percent = longRunningRecognizeMetadata.progressPercent
         if (percent !== undefined) {
           try {
-            await database.updatePercent(id, percent)
+            await database.setPercent(id, percent)
           } catch (error) {
             console.log("Error in on.('progress')")
             console.error(error)

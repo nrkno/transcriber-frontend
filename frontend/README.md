@@ -1,24 +1,19 @@
 # Set up
 
 - Follow the steps in setting up the backend.
-- In the Firebase Console, Choose "Add Firebase to your web project" copy the values of `apiKey`, `databaseURL`, and the name of your uploads bucket and paste them in to `development.env` and `production.env`.
+- Rename `.env.sample` to `.env`
+- In the Firebase Console, Choose "Add Firebase to your web project" copy the values of `apiKey`, `databaseURL`, and the name of your uploads bucket and paste them in to `.env`.
 - Run `npm install` to install dependencies.
 
 ## Development
 
 ```sh
-npm start
-```
-
-## Deployment
-
-```sh
-firebase deploy
+npm run dev
 ```
 
 # Google Analytics
 
-To track events to [Google Analytics](https://analytics.google.com/analytics/web), enter your `GOOGLE_ANALYTICS_PROPERTY_ID` in the correspoindg `.env` file. The following events are tracked:
+To track events to [Google Analytics](https://analytics.google.com/analytics/web), enter your `GOOGLE_ANALYTICS_PROPERTY_ID` in the `.env` file. The following events are tracked:
 
 ## Upload page
 

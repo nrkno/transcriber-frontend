@@ -18,7 +18,7 @@ export async function saveResult(speechRecognitionResults: any, id: string) {
     const percent = Math.round(((index + 1) / speechRecognitionResults.length) * 100)
 
     if (index + 1 < speechRecognitionResults.length) {
-      await database.updatePercent(id, percent)
+      await database.setPercent(id, percent)
     }
   }
 }

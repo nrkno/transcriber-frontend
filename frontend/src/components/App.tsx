@@ -1,10 +1,10 @@
+import createHistory from "history/createBrowserHistory"
 import * as React from "react"
+import ReactGA from "react-ga"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
 import "../css/App.css"
-import ReactGA from "react-ga"
 import Transcript from "./Transcript"
 import Upload from "./Upload"
-import createHistory from "history/createBrowserHistory"
 
 ReactGA.initialize(process.env.GOOGLE_ANALYTICS_PROPERTY_ID, {
   debug: process.env.NODE_ENV === "development",
@@ -20,9 +20,9 @@ class App extends React.Component {
   public render() {
     return (
       <BrowserRouter>
-        <div className="App">
-          <header>
-            <h1>NRK transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</h1>
+        <div className="container">
+          <header className="org-color-dark">
+            <h1 className="org-text-l">Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</h1>
           </header>
           <Switch>
             <Route exact={true} path="/" component={Upload} />

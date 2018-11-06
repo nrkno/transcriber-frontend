@@ -45,6 +45,7 @@ exports[`renders correctly 1`] = `
      a 47,47 0 1 1 0,94
      a 47,47 0 1 1 0,-94"
           fillOpacity="0"
+          stroke="#efefef"
           strokeWidth={6}
           style={
             Object {

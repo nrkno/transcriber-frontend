@@ -138,40 +138,41 @@ class Upload extends React.Component<any, IState> {
     if (this.state.uploadProgress === 0) {
       return (
         <main id="progress">
-          <div className="dropForm">
-            <form onSubmit={this.handleSubmit}>
-              <p>Last opp lydfil</p>
+          <form className="dropForm" onSubmit={this.handleSubmit}>
+            <p>Last opp lydfil</p>
 
-              <Dropzone
-                accept="audio/*"
+            <Dropzone
+              accept="audio/*"
+              style={{
+                border: "10px solid #efefef",
+                borderRadius: "50%",
+                height: "132px",
+                width: "132px",
+              }}
+              onDrop={this.handleFileDrop}
+            >
+              <div
                 style={{
-                  border: "10px solid #efefef",
-                  borderRadius: "50%",
-                  height: "132px",
-                  width: "132px",
+                  marginTop: "50%",
+                  padding: "0 10px",
+                  textAlign: "center",
+                  transform: "translateY(-50%)",
                 }}
-                onDrop={this.handleFileDrop}
               >
-                <div
-                  style={{
-                    marginTop: "50%",
-                    padding: "0 10px",
-                    textAlign: "center",
-                    transform: "translateY(-50%)",
-                  }}
-                >
-                  {this.state.dropzoneMessage}
-                </div>
-              </Dropzone>
+                {this.state.dropzoneMessage}
+              </div>
+            </Dropzone>
+            <label className="org-label">
+              Språk
               <select data-testid="languages" value={this.state.languageCode} onChange={this.handleLanguageChange}>
                 <option value="nb-NO">Norsk</option>
                 <option value="en-US">Engelsk</option>
               </select>
-              <button className="nrk-button" disabled={this.state.file === undefined} type="submit">
-                Last opp
-              </button>
-            </form>
-          </div>
+            </label>
+            <button className="org-btn org-btn--primary" disabled={this.state.file === undefined} type="submit">
+              Last opp
+            </button>
+          </form>
         </main>
       )
     }

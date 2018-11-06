@@ -100,9 +100,11 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
           return (
             <>
-              <main>
-                <h2>{audioFile.name}</h2>
+              <main id="transcript">
                 <div className="results">
+                  <div className="meta">
+                    <h1 className="org-text-xl">{audioFile.name}</h1>
+                  </div>
                   {Object.values(text).map((result, i) => {
                     let seconds = 0
 
@@ -114,7 +116,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
                     return (
                       <>
-                        <div className="startTime">{startTime}</div>
+                        <div className="startTime">{i !== 0 ? startTime : ""}</div>
 
                         <div key={i} className="result">
                           {Object.values(result).map((wordObject, j) => {

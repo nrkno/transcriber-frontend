@@ -25,7 +25,7 @@ header {
 main {
   margin: 20px;
   display: grid;
-  grid-template-columns: minmax(auto, 1000px);
+  grid-template-columns: minmax(auto, 600px);
   justify-content: center;
   align-content: start;
 }
@@ -65,6 +65,10 @@ main#progress {
 }
 
 /* Transcript */
+
+.meta {
+  grid-column-start: 2;
+}
 
 .active {
   background: #ffc600;

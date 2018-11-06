@@ -39,8 +39,8 @@ class Upload extends React.Component<any, IState> {
       this.setState({ dropzoneMessage: "Filen har feil format", file: undefined })
 
       ReactGA.event({
-        category: "Upload",
         action: "Wrong file format",
+        category: "Upload",
       })
     } else {
       // Take the first file
@@ -137,9 +137,9 @@ class Upload extends React.Component<any, IState> {
   public render() {
     if (this.state.uploadProgress === 0) {
       return (
-        <main>
+        <main id="progress">
           <div className="dropForm">
-            <form className="org-shadow-m formX" onSubmit={this.handleSubmit}>
+            <form onSubmit={this.handleSubmit}>
               <p>Last opp lydfil</p>
 
               <Dropzone
@@ -178,12 +178,12 @@ class Upload extends React.Component<any, IState> {
 
     const status = this.state.uploadProgress < 100 ? "active" : "success"
     return (
-      <div className="wrapper">
+      <main id="progress">
         <div className="dropForm">
           <p>Laster opp</p>
           <Progress type="circle" percent={this.state.uploadProgress} status={status} />
         </div>
-      </div>
+      </main>
     )
   }
 }

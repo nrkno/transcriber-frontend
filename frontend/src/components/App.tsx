@@ -23,7 +23,6 @@ class App extends React.Component {
         <div className="container">
           <header className="org-color-dark">
             <h1 className="org-text-l">Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</h1>
-            <div>Navn navnesen</div>
           </header>
           <Switch>
             <Route exact={true} path="/" component={Upload} />

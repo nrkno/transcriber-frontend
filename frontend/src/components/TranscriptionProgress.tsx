@@ -21,16 +21,16 @@ const TranscriptionProgress = ({ message, percent = 100, status, symbol }: IProp
   }
 
   if (symbol !== undefined) {
-    props["theme"] = { active: { symbol, color: "#efefef" } }
+    props.theme = { active: { symbol, color: "#efefef" } }
   }
 
   return (
-    <div className="wrapper">
+    <main id="progress">
       <div className="dropForm">
         <p className={className}>{message}</p>
         <Progress {...props} />
       </div>
-    </div>
+    </main>
   )
 }
 

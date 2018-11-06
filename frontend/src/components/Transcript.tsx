@@ -2,7 +2,7 @@ import * as React from "react"
 import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"
 import { Status, SweetProgressStatus } from "../enums"
-import { database } from "../firebaseApp"
+import { database, functions } from "../firebaseApp"
 import { ITime, ITranscription } from "../interfaces"
 import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
@@ -73,8 +73,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     // Transcription not found
     else if (transcription === null) {
       ReactGA.event({
-        category: "Transcription",
         action: "Not found",
+        category: "Transcription",
       })
       return <TranscriptionProgress message={"Fant ikke transkripsjonen"} status={SweetProgressStatus.Error} />
     } else {
@@ -157,26 +157,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     event.preventDefault()
 
     const id = this.props.match.params.id
-    window.location.href = `https://europe-west1-nrk-transkribering-development.cloudfunctions.net/exportToDoc?id=${id}`
 
-    return
-    console.log("HEI exportToDoc")
-
-    fetch("https://europe-west1-nrk-transkribering-development.cloudfunctions.net/exportToDoc").then(function(response) {
-      console.log(response)
-    })
-
-    return
-    const exportToDoc = functions.httpsCallable("exportToDoc2")
-
-    try {
-      const result = await exportToDoc()
-      console.log("Fikk svar")
-
-      console.log(result)
-    } catch (error) {
-      console.log(error)
-    }
+    window.location.href = `${process.env.REACT_APP_FIREBASE_HTTP_CLOUD_FUNCTION_URL}/exportToDoc?id=${id}`
   }
 }
 

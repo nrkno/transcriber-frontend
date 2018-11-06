@@ -2,15 +2,15 @@
 import firebase from "firebase/app"
 
 // These imports load individual services into the firebase namespace.
-import "firebase/storage"
 import "firebase/database"
 import "firebase/functions"
+import "firebase/storage"
 
 const config = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
   projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
 }
 
 firebase.initializeApp(config)

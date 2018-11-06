@@ -1,11 +1,11 @@
 .active {
-  background: yellow;
+  background: #ffc600;
   border-radius: 3px;
 }
 
 .container {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
   height: 100vh;
 }
 
@@ -37,16 +37,6 @@ main {
   justify-content: center;
 }
 
-.results {
-  display: grid;
-  grid-template-columns: 75px 1fr;
-  grid-gap: 10px;
-}
-
-.results .startTime {
-  color: grey;
-}
-
 .dropForm {
   width: 100%;
   height: 100%;
@@ -73,6 +63,7 @@ main {
   font-size: 2rem;
   border: none;
   width: 64px;
+  color: white;
 }
 
 #player .timer-wrapper {
@@ -199,7 +190,15 @@ input[type="range"]:focus::-ms-fill-upper {
 }
 
 .results {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-gap: 10px;
   padding: 16px;
+  padding-bottom: 100px;
+}
+
+.results .startTime {
+  color: grey;
 }
 
 .results h2 {

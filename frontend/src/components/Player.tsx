@@ -1,6 +1,6 @@
 import * as React from "react"
-import secondsToTime from "../secondsToTime"
 import ReactGA from "react-ga"
+import secondsToTime from "../secondsToTime"
 
 interface IState {
   currentTime: number
@@ -34,23 +34,23 @@ class Player extends React.Component<IProps, IState> {
     this.audioRef.current!.play()
     this.setState({ isPlaying: true })
     ReactGA.event({
-      category: "Player",
       action: "Play button pressed",
+      category: "Player",
     })
   }
   public handlePause = (event: React.FormEvent<HTMLButtonElement>) => {
     this.audioRef.current!.pause()
     this.setState({ isPlaying: false })
     ReactGA.event({
-      category: "Player",
       action: "Pause button pressed",
+      category: "Player",
     })
   }
   public handleVolume = (event: React.FormEvent<HTMLInputElement>) => {
     this.audioRef.current!.volume = Number(event.currentTarget.value)
     ReactGA.event({
-      category: "Player",
       action: "Volume changed",
+      category: "Player",
     })
   }
   public handleTimeUpdate = (event: React.ChangeEvent<HTMLAudioElement>) => {

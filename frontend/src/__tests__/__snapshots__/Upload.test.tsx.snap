@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders correctly 1`] = `
-<div
-  className="wrapper"
+<main
+  id="progress"
 >
   <form
     className="dropForm"
@@ -62,29 +62,34 @@ exports[`renders correctly 1`] = `
         type="file"
       />
     </div>
-    <select
-      data-testid="languages"
-      onChange={[Function]}
-      value="nb-NO"
+    <label
+      className="org-label"
     >
-      <option
+      Språk
+      <select
+        data-testid="languages"
+        onChange={[Function]}
         value="nb-NO"
       >
-        Norsk
-      </option>
-      <option
-        value="en-US"
-      >
-        Engelsk
-      </option>
-    </select>
+        <option
+          value="nb-NO"
+        >
+          Norsk
+        </option>
+        <option
+          value="en-US"
+        >
+          Engelsk
+        </option>
+      </select>
+    </label>
     <button
-      className="nrk-button"
+      className="org-btn org-btn--primary"
       disabled={true}
       type="submit"
     >
       Last opp
     </button>
   </form>
-</div>
+</main>
 `;

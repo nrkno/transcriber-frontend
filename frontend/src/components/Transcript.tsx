@@ -121,26 +121,47 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
           }
 
           return (
-            <div className="wrapper">
-              <div className="results">
-                <h2>{transcript.name}</h2>
-                <div className="nrk-color-spot warning">
-                  ⚠️ Transkribering er i en tidlig utviklingsfase. Transkriberingen er ikke noen fasit, og at kan ikke brukes verbatim i f.eks. artikler el.l. uten at man har gått igjennom teksten for hånd.
+            <>
+              <main id="transcript">
+                <div className="results">
+                  <div className="meta">
+                    <h1 className="org-text-xl">{audioFile.name}</h1>
+                    <form onSubmit={this.handleExportToWord}>
+                      <button className="org-btn" type="submit">
+                        <svg width="20" height="20" focusable="false" aria-hidden="true">
+                          <use xlinkHref="#icon-download" />
+                        </svg>{" "}
+                        Last ned som Word
+                      </button>
+                    </form>
+                  </div>
+                  {Object.values(text).map((result, i) => {
+                    let seconds = 0
+
+                    if (result[0].startTime && result[0].startTime.seconds) {
+                      seconds = parseInt(result[0].startTime.seconds, 10)
+                    }
+
+                    const startTime = new Date(seconds * 1000).toISOString().substr(11, 8)
+
+                    return (
+                      <React.Fragment key={i}>
+                        <div key={`startTime-${i}`} className="startTime">
+                          {i !== 0 ? startTime : ""}
+                        </div>
+
+                        <div key={`result-${i}`} className="result">
+                          {result.words.map((wordObject, j) => {
+                            return <Word key={`word-${i}-${j}`} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
+                          })}
+                        </div>
+                      </React.Fragment>
+                    )
+                  })}
                 </div>
-
-                {transcript.results.map((result, i) => {
-                  return (
-                    <p className="result" key={i}>
-                      {result.words.map((wordObject, j) => {
-                        return <Word key={j} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
-                      })}
-                    </p>
-                  )
-                })}
-
-                <Player ref={this.playerRef} fileUrl={transcript.url!} handleTimeUpdate={this.handleTimeUpdate} />
-              </div>
-            </div>
+              </main>
+              <Player ref={this.playerRef} fileUrl={audioFile.url} handleTimeUpdate={this.handleTimeUpdate} />
+            </>
           )
 
         case Status.Failed:
@@ -151,6 +172,14 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
           return <TranscriptionProgress message={"Noe gikk galt!"} status={SweetProgressStatus.Error} />
       }
     }
+  }
+
+  private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const id = this.props.match.params.id
+
+    window.location.href = `${process.env.REACT_APP_FIREBASE_HTTP_CLOUD_FUNCTION_URL}/exportToDoc?id=${id}`
   }
 }
 

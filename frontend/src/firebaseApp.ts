@@ -3,6 +3,7 @@ import firebase from "firebase/app"
 
 // These imports load individual services into the firebase namespace.
 import "firebase/firestore"
+import "firebase/functions"
 import "firebase/storage"
 
 const config = {
@@ -18,5 +19,6 @@ const database = firebase.firestore()
 const settings = { timestampsInSnapshots: true }
 database.settings(settings)
 const storage = firebase.storage()
+const functions = firebase.app().functions("europe-west1")
 
-export { database, storage }
+export { database, storage, functions }

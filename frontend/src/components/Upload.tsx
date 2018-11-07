@@ -129,7 +129,7 @@ class Upload extends React.Component<any, IState> {
   public render() {
     if (this.state.uploadProgress === 0) {
       return (
-        <div className="wrapper">
+        <main id="progress">
           <form className="dropForm" onSubmit={this.handleSubmit}>
             <p>Last opp lydfil</p>
 
@@ -154,26 +154,29 @@ class Upload extends React.Component<any, IState> {
                 {this.state.dropzoneMessage}
               </div>
             </Dropzone>
-            <select data-testid="languages" value={this.state.languageCode} onChange={this.handleLanguageChange}>
-              <option value="nb-NO">Norsk</option>
-              <option value="en-US">Engelsk</option>
-            </select>
-            <button className="nrk-button" disabled={this.state.file === undefined} type="submit">
+            <label className="org-label">
+              Språk
+              <select data-testid="languages" value={this.state.languageCode} onChange={this.handleLanguageChange}>
+                <option value="nb-NO">Norsk</option>
+                <option value="en-US">Engelsk</option>
+              </select>
+            </label>
+            <button className="org-btn org-btn--primary" disabled={this.state.file === undefined} type="submit">
               Last opp
             </button>
           </form>
-        </div>
+        </main>
       )
     }
 
     const status = this.state.uploadProgress < 100 ? "active" : "success"
     return (
-      <div className="wrapper">
+      <main id="progress">
         <div className="dropForm">
           <p>Laster opp</p>
           <Progress type="circle" percent={this.state.uploadProgress} status={status} />
         </div>
-      </div>
+      </main>
     )
   }
 }

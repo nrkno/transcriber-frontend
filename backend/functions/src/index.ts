@@ -4,8 +4,10 @@
  */
 
 import * as functions from "firebase-functions"
+import serializeError from "serialize-error"
 import database from "./database"
 import { Status } from "./enums"
+import exportToDoc from "./exportToDoc"
 import { ITranscript } from "./interfaces"
 import { saveResult } from "./persistence"
 import { transcode } from "./transcoding"
@@ -17,7 +19,7 @@ exports.transcription = functions
   .onCreate(async (documentSnapshot, eventContext) => {
     const id = documentSnapshot.id
 
-    console.log(`Deployed 10:43 - Start transcription of id: ${id}`)
+    console.log(`Deployed 14:16 - Start transcription of id: ${id}`)
 
     try {
       // Because of indempotency, we need to fetch the transcript from the server and check if it's already in process
@@ -63,6 +65,22 @@ exports.transcription = functions
       throw error
     }
   })
+
+exports.exportToDoc = functions.region("europe-west1").https.onRequest(async (request, response: functions.Response) => {
+  try {
+    console.log("export 14:07")
+
+    if (!request.query.id) {
+      throw new Error("ID missing")
+    }
+
+    await exportToDoc(request.query.id, response)
+  } catch (error) {
+    // Handle the error
+    console.log(error)
+    response.status(500).send(serializeError(error))
+  }
+})
 
 process.on("unhandledRejection", (reason: any, promise: Promise<any>) => {
   console.error(new Error(`Unhandled Rejection at: Promise: ${promise} with reason: ${reason.stack || reason}`))

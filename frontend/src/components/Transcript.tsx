@@ -143,7 +143,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                     return (
                       <React.Fragment key={i}>
                         <div key={`startTime-${i}`} className="startTime">
-                          {i !== 0 ? startTime : ""}
+                          {i > 0 ? startTime : ""}
                         </div>
 
                         <div key={`result-${i}`} className="result">

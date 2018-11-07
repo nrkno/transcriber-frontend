@@ -68,7 +68,7 @@ exports.transcription = functions
 
 exports.exportToDoc = functions.region("europe-west1").https.onRequest(async (request, response: functions.Response) => {
   try {
-    console.log("export 14:07")
+    console.log("export 17:37")
 
     if (!request.query.id) {
       throw new Error("ID missing")

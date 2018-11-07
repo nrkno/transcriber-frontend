@@ -24,6 +24,7 @@ interface ITranscript {
 }
 
 interface IResult {
+  startTime: number
   confidence: number
   transcript: string
   words: Array<IWord>

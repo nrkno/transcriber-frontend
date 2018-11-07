@@ -5,30 +5,20 @@ import database from "../database"
 async function exportToDoc(id: string, response: functions.Response) {
   console.log(id)
 
-  const text = await database.downloadText(id)
-
-  const results = text.val()
+  const results = await database.getResults(id)
 
   const doc = new Document()
 
   Object.values(results).map((result, i) => {
-    let seconds = 0
-
-    if (result[0].startTime && result[0].startTime.seconds) {
-      seconds = parseInt(result[0].startTime.seconds, 10)
-    }
-
-    const startTime = new Date(seconds * 1000).toISOString().substr(11, 8)
-
     if (i > 0) {
+      const seconds = result.startTime || 0
+      const startTime = new Date(seconds * 1000).toISOString().substr(11, 8)
       doc.addParagraph(new Paragraph())
       doc.addParagraph(new Paragraph(startTime))
       doc.addParagraph(new Paragraph())
     }
 
-    const words = Object.values(result)
-      .map(word => word.word)
-      .join(" ")
+    const words = result.words.map(word => word.word).join(" ")
 
     doc.addParagraph(new Paragraph(words))
   })

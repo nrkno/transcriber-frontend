@@ -72,11 +72,21 @@ const database = (() => {
     return updateTranscript(id, transcript)
   }
 
-  const downloadText = async (id: string) => {
-    /*return realtimeDatabase.ref(`/transcripts/${id}/text`).once("value", dataSnapshot => {
-      dataSnapshot.val()
+  const getResults = async (id: string): Promise<IResult[]> => {
+    const querySnapshot = await db
+      .collection(`transcripts/${id}/results`)
+      .orderBy("startTime")
+      .get()
+
+    const results = Array<IResult>()
+
+    querySnapshot.forEach(doc => {
+      const result = doc.data() as IResult
+
+      results.push(result)
     })
-    */
+
+    return results
   }
 
   const getStatus = async (id: string) => {
@@ -87,7 +97,7 @@ const database = (() => {
     return transcript.progress.status
   }
 
-  return { addResult, errorOccured, setDurationInSeconds, setStatus, setPercent, getStatus, downloadText }
+  return { addResult, errorOccured, setDurationInSeconds, setStatus, setPercent, getStatus, getResults }
 })()
 
 export default database

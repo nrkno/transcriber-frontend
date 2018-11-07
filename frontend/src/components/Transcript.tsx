@@ -43,7 +43,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   }
 
   public async componentDidMount() {
-    database.doc(`users/aaaa/transcripts/${this.props.match.params.id}`).onSnapshot(documentSnapshot => {
+    database.doc(`transcripts/${this.props.match.params.id}`).onSnapshot(documentSnapshot => {
       console.log(documentSnapshot)
 
       const transcript = documentSnapshot.data() as ITranscript
@@ -104,7 +104,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
             transcript.results = Array<IResult>()
 
             database
-              .collection(`users/aaaa/transcripts/${this.props.match.params.id}/results`)
+              .collection(`transcripts/${this.props.match.params.id}/results`)
               .orderBy("startTime")
               .get()
               .then(querySnapshot => {
@@ -125,7 +125,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
               <main id="transcript">
                 <div className="results">
                   <div className="meta">
-                    <h1 className="org-text-xl">{audioFile.name}</h1>
+                    <h1 className="org-text-xl">{transcript.name}</h1>
                     <form onSubmit={this.handleExportToWord}>
                       <button className="org-btn" type="submit">
                         <svg width="20" height="20" focusable="false" aria-hidden="true">
@@ -135,12 +135,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                       </button>
                     </form>
                   </div>
-                  {Object.values(text).map((result, i) => {
-                    let seconds = 0
-
-                    if (result[0].startTime && result[0].startTime.seconds) {
-                      seconds = parseInt(result[0].startTime.seconds, 10)
-                    }
+                  {Object.values(transcript.results).map((result, i) => {
+                    const seconds = result.startTime || 0
 
                     const startTime = new Date(seconds * 1000).toISOString().substr(11, 8)
 
@@ -160,7 +156,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                   })}
                 </div>
               </main>
-              <Player ref={this.playerRef} fileUrl={audioFile.url} handleTimeUpdate={this.handleTimeUpdate} />
+              <Player ref={this.playerRef} fileUrl={transcript.url} handleTimeUpdate={this.handleTimeUpdate} />
             </>
           )
 

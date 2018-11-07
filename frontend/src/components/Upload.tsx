@@ -101,7 +101,7 @@ class Upload extends React.Component<any, IState> {
       () => {
         uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
           database
-            .doc(`users/aaaa/transcripts/${id}`)
+            .doc(`transcripts/${id}`)
             .set({
               languageCode,
               name: file.name,

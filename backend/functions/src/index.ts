@@ -15,11 +15,11 @@ import { transcribe } from "./transcription"
 
 exports.transcription = functions
   .region("europe-west1")
-  .firestore.document("users/{userId}/transcripts/{transcriptId}")
+  .firestore.document("transcripts/{transcriptId}")
   .onCreate(async (documentSnapshot, eventContext) => {
     const id = documentSnapshot.id
 
-    console.log(`Deployed 14:16 - Start transcription of id: ${id}`)
+    console.log(`Deployed 15:24 - Start transcription of id: ${id}`)
 
     try {
       // Because of indempotency, we need to fetch the transcript from the server and check if it's already in process

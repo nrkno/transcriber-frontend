@@ -21,7 +21,7 @@ db.settings(settings)
 
 const database = (() => {
   const updateTranscript = async (id: string, transcript: ITranscript) => {
-    return db.doc(`users/aaaa/transcripts/${id}`).set({ ...transcript }, { merge: true })
+    return db.doc(`transcripts/${id}`).set({ ...transcript }, { merge: true })
   }
 
   const setStatus = async (id: string, status: Status) => {
@@ -52,7 +52,7 @@ const database = (() => {
 
     const data = JSON.parse(JSON.stringify(resultWithStartTimeInSeconds))
 
-    return db.collection(`users/aaaa/transcripts/${id}/results`).add(data)
+    return db.collection(`transcripts/${id}/results`).add(data)
   }
 
   const setDurationInSeconds = async (id: string, seconds: number) => {
@@ -73,13 +73,14 @@ const database = (() => {
   }
 
   const downloadText = async (id: string) => {
-    return realtimeDatabase.ref(`/transcripts/${id}/text`).once("value", dataSnapshot => {
+    /*return realtimeDatabase.ref(`/transcripts/${id}/text`).once("value", dataSnapshot => {
       dataSnapshot.val()
     })
+    */
   }
 
   const getStatus = async (id: string) => {
-    const doc = await db.doc(`users/aaaa/transcripts/${id}`).get()
+    const doc = await db.doc(`transcripts/${id}`).get()
 
     const transcript = doc.data() as ITranscript
 

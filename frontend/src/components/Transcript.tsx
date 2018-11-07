@@ -136,19 +136,19 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                     </form>
                   </div>
                   {Object.values(transcript.results).map((result, i) => {
-                    const seconds = result.startTime || 0
+                    const startTime = result.startTime || 0
 
-                    const startTime = new Date(seconds * 1000).toISOString().substr(11, 8)
+                    const formattedStartTime = new Date(startTime * 1000).toISOString().substr(11, 8)
 
                     return (
                       <React.Fragment key={i}>
                         <div key={`startTime-${i}`} className="startTime">
-                          {i > 0 ? startTime : ""}
+                          {i > 0 ? formattedStartTime : ""}
                         </div>
 
                         <div key={`result-${i}`} className="result">
-                          {result.words.map((wordObject, j) => {
-                            return <Word key={`word-${i}-${j}`} word={wordObject} handleClick={this.setTime} currentTime={this.state.currentTime} />
+                          {result.words.map((word, j) => {
+                            return <Word key={`word-${i}-${j}`} word={word} handleClick={this.setTime} currentTime={this.state.currentTime} />
                           })}
                         </div>
                       </React.Fragment>

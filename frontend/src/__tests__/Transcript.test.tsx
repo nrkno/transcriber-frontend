@@ -30,10 +30,9 @@ jest.mock("../firebaseApp", () => {
 })
 
 import * as React from "react"
-import Transcript from "../components/Transcript"
 import * as TestRenderer from "react-test-renderer"
-import { waitForElement, render, /*wait, */ cleanup } from "react-testing-library"
-// import { Status } from "../enums"
+import { cleanup, render, /*wait, */ waitForElement } from "react-testing-library"
+import Transcript from "../components/Transcript"
 
 jest.mock("react-ga")
 
@@ -59,7 +58,7 @@ test("show transcription not found on invalid id", async () => {
 
   const { getByText } = render(<Transcript match={match} location={mock} history={mock} />)
 
-  mockDatabase.ref.child("/transcripts").push() //Pushing empty object, will result in transaction === null
+  mockDatabase.ref.child("/transcripts").push() // Pushing empty object, will result in transaction === null
   mockDatabase.ref.flush()
 
   await waitForElement(() => getByText("Fant ikke transkripsjonen"))

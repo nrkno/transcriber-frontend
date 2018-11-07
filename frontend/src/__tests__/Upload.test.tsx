@@ -4,9 +4,9 @@ jest.mock("../firebaseApp", () => {
   return firebaseMock
 })
 import * as React from "react"
-import Upload from "../components/Upload"
 import * as TestRenderer from "react-test-renderer"
-import { render, wait, cleanup, fireEvent } from "react-testing-library"
+import { cleanup, fireEvent, render, wait } from "react-testing-library"
+import Upload from "../components/Upload"
 
 beforeAll(() => {
   // Dropzone will fail unless we redefine window.URL.createObjectURL

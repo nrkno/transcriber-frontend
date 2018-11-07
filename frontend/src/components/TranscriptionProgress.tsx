@@ -10,11 +10,23 @@ interface IProps {
   symbol?: string
 }
 
+interface IProgressProps {
+  percent: number
+  status: SweetProgressStatus | undefined
+  type: string
+  theme?: {
+    active: {
+      symbol: string
+      color: string
+    }
+  }
+}
+
 const TranscriptionProgress = ({ message, percent = 100, status, symbol }: IProps) => {
   // Show animating dots if there is progress going on
   const className = status === SweetProgressStatus.Active ? "loading" : ""
 
-  const props = {
+  const props: IProgressProps = {
     percent,
     status,
     type: "circle",

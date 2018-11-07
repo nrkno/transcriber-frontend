@@ -2,7 +2,7 @@ import * as React from "react"
 import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"
 import { Status, SweetProgressStatus } from "../enums"
-import { database, functions } from "../firebaseApp"
+import { database } from "../firebaseApp"
 import { ITime, ITranscription } from "../interfaces"
 import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
@@ -108,7 +108,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                     <form onSubmit={this.handleExportToWord}>
                       <button className="org-btn" type="submit">
                         <svg width="20" height="20" focusable="false" aria-hidden="true">
-                          <use xlink={true} href="#icon-download" />
+                          <use xlinkHref="#icon-download" />
                         </svg>{" "}
                         Last ned som Word
                       </button>

@@ -27,10 +27,10 @@ interface IResult {
   startTime: number
   confidence: number
   transcript: string
-  words: Array<IWord>
+  words: Array<IWordInfo>
 }
 
-interface IWord {
+interface IWordInfo {
   word: string
   endTime: ITime
   startTime?: ITime

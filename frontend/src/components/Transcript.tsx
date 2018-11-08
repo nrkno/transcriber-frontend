@@ -9,7 +9,9 @@ import TranscriptionProgress from "./TranscriptionProgress"
 import Word from "./Word"
 
 interface IState {
+  currentResult: number | undefined
   currentTime: number
+  currentWord: number | undefined
   transcript?: ITranscript
 }
 
@@ -18,7 +20,9 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   constructor(props: any) {
     super(props)
     this.state = {
+      currentResult: undefined,
       currentTime: 0,
+      currentWord: undefined,
       transcript: undefined,
     }
   }
@@ -55,7 +59,63 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   }
 
   public handleTimeUpdate = (event: React.ChangeEvent<HTMLAudioElement>) => {
-    this.setState({ currentTime: event.target.currentTime })
+    // Find the next current result and word
+
+    if (this.state.transcript === undefined || this.state.transcript.results === undefined) {
+      return
+    }
+
+    const { results } = this.state.transcript
+    const currentTime = event.target.currentTime
+    console.log(currentTime)
+
+    let i
+    loop: for (i = this.state.currentResult || 0; i < results.length; i++) {
+      console.log(`-----------`)
+      console.log(`result ${i}`)
+
+      const words = results[i].words
+      let j
+      for (j = this.state.currentWord || 0; j < words.length; j++) {
+        console.log(`word ${j}`)
+        const word = words[j]
+
+        const { startTime, endTime } = word
+
+        let start = 0
+        if (startTime !== undefined) {
+          if (startTime.seconds !== undefined) {
+            start += parseFloat(startTime.seconds)
+          }
+          if (startTime.nanos !== undefined) {
+            start += startTime.nanos / 1000000000
+          }
+        }
+
+        if (currentTime < start) {
+          continue
+        }
+
+        let end = 0
+        if (endTime !== undefined) {
+          if (endTime.seconds !== undefined) {
+            end += parseFloat(endTime.seconds)
+          }
+          if (endTime.nanos !== undefined) {
+            end += endTime.nanos / 1000000000
+          }
+        }
+
+        if (currentTime > end) {
+          continue
+        }
+        console.log(word.word)
+
+        this.setState({ currentTime, currentResult: i, currentWord: j })
+
+        break loop
+      }
+    }
   }
 
   public setTime = (startTime: ITime) => {
@@ -148,7 +208,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
                         <div key={`result-${i}`} className="result">
                           {result.words.map((word, j) => {
-                            return <Word key={`word-${i}-${j}`} word={word} handleClick={this.setTime} currentTime={this.state.currentTime} />
+                            const isCurrentWord = this.state.currentResult === i && this.state.currentWord === j
+                            return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} handleClick={this.setTime} currentTime={this.state.currentTime} />
                           })}
                         </div>
                       </React.Fragment>

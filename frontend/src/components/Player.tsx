@@ -61,11 +61,13 @@ class Player extends React.Component<IProps, IState> {
   public render() {
     const currentTime = this.audioRef.current && this.audioRef.current.currentTime ? this.audioRef.current.currentTime : 0
     const duration = this.audioRef.current && this.audioRef.current.duration ? this.audioRef.current.duration : 0
-    const progress = currentTime / duration
+
+    // Avoid division by zero
+    const progress = duration !== 0 ? currentTime / duration : 0
 
     return (
       <div>
-        <audio ref={this.audioRef} onDurationChange={this.handleDurationChange} src={this.props.fileUrl} />
+        <audio ref={this.audioRef} src={this.props.fileUrl} />
         <div id="player">
           {!this.state.isPlaying ? (
             <button onClick={this.handlePlay}>

@@ -86,11 +86,29 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         return
       }
     }
+    // The current word has been said, start scanning for the next word
+    // We assume that it will be the next word in the current result
 
-    loop: for (let i = currentResultIndex || 0; i < results.length; i++) {
+    let nextWordIndex = 0
+    let nextResultIndex = 0
+
+    if (currentResultIndex !== undefined && currentWordIndex !== undefined) {
+      nextWordIndex = currentWordIndex ? currentWordIndex + 1 : 0
+      nextResultIndex = currentResultIndex
+
+      if (nextWordIndex === results[currentResultIndex].words.length) {
+        // This was the last word, reset word index and move to next result
+
+        nextWordIndex = 0
+        nextResultIndex = nextResultIndex + 1
+      }
+    }
+
+    // Start scanning for next word
+    for (let i = nextResultIndex; i < results.length; i++) {
       const words = results[i].words
 
-      for (let j = currentWordIndex || 0; j < words.length; j++) {
+      for (let j = nextWordIndex; j < words.length; j++) {
         const word = words[j]
 
         const { startTime, endTime } = word
@@ -106,7 +124,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         }
 
         if (currentTime < start) {
-          continue
+          // This word hasn't started yet, returning and waiting to be called again on new current time update
+          return
         }
 
         let end = 0
@@ -120,12 +139,15 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         }
 
         if (currentTime > end) {
+          // This word is no longer being said, go to next
           continue
         }
 
+        // console.log(word)
+
         this.setState({ currentTime, currentResultIndex: i, currentWordIndex: j })
 
-        break loop
+        return
       }
     }
   }

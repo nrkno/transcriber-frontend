@@ -17,6 +17,7 @@ interface IState {
   dropzoneMessage: string
   languageCode: string
   uploadProgress: number
+  user?: firebase.User
 }
 
 class Upload extends React.Component<any, IState> {
@@ -47,6 +48,18 @@ class Upload extends React.Component<any, IState> {
       const [file] = acceptedFiles
       this.setState({ file, dropzoneMessage: file.name })
     }
+  }
+
+  public componentWillReceiveProps(nextProps) {
+    console.log("nextProps")
+    console.log(nextProps)
+  }
+
+  public componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log("prevProps")
+    console.log(prevProps)
+    console.log("snapshot")
+    console.log(snapshot)
   }
 
   public handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -127,6 +140,9 @@ class Upload extends React.Component<any, IState> {
   }
 
   public render() {
+    console.log("this.props.user")
+    console.log(this.props.user)
+
     if (this.state.uploadProgress === 0) {
       return (
         <main id="progress">
@@ -161,7 +177,7 @@ class Upload extends React.Component<any, IState> {
                 <option value="en-US">Engelsk</option>
               </select>
             </label>
-            <button className="org-btn org-btn--primary" disabled={this.state.file === undefined} type="submit">
+            <button className="org-btn org-btn--primary" disabled={this.state.file === undefined || this.props.user === undefined} type="submit">
               Last opp
             </button>
           </form>

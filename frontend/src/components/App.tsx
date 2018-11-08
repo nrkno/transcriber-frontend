@@ -24,9 +24,7 @@ interface IState {
 class App extends React.Component<any, IState> {
   constructor(props: any) {
     super(props)
-    this.state = {
-      user: undefined,
-    }
+    this.state = {}
   }
 
   public async componentDidMount() {
@@ -40,6 +38,9 @@ class App extends React.Component<any, IState> {
   }
 
   public render() {
+    console.log("this.state.user")
+    console.log(this.state.user)
+
     return (
       <BrowserRouter>
         <div className="container">
@@ -48,7 +49,7 @@ class App extends React.Component<any, IState> {
             <div className="user">{this.state.user !== undefined ? this.state.user.displayName : ""}</div>
           </header>
           <Switch>
-            <Route exact={true} path="/" component={Upload} />
+            <Route exact={true} path="/" component={Upload} props={this.state.user} />
             <Route path="/transcripts/:id" component={Transcript} />
           </Switch>
         </div>

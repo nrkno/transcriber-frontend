@@ -3,15 +3,15 @@ import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"
 import { Status, SweetProgressStatus } from "../enums"
 import { database } from "../firebaseApp"
-import { IResult, ITime, ITranscript } from "../interfaces"
+import { IResult, ITranscript, IWordInfo } from "../interfaces"
 import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
 import Word from "./Word"
 
 interface IState {
-  currentResult: number | undefined
+  currentResultIndex: number | undefined
   currentTime: number
-  currentWord: number | undefined
+  currentWordIndex: number | undefined
   transcript?: ITranscript
 }
 
@@ -20,9 +20,9 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   constructor(props: any) {
     super(props)
     this.state = {
-      currentResult: undefined,
+      currentResultIndex: undefined,
       currentTime: 0,
-      currentWord: undefined,
+      currentWordIndex: undefined,
       transcript: undefined,
     }
   }
@@ -48,8 +48,6 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
   public async componentDidMount() {
     database.doc(`transcripts/${this.props.match.params.id}`).onSnapshot(documentSnapshot => {
-      console.log(documentSnapshot)
-
       const transcript = documentSnapshot.data() as ITranscript
 
       this.setState({
@@ -58,26 +56,41 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     })
   }
 
-  public handleTimeUpdate = (event: React.ChangeEvent<HTMLAudioElement>) => {
+  public handleTimeUpdate = (currentTime: number) => {
     // Find the next current result and word
 
-    if (this.state.transcript === undefined || this.state.transcript.results === undefined) {
+    const { currentResultIndex, currentWordIndex, transcript } = this.state
+
+    if (transcript === undefined || transcript.results === undefined) {
       return
     }
 
-    const { results } = this.state.transcript
-    const currentTime = event.target.currentTime
-    console.log(currentTime)
+    const { results } = transcript
 
-    let i
-    loop: for (i = this.state.currentResult || 0; i < results.length; i++) {
-      console.log(`-----------`)
-      console.log(`result ${i}`)
+    // First, we check if the current word is still being said
 
+    if (currentResultIndex !== undefined && currentWordIndex !== undefined) {
+      const currentWord = results[currentResultIndex].words[currentWordIndex]
+
+      let end = 0
+      if (currentWord.endTime !== undefined) {
+        if (currentWord.endTime.seconds !== undefined) {
+          end += parseFloat(currentWord.endTime.seconds)
+        }
+        if (currentWord.endTime.nanos !== undefined) {
+          end += currentWord.endTime.nanos / 1000000000
+        }
+      }
+
+      if (currentTime < end) {
+        return
+      }
+    }
+
+    loop: for (let i = currentResultIndex || 0; i < results.length; i++) {
       const words = results[i].words
-      let j
-      for (j = this.state.currentWord || 0; j < words.length; j++) {
-        console.log(`word ${j}`)
+
+      for (let j = currentWordIndex || 0; j < words.length; j++) {
         const word = words[j]
 
         const { startTime, endTime } = word
@@ -109,17 +122,31 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         if (currentTime > end) {
           continue
         }
-        console.log(word.word)
 
-        this.setState({ currentTime, currentResult: i, currentWord: j })
+        this.setState({ currentTime, currentResultIndex: i, currentWordIndex: j })
 
         break loop
       }
     }
   }
 
-  public setTime = (startTime: ITime) => {
-    this.playerRef.current!.setTime(startTime.seconds ? Number(startTime.seconds) : 0)
+  public setCurrentWord = (word: IWordInfo, resultIndex: number, wordIndex: number) => {
+    let time = 0
+    if (word.startTime !== undefined) {
+      if (word.startTime.seconds !== undefined) {
+        time += parseFloat(word.startTime.seconds)
+      }
+      if (word.startTime.nanos !== undefined) {
+        time += word.startTime.nanos / 1000000000
+      }
+    }
+
+    this.playerRef.current!.setTime(time)
+
+    this.setState({
+      currentResultIndex: resultIndex,
+      currentWordIndex: wordIndex,
+    })
   }
 
   public render() {
@@ -159,8 +186,6 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
           // Read results
 
           if (transcript.results === undefined) {
-            console.log(transcript.results)
-
             transcript.results = Array<IResult>()
 
             database
@@ -172,10 +197,10 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                   const result = doc.data() as IResult
 
                   transcript.results.push(result)
+                })
 
-                  this.setState({
-                    transcript,
-                  })
+                this.setState({
+                  transcript,
                 })
               })
           }
@@ -195,7 +220,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                       </button>
                     </form>
                   </div>
-                  {Object.values(transcript.results).map((result, i) => {
+                  {transcript.results.map((result, i) => {
                     const startTime = result.startTime || 0
 
                     const formattedStartTime = new Date(startTime * 1000).toISOString().substr(11, 8)
@@ -208,8 +233,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
                         <div key={`result-${i}`} className="result">
                           {result.words.map((word, j) => {
-                            const isCurrentWord = this.state.currentResult === i && this.state.currentWord === j
-                            return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} handleClick={this.setTime} currentTime={this.state.currentTime} />
+                            const isCurrentWord = this.state.currentResultIndex === i && this.state.currentWordIndex === j
+                            return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
                           })}
                         </div>
                       </React.Fragment>

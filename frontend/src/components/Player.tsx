@@ -3,15 +3,13 @@ import ReactGA from "react-ga"
 import secondsToTime from "../secondsToTime"
 
 interface IState {
-  currentTime: number
-  duration: number
   isPlaying: boolean
-  progress: number
+  timer?: NodeJS.Timer
 }
 
 interface IProps {
   fileUrl: string
-  handleTimeUpdate(event: React.ChangeEvent<HTMLAudioElement>): void
+  handleTimeUpdate(currentTime: number): void
 }
 
 class Player extends React.Component<IProps, IState> {
@@ -20,19 +18,13 @@ class Player extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props)
     this.state = {
-      currentTime: 0,
-      duration: 0,
       isPlaying: false,
-      progress: 0,
     }
   }
 
-  public handleDurationChange = (event: React.ChangeEvent<HTMLAudioElement>) => {
-    this.setState({ duration: this.audioRef.current!.duration })
-  }
   public handlePlay = (event: React.FormEvent<HTMLButtonElement>) => {
-    this.audioRef.current!.play()
-    this.setState({ isPlaying: true })
+    this.play()
+
     ReactGA.event({
       action: "Play button pressed",
       category: "Player",
@@ -40,7 +32,10 @@ class Player extends React.Component<IProps, IState> {
   }
   public handlePause = (event: React.FormEvent<HTMLButtonElement>) => {
     this.audioRef.current!.pause()
-    this.setState({ isPlaying: false })
+
+    clearInterval(this.state.timer)
+
+    this.setState({ isPlaying: false, timer: undefined })
     ReactGA.event({
       action: "Pause button pressed",
       category: "Player",
@@ -53,21 +48,24 @@ class Player extends React.Component<IProps, IState> {
       category: "Player",
     })
   }
-  public handleTimeUpdate = (event: React.ChangeEvent<HTMLAudioElement>) => {
-    const currentTime = event.target.currentTime
-    const progress = currentTime / this.audioRef.current!.duration
-    this.setState({ currentTime, progress })
-    this.props.handleTimeUpdate(event)
-  }
   public setTime = (time: number) => {
-    this.audioRef.current!.play()
-    this.setState({ isPlaying: true })
     this.audioRef.current!.currentTime = time
+
+    this.play()
+
+    ReactGA.event({
+      action: "Word selected",
+      category: "Player",
+    })
   }
   public render() {
+    const currentTime = this.audioRef.current && this.audioRef.current.currentTime ? this.audioRef.current.currentTime : 0
+    const duration = this.audioRef.current && this.audioRef.current.duration ? this.audioRef.current.duration : 0
+    const progress = currentTime / duration
+
     return (
       <div>
-        <audio ref={this.audioRef} onDurationChange={this.handleDurationChange} src={this.props.fileUrl} onTimeUpdate={this.handleTimeUpdate} />
+        <audio ref={this.audioRef} onDurationChange={this.handleDurationChange} src={this.props.fileUrl} />
         <div id="player">
           {!this.state.isPlaying ? (
             <button onClick={this.handlePlay}>
@@ -83,24 +81,39 @@ class Player extends React.Component<IProps, IState> {
             </button>
           )}
 
-          <div className="currentTime">{secondsToTime(this.state.currentTime)}</div>
+          <div className="currentTime">{secondsToTime(currentTime)}</div>
           <div className="timer-wrapper">
             <div className="timer-background">
               <div
                 className="timer-current"
                 style={{
-                  transform: `translateX(-${100 - this.state.progress * 100}%)`,
+                  transform: `translateX(-${100 - progress * 100}%)`,
                 }}
               />
             </div>
           </div>
-          <div className="duration">{secondsToTime(this.state.duration)}</div>
+          <div className="duration">{secondsToTime(duration)}</div>
           <div className="volume">
             <input type="range" min="0" max="1" step="0.1" onChange={this.handleVolume} />
           </div>
         </div>
       </div>
     )
+  }
+
+  private play = () => {
+    this.audioRef.current!.play()
+
+    const timer = setInterval(() => {
+      this.handleTimeUpdate()
+    }, 100)
+
+    this.setState({ isPlaying: true, timer })
+  }
+  private handleTimeUpdate = () => {
+    const currentTime = this.audioRef.current!.currentTime
+
+    this.props.handleTimeUpdate(currentTime)
   }
 }
 

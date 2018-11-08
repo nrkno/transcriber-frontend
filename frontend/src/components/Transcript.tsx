@@ -4,6 +4,7 @@ import { RouteComponentProps } from "react-router"
 import { Status, SweetProgressStatus } from "../enums"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWordInfo } from "../interfaces"
+import secondsToTime from "../secondsToTime"
 import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
 import Word from "./Word"
@@ -245,7 +246,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                   {transcript.results.map((result, i) => {
                     const startTime = result.startTime || 0
 
-                    const formattedStartTime = new Date(startTime * 1000).toISOString().substr(11, 8)
+                    const formattedStartTime = secondsToTime(startTime)
 
                     return (
                       <React.Fragment key={i}>

@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import { Link } from "react-router-dom"
 import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 
@@ -53,12 +54,11 @@ class Transcripts extends Component<IProps, IState> {
             this.state.transcripts.map((transcript, index) => {
               const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
               const formattedCreatedAt = createdAt.toLocaleDateString() + " " + createdAt.toLocaleTimeString()
-
               const id = this.state.ids[index]
 
               return (
                 <div className="transcript org-shadow-m" key={id}>
-                  <a href={`/transcripts/${id}`}>
+                  <Link to={`/transcripts/${id}`}>
                     <h2 className="title org-text-l">{transcript.title}</h2>
 
                     <div className="meta">
@@ -76,7 +76,7 @@ class Transcripts extends Component<IProps, IState> {
                         {transcript.audio.duration}
                       </div>
                     </div>
-                  </a>
+                  </Link>
                 </div>
               )
             })}

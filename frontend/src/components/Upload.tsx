@@ -17,10 +17,13 @@ interface IState {
   dropzoneMessage: string
   languageCode: string
   uploadProgress: number
+}
+
+interface IProps {
   user?: firebase.User
 }
 
-class Upload extends React.Component<any, IState> {
+class Upload extends React.Component<IProps, IState> {
   constructor(props: any) {
     super(props)
 
@@ -50,28 +53,17 @@ class Upload extends React.Component<any, IState> {
     }
   }
 
-  public componentWillReceiveProps(nextProps) {
-    console.log("nextProps")
-    console.log(nextProps)
-  }
-
-  public componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log("prevProps")
-    console.log(prevProps)
-    console.log("snapshot")
-    console.log(snapshot)
-  }
-
   public handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     const { file, languageCode } = this.state
 
-    if (file === undefined) {
+    if (file === undefined || this.props.user === undefined) {
       return
     }
 
-    const transcriptRef = database.collection("users/aaaa/transcripts").doc()
+    const transcriptRef = database.collection("/users").doc()
+
     const id = transcriptRef.id
 
     const metadata = {
@@ -112,12 +104,15 @@ class Upload extends React.Component<any, IState> {
         }*/
       },
       () => {
+        const path = `transcripts/${id}`
+
         uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
           database
-            .doc(`transcripts/${id}`)
+            .doc(path)
             .set({
               languageCode,
               name: file.name,
+              ownedBy: this.props.user.uid,
               progress: { status: Status.Analysing },
               timestamps: {
                 analysing: firebase.firestore.FieldValue.serverTimestamp(),
@@ -126,7 +121,7 @@ class Upload extends React.Component<any, IState> {
             })
 
             .then(success => {
-              this.props.history.push(`/transcripts/${id}`)
+              this.props.history.push(path)
             })
             .catch((error: Error) => {
               ReactGA.exception({

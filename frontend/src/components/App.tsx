@@ -30,17 +30,12 @@ class App extends React.Component<any, IState> {
   public async componentDidMount() {
     auth.onAuthStateChanged(user => {
       if (user) {
-        console.log("onAuthStateChanged")
-        console.log(user)
         this.setState({ user })
       }
     })
   }
 
   public render() {
-    console.log("this.state.user")
-    console.log(this.state.user)
-
     return (
       <BrowserRouter>
         <div className="container">
@@ -49,7 +44,7 @@ class App extends React.Component<any, IState> {
             <div className="user">{this.state.user !== undefined ? this.state.user.displayName : ""}</div>
           </header>
           <Switch>
-            <Route exact={true} path="/" component={Upload} props={this.state.user} />
+            <Route exact={true} path="/" render={props => <Upload {...props} user={this.state.user} />} />
             <Route path="/transcripts/:id" component={Transcript} />
           </Switch>
         </div>

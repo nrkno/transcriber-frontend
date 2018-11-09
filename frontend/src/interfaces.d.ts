@@ -5,6 +5,7 @@ interface ITranscript {
   languageCode?: string
   url?: string
   name?: string
+  ownedBy: string
   results?: Array<IResult>
   error?: any
   progress?: {

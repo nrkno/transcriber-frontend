@@ -1,26 +1,32 @@
 import admin from "firebase-admin"
-
 import { Status } from "./enums"
 
 interface ITranscript {
-  durationInSeconds?: number
-  languageCode?: string
-  url?: string
-  name?: string
-  results?: Array<IResult>
+  audio?: IAudio
+  createdAt?: Date | admin.firestore.FieldValue
   error?: any
+  languageCode?: string
+  ownedBy?: string
   progress?: {
     percent?: number | admin.firestore.FieldValue
     status?: Status
   }
+  results?: Array<IResult>
   timestamps?: {
-    analysing?: string
-    transcoding?: string
-    transcribing?: string
-    saving?: string
-    success?: string
-    failed?: string
+    analysing?: Date | admin.firestore.FieldValue
+    transcoding?: Date | admin.firestore.FieldValue
+    transcribing?: Date | admin.firestore.FieldValue
+    saving?: Date | admin.firestore.FieldValue
+    success?: Date | admin.firestore.FieldValue
+    failed?: Date | admin.firestore.FieldValue
   }
+  title?: string
+}
+
+interface IAudio {
+  duration?: number
+  type?: string
+  url?: string
 }
 
 interface IResult {

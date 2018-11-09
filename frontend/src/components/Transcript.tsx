@@ -233,7 +233,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
               <main id="transcript">
                 <div className="results">
                   <div className="meta">
-                    <h1 className="org-text-xl">{transcript.name}</h1>
+                    <h1 className="org-text-xl">{transcript.title}</h1>
                     <form onSubmit={this.handleExportToWord}>
                       <button className="org-btn" type="submit">
                         <svg width="20" height="20" focusable="false" aria-hidden="true">
@@ -265,7 +265,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                   })}
                 </div>
               </main>
-              <Player ref={this.playerRef} fileUrl={transcript.url} handleTimeUpdate={this.handleTimeUpdate} />
+              <Player ref={this.playerRef} fileUrl={transcript.audio.url} handleTimeUpdate={this.handleTimeUpdate} />
             </>
           )
 

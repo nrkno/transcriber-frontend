@@ -11,6 +11,7 @@ import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
 import { Status } from "../enums"
 import { database, storage } from "../firebaseApp"
+import { ITranscript } from "../interfaces"
 
 interface IState {
   file?: File
@@ -49,6 +50,7 @@ class Upload extends React.Component<IProps, IState> {
     } else {
       // Take the first file
       const [file] = acceptedFiles
+
       this.setState({ file, dropzoneMessage: file.name })
     }
   }
@@ -104,22 +106,29 @@ class Upload extends React.Component<IProps, IState> {
         }*/
       },
       () => {
-        const path = `transcripts/${id}`
-
         uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+          const title = file.name.substr(0, file.name.lastIndexOf(".")) || file.name
+
+          const transcript: ITranscript = {
+            audio: {
+              type: file.type,
+              url: downloadURL,
+            },
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            languageCode,
+            ownedBy: this.props.user.uid,
+            progress: { status: Status.Analysing },
+            timestamps: {
+              analysing: firebase.firestore.FieldValue.serverTimestamp(),
+            },
+            title,
+          }
+
+          const path = `transcripts/${id}`
+
           database
             .doc(path)
-            .set({
-              languageCode,
-              name: file.name,
-              ownedBy: this.props.user.uid,
-              progress: { status: Status.Analysing },
-              timestamps: {
-                analysing: firebase.firestore.FieldValue.serverTimestamp(),
-              },
-              url: downloadURL,
-            })
-
+            .set(transcript)
             .then(success => {
               this.props.history.push(path)
             })

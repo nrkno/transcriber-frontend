@@ -16,7 +16,7 @@ import { IWord } from "../interfaces"
 
 test("Set duration in seconds", async () => {
   expect.assertions(1)
-  await database.setDurationInSeconds("test", 1234)
+  await database.setDuration("test", 1234)
   const dataSnapshot = await admin
     .database()
     .ref("transcripts/test/audioFile/durationInSeconds")

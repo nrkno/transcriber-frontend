@@ -55,8 +55,8 @@ const database = (() => {
     return db.collection(`transcripts/${id}/results`).add(data)
   }
 
-  const setDurationInSeconds = async (id: string, seconds: number) => {
-    const transcript: ITranscript = { durationInSeconds: seconds }
+  const setDuration = async (id: string, seconds: number) => {
+    const transcript: ITranscript = { audio: { duration: seconds } }
 
     return updateTranscript(id, transcript)
   }
@@ -97,7 +97,7 @@ const database = (() => {
     return transcript.progress.status
   }
 
-  return { addResult, errorOccured, setDurationInSeconds, setStatus, setPercent, getStatus, getResults }
+  return { addResult, errorOccured, setDuration, setStatus, setPercent, getStatus, getResults }
 })()
 
 export default database

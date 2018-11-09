@@ -49,7 +49,7 @@ test("show loading text", async () => {
 
   const { getByText } = render(<Transcript match={match} location={mock} history={mock} />)
 
-  await waitForElement(() => getByText("Laster inn transkripsjon"))
+  await waitForElement(() => getByText("Laster"))
 })
 
 test("show transcription not found on invalid id", async () => {

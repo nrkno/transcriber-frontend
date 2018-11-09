@@ -31,9 +31,9 @@ async function reencodeToMono(tempFilePath: string, targetTempFilePath: string, 
       })
       .on("codecData", async data => {
         // Saving duration to database
-        const durationInSeconds = hoursMinutesSecondsToSeconds(data.duration)
+        const duration = hoursMinutesSecondsToSeconds(data.duration)
         try {
-          await database.setDurationInSeconds(id, durationInSeconds)
+          await database.setDuration(id, duration)
         } catch (error) {
           console.log("Error in transcoding on('codecData')")
           console.error(error)

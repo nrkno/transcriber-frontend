@@ -1,25 +1,31 @@
 import { Status } from "./enums"
 
 interface ITranscript {
-  durationInSeconds?: number
-  languageCode?: string
-  url?: string
-  name?: string
-  ownedBy: string
-  results?: Array<IResult>
+  audio: IAudio
+  createdAt: Date | firebase.firestore.FieldValue
   error?: any
+  languageCode: string
+  ownedBy: string
   progress?: {
     percent?: number
     status?: Status
   }
-  timestamps?: {
-    analysing?: string
-    transcoding?: string
-    transcribing?: string
-    saving?: string
-    success?: string
-    failed?: string
+  results?: Array<IResult>
+  timestamps: {
+    analysing?: Date | firebase.firestore.FieldValue
+    transcoding?: Date | firebase.firestore.FieldValue
+    transcribing?: Date | firebase.firestore.FieldValue
+    saving?: Date | firebase.firestore.FieldValue
+    success?: Date | firebase.firestore.FieldValue
+    failed?: Date | firebase.firestore.FieldValue
   }
+  title: string
+}
+
+interface IAudio {
+  duration?: number
+  type: string
+  url: string
 }
 
 interface IResult {

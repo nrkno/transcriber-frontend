@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Switch } from "react-router-dom"
 import "../css/App.css"
 import { auth } from "../firebaseApp"
 import Transcript from "./Transcript"
+import Transcripts from "./Transcripts"
 import Upload from "./Upload"
 
 ReactGA.initialize(process.env.GOOGLE_ANALYTICS_PROPERTY_ID, {
@@ -44,7 +45,8 @@ class App extends React.Component<any, IState> {
             <div className="user">{this.state.user !== undefined ? this.state.user.displayName : ""}</div>
           </header>
           <Switch>
-            <Route exact={true} path="/" render={props => <Upload {...props} user={this.state.user} />} />
+            <Route path="/" exact={true} render={props => <Upload {...props} user={this.state.user} />} />
+            <Route path="/transcripts" exact={true} render={props => <Transcripts {...props} user={this.state.user} />} />
             <Route path="/transcripts/:id" component={Transcript} />
           </Switch>
         </div>

@@ -55,6 +55,7 @@ class Transcripts extends Component<IProps, IState> {
               const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
               const formattedCreatedAt = createdAt.toLocaleDateString() + " " + createdAt.toLocaleTimeString()
               const id = this.state.ids[index]
+              const duration = transcript.audio.duration / 60
 
               return (
                 <div className="transcript org-shadow-m" key={id}>
@@ -73,7 +74,7 @@ class Transcripts extends Component<IProps, IState> {
                         <svg width="20" height="20" focusable="false" aria-hidden="true">
                           <use xlinkHref={"#icon-klokke"} />
                         </svg>
-                        {transcript.audio.duration}
+                        {duration} minutter
                       </div>
                     </div>
                   </Link>

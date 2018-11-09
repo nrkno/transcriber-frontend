@@ -2,7 +2,7 @@ import { Status } from "./enums"
 
 interface ITranscript {
   audio: IAudio
-  createdAt: Date | firebase.firestore.FieldValue
+  createdAt: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   error?: any
   languageCode: string
   ownedBy: string
@@ -12,12 +12,12 @@ interface ITranscript {
   }
   results?: Array<IResult>
   timestamps: {
-    analysing?: Date | firebase.firestore.FieldValue
-    transcoding?: Date | firebase.firestore.FieldValue
-    transcribing?: Date | firebase.firestore.FieldValue
-    saving?: Date | firebase.firestore.FieldValue
-    success?: Date | firebase.firestore.FieldValue
-    failed?: Date | firebase.firestore.FieldValue
+    analysing?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+    transcoding?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+    transcribing?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+    saving?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+    success?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+    failed?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   }
   title: string
 }

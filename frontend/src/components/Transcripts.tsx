@@ -8,6 +8,7 @@ interface IProps {
 
 interface IState {
   transcripts?: ITranscript[]
+  ids?: string[]
 }
 
 class Transcripts extends Component<IProps, IState> {
@@ -23,17 +24,18 @@ class Transcripts extends Component<IProps, IState> {
         .get()
         .then(querySnapshot => {
           const transcripts = Array<ITranscript>()
+          const ids = Array<string>()
 
           querySnapshot.forEach(doc => {
             // doc.data() is never undefined for query doc snapshots
             const transcript = doc.data() as ITranscript
 
             transcripts.push(transcript)
-
-            console.log(doc.id, " => ", doc.data())
+            ids.push(doc.id)
           })
 
           this.setState({
+            ids,
             transcripts,
           })
 
@@ -43,23 +45,43 @@ class Transcripts extends Component<IProps, IState> {
   }
 
   public render() {
-    console.log("this.state.transcripts")
-    console.log(this.state.transcripts)
-
     return (
-      <div>
-        Transckrips
-        <ul>
+      <main id="transcripts">
+        <div className="transcripts">
           {this.state.transcripts !== undefined &&
-            this.state.transcripts.map(transcript => {
+            this.state.ids !== undefined &&
+            this.state.transcripts.map((transcript, index) => {
+              const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
+              const formattedCreatedAt = createdAt.toLocaleDateString() + " " + createdAt.toLocaleTimeString()
+
+              const id = this.state.ids[index]
+
               return (
-                <li>
-                  <a href="">{transcript.title}</a>
-                </li>
+                <div className="transcript org-shadow-m" key={id}>
+                  <a href={`/transcripts/${id}`}>
+                    <h2 className="title org-text-l">{transcript.title}</h2>
+
+                    <div className="meta">
+                      <div className="date org-label small">
+                        <svg width="20" height="20" focusable="false" aria-hidden="true">
+                          <use xlinkHref={"#icon-calendar-blank"} />
+                        </svg>{" "}
+                        {formattedCreatedAt}
+                      </div>
+
+                      <div className="duration org-label small">
+                        <svg width="20" height="20" focusable="false" aria-hidden="true">
+                          <use xlinkHref={"#icon-klokke"} />
+                        </svg>
+                        {transcript.audio.duration}
+                      </div>
+                    </div>
+                  </a>
+                </div>
               )
             })}
-        </ul>
-      </div>
+        </div>
+      </main>
     )
   }
 }

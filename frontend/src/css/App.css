@@ -34,6 +34,13 @@ main {
   align-content: start;
 }
 
+main#transcripts {
+  margin: 40px;
+  display: grid;
+  grid-template-columns: minmax(auto, 1260px);
+  justify-content: center;
+}
+
 /* Progress */
 main#progress {
   align-content: center;
@@ -65,6 +72,39 @@ main#progress {
   100% {
     text-shadow: 0.25em 0 0 black, 0.5em 0 0 black;
   }
+}
+
+/* Transcripts */
+
+.transcripts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-rows: 150px;
+  grid-gap: 20px;
+}
+
+.transcripts .transcript {
+  padding: 20px;
+  display: grid;
+  grid-gap: 10px;
+  grid-template-rows: auto auto 1fr;
+}
+
+.transcripts .transcript .meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-flow: column;
+}
+
+.transcripts .transcript .text {
+  height: 50;
+  text-overflow: hidden;
+}
+
+.transcript .results {
+  display: grid;
+  grid-template-columns: 75px 1fr;
+  grid-gap: 10px;
 }
 
 /* Transcript */

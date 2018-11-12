@@ -54,15 +54,17 @@ class Transcripts extends Component<IProps, IState> {
             this.state.ids !== undefined &&
             this.state.transcripts.map((transcript, index) => {
               const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
-              const formattedCreatedAt = createdAt.toLocaleDateString() + " " + createdAt.toLocaleTimeString()
+              const formattedCreatedAt = moment(createdAt)
+                .locale("nb")
+                .calendar()
               const id = this.state.ids[index]
               const duration = moment.duration(transcript.audio.duration * 1000)
 
               return (
                 <div className="transcript org-shadow-m" key={id}>
-                  <Link to={`/transcripts/${id}`}>
+                  <Link style={{ textDecoration: "none", padding: "20px", display: "block", color: "black" }} to={`/transcripts/${id}`}>
                     <h2 className="title org-text-l">{transcript.title}</h2>
-
+                    <hr />
                     <div className="meta">
                       <div className="date org-label small">
                         <svg width="20" height="20" focusable="false" aria-hidden="true">

@@ -1,3 +1,4 @@
+import moment from "moment"
 import React, { Component } from "react"
 import { Link } from "react-router-dom"
 import { database } from "../firebaseApp"
@@ -55,7 +56,7 @@ class Transcripts extends Component<IProps, IState> {
               const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
               const formattedCreatedAt = createdAt.toLocaleDateString() + " " + createdAt.toLocaleTimeString()
               const id = this.state.ids[index]
-              const duration = transcript.audio.duration / 60
+              const duration = moment.duration(transcript.audio.duration * 1000)
 
               return (
                 <div className="transcript org-shadow-m" key={id}>
@@ -74,7 +75,9 @@ class Transcripts extends Component<IProps, IState> {
                         <svg width="20" height="20" focusable="false" aria-hidden="true">
                           <use xlinkHref={"#icon-klokke"} />
                         </svg>
-                        {duration} minutter
+                        {duration.hours() > 0 ? `${duration.hours()} t` : ""}
+                        {duration.minutes() > 0 ? `${duration.minutes()} m` : ""}
+                        {duration.hours() === 0 && duration.minutes() === 0 ? `${duration.seconds()} s` : ""}
                       </div>
                     </div>
                   </Link>

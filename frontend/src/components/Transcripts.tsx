@@ -1,8 +1,11 @@
 import moment from "moment"
 import React, { Component } from "react"
+import Dropzone from "react-dropzone"
 import { Link } from "react-router-dom"
+import { Status } from "../enums"
 import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
+import InProgress from "./InProgress"
 
 interface IProps {
   user?: firebase.User
@@ -10,35 +13,46 @@ interface IProps {
 
 interface IState {
   transcripts?: ITranscript[]
-  ids?: string[]
+  transcriptsInProgressIds?: string[]
+  transcriptIds?: string[]
+  modalIsOpen: boolean
 }
 
 class Transcripts extends Component<IProps, IState> {
   constructor(props: IProps) {
     super(props)
-    this.state = {}
+    this.state = { modalIsOpen: false }
   }
   public componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.user !== undefined && this.state.transcripts === undefined) {
       database
         .collection("/transcripts")
         .where("ownedBy", "==", this.props.user.uid)
+        .orderBy("createdAt", "desc")
         .get()
         .then(querySnapshot => {
           const transcripts = Array<ITranscript>()
-          const ids = Array<string>()
+          const transcriptsInProgressIds = Array<string>()
+          const transcriptIds = Array<string>()
 
           querySnapshot.forEach(doc => {
             // doc.data() is never undefined for query doc snapshots
             const transcript = doc.data() as ITranscript
 
-            transcripts.push(transcript)
-            ids.push(doc.id)
+            if (transcript.progress.status === Status.Success) {
+              transcripts.push(transcript)
+              transcriptIds.push(doc.id)
+              console.log("success", doc.id)
+            } else {
+              transcriptsInProgressIds.push(doc.id)
+              console.log("In progress", doc.id)
+            }
           })
 
           this.setState({
-            ids,
+            transcriptIds,
             transcripts,
+            transcriptsInProgressIds,
           })
 
           console.log(querySnapshot.docs)
@@ -49,43 +63,75 @@ class Transcripts extends Component<IProps, IState> {
   public render() {
     return (
       <main id="transcripts">
+        <div className="create">
+          <h2 className=".org-text-l">Ny transkripsjon</h2>
+
+          <Dropzone accept="audio/*" style={{ position: "relative", width: "100%", height: "100px", borderWidth: "2px", borderColor: "rgb(102, 102, 102)", borderStyle: "dashed", borderRadius: "5px" }}>
+            <div
+              style={{
+                textAlign: "center",
+                textJustify: "center",
+              }}
+            >
+              Trykk for å velge, eller slipp lydfil her
+            </div>
+          </Dropzone>
+
+          <form action="">
+            <label className="org-label org-prs">
+              Språk
+              <select>
+                <option selected={true}>Norsk</option>
+                <option>Engelsk</option>
+              </select>
+            </label>
+            <button className="org-btn org-btn--primary" disabled={this.state.file === undefined || this.props.user === undefined} type="submit">
+              Last opp
+            </button>
+          </form>
+        </div>
+
         <div className="transcripts">
-          {this.state.transcripts !== undefined &&
-            this.state.ids !== undefined &&
-            this.state.transcripts.map((transcript, index) => {
-              const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
-              const formattedCreatedAt = moment(createdAt)
-                .locale("nb")
-                .calendar()
-              const id = this.state.ids[index]
-              const duration = moment.duration(transcript.audio.duration * 1000)
+          <h2 className=".org-text-l">Transkripsjoner</h2>
+          {/* Render transcripts in progress */}
+          {this.state.transcriptsInProgressIds &&
+            this.state.transcriptsInProgressIds.map((id, index) => {
+              return <InProgress id={id} key={id} />
+            })}
+          <table className="org-table">
+            <thead>
+              <tr>
+                <th>Navn</th>
+                <th>Dato</th>
+                <th>Lengde</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Inserting transcripts from Firestore */}
+              {this.state.transcripts !== undefined &&
+                this.state.transcriptIds !== undefined &&
+                this.state.transcripts.map((transcript, index) => {
+                  const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
+                  const formattedCreatedAt = moment(createdAt)
+                    .locale("nb")
+                    .calendar()
+                  const id = this.state.transcriptIds[index]
+                  const duration = moment.duration(transcript.audio.duration * 1000)
 
-              return (
-                <div className="transcript org-shadow-m" key={id}>
-                  <Link style={{ textDecoration: "none", padding: "20px", display: "block", color: "black" }} to={`/transcripts/${id}`}>
-                    <h2 className="title org-text-l">{transcript.title}</h2>
-                    <hr />
-                    <div className="meta">
-                      <div className="date org-label small">
-                        <svg width="20" height="20" focusable="false" aria-hidden="true">
-                          <use xlinkHref={"#icon-calendar-blank"} />
-                        </svg>{" "}
-                        {formattedCreatedAt}
-                      </div>
-
-                      <div className="duration org-label small">
-                        <svg width="20" height="20" focusable="false" aria-hidden="true">
-                          <use xlinkHref={"#icon-klokke"} />
-                        </svg>
-                        {duration.hours() > 0 ? `${duration.hours()} t` : ""}
+                  return (
+                    <tr key={id}>
+                      <td>{transcript.title}</td>
+                      <td>{formattedCreatedAt}</td>
+                      <td>
+                        {duration.hours() > 0 ? `${duration.hours()} t ` : ""}
                         {duration.minutes() > 0 ? `${duration.minutes()} m` : ""}
                         {duration.hours() === 0 && duration.minutes() === 0 ? `${duration.seconds()} s` : ""}
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              )
-            })}
+                      </td>
+                    </tr>
+                  )
+                })}
+            </tbody>
+          </table>
         </div>
       </main>
     )

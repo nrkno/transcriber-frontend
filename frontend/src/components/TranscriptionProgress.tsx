@@ -13,7 +13,6 @@ interface IProps {
 interface IProgressProps {
   percent: number
   status: SweetProgressStatus | undefined
-  type: string
   theme?: {
     active: {
       symbol: string
@@ -24,12 +23,10 @@ interface IProgressProps {
 
 const TranscriptionProgress = ({ message, percent = 100, status, symbol }: IProps) => {
   // Show animating dots if there is progress going on
-  const className = status === SweetProgressStatus.Active ? "loading" : ""
 
   const props: IProgressProps = {
     percent,
     status,
-    type: "circle",
   }
 
   if (symbol !== undefined) {
@@ -38,8 +35,8 @@ const TranscriptionProgress = ({ message, percent = 100, status, symbol }: IProp
 
   return (
     <main id="progress">
-      <div className="dropForm">
-        <p className={className}>{message}</p>
+      <div>
+        <p>{message}</p>
         <Progress {...props} />
       </div>
     </main>

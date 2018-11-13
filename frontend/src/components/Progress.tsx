@@ -5,23 +5,13 @@ import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 import TranscriptionProgress from "./TranscriptionProgress"
 
-interface IState {
-  transcript?: ITranscript
-}
-
 interface IProps {
-  id: string
+  transcript: ITranscript
 }
 
-class Progress extends React.Component<IProps, IState> {
-  constructor(props: IProps) {
-    super(props)
-    this.state = {
-      transcript: undefined,
-    }
-  }
-  public componentDidUpdate(_prevProps: any, prevState: IState /*, _snapshot*/) {
-    if (this.state.transcript && this.state.transcript.progress && this.state.transcript.progress.status) {
+class Progress extends React.Component<IProps, any> {
+  public componentDidUpdate(_prevProps: any, prevState: any /*, _snapshot*/) {
+    /* if (this.state.transcript && this.state.transcript.progress && this.state.transcript.progress.status) {
       // Log errors
       if (this.state.transcript.progress.status === Status.Failed && this.state.transcript.error) {
         ReactGA.exception({
@@ -38,27 +28,18 @@ class Progress extends React.Component<IProps, IState> {
         })
       }
     }
-  }
-
-  public async componentDidMount() {
-    database.doc(`transcripts/${this.props.id}`).onSnapshot(documentSnapshot => {
-      const transcript = documentSnapshot.data() as ITranscript
-
-      this.setState({
-        transcript,
-      })
-    })
+    */
   }
 
   public render() {
-    const transcript = this.state.transcript
+    const transcript = this.props.transcript
 
     if (transcript === undefined || transcript.progress === undefined || transcript.progress.status === Status.Success) {
       return null
     }
 
     return (
-      <div className="progress org-shadow-s org-color-shade" key={this.props.id}>
+      <div className="progress org-shadow-s org-color-shade">
         {(() => {
           const progress = transcript.progress
 

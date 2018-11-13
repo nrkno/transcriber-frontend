@@ -15,7 +15,7 @@ import { ITranscript } from "../interfaces"
 
 interface IState {
   file?: File
-  dropzoneMessage: string
+  dropzoneMessage?: string
   languageCode: string
   uploadProgress: number
 }
@@ -29,7 +29,6 @@ class Upload extends React.Component<IProps, IState> {
     super(props)
 
     this.state = {
-      dropzoneMessage: "Klikk for å velge, eller slipp lydfil her",
       file: undefined,
       languageCode: "nb-NO",
       uploadProgress: 0,
@@ -124,13 +123,17 @@ class Upload extends React.Component<IProps, IState> {
             title,
           }
 
-          const path = `transcripts/${id}`
-
           database
-            .doc(path)
+            .doc(`transcripts/${id}`)
             .set(transcript)
             .then(success => {
-              this.props.history.push(path)
+              // Reset state
+              this.setState({
+                dropzoneMessage: undefined,
+                file: undefined,
+                languageCode: "nb-NO",
+                uploadProgress: 0,
+              })
             })
             .catch((error: Error) => {
               ReactGA.exception({
@@ -144,36 +147,37 @@ class Upload extends React.Component<IProps, IState> {
   }
 
   public render() {
-    console.log("this.props.user")
-    console.log(this.props.user)
-
-    if (this.state.uploadProgress === 0) {
+    if (this.state.uploadProgress === 0 || this.state.uploadProgress === 100) {
       return (
-        <main id="progress">
+        <div className="create">
+          <h2 className="org-text-xl">Ny transkripsjon</h2>
           <form className="dropForm" onSubmit={this.handleSubmit}>
-            <p>Last opp lydfil</p>
-
-            <Dropzone
-              accept="audio/*"
-              style={{
-                border: "10px solid #efefef",
-                borderRadius: "50%",
-                height: "132px",
-                width: "132px",
-              }}
-              onDrop={this.handleFileDrop}
-            >
-              <div
+            <label className="org-label">
+              Lydfil
+              <Dropzone
+                accept="audio/*"
                 style={{
-                  marginTop: "50%",
-                  padding: "0 10px",
-                  textAlign: "center",
-                  transform: "translateY(-50%)",
+                  display: "grid",
+                  justifyContent: "center",
+                  alignContent: "center",
+                  position: "relative",
+                  width: "100%",
+                  height: "100px",
+                  borderWidth: "2px",
+                  borderColor: "rgb(102, 102, 102)",
+                  borderStyle: "dashed",
+                  borderRadius: "5px",
                 }}
+                onDrop={this.handleFileDrop}
               >
-                {this.state.dropzoneMessage}
-              </div>
-            </Dropzone>
+                <div>
+                  <svg width="20" height="20" focusable="false" aria-hidden="true">
+                    <use xlinkHref="#icon-lyd" />
+                  </svg>
+                  {this.state.dropzoneMessage}
+                </div>
+              </Dropzone>
+            </label>
             <label className="org-label">
               Språk
               <select data-testid="languages" value={this.state.languageCode} onChange={this.handleLanguageChange}>
@@ -185,19 +189,19 @@ class Upload extends React.Component<IProps, IState> {
               Last opp
             </button>
           </form>
+        </div>
+      )
+    } else {
+      const status = this.state.uploadProgress < 100 ? "active" : "success"
+      return (
+        <main id="progress">
+          <div className="dropForm">
+            <p>Laster opp</p>
+            <Progress type="circle" percent={this.state.uploadProgress} status={status} />
+          </div>
         </main>
       )
     }
-
-    const status = this.state.uploadProgress < 100 ? "active" : "success"
-    return (
-      <main id="progress">
-        <div className="dropForm">
-          <p>Laster opp</p>
-          <Progress type="circle" percent={this.state.uploadProgress} status={status} />
-        </div>
-      </main>
-    )
   }
 }
 

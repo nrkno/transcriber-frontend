@@ -6,6 +6,7 @@ import { Status } from "../enums"
 import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 import Progress from "./Progress"
+import Upload from "./Upload"
 
 interface IProps {
   user?: firebase.User
@@ -53,33 +54,7 @@ class Transcripts extends Component<IProps, IState> {
   public render() {
     return (
       <main id="transcripts">
-        <div className="create">
-          <h2 className="org-text-xl">Ny transkripsjon</h2>
-
-          <Dropzone accept="audio/*" style={{ position: "relative", width: "100%", height: "100px", borderWidth: "2px", borderColor: "rgb(102, 102, 102)", borderStyle: "dashed", borderRadius: "5px" }}>
-            <div
-              style={{
-                textAlign: "center",
-                textJustify: "center",
-              }}
-            >
-              Trykk for å velge, eller slipp lydfil her
-            </div>
-          </Dropzone>
-
-          <form action="">
-            <label className="org-label org-prs">
-              Språk
-              <select>
-                <option selected={true}>Norsk</option>
-                <option>Engelsk</option>
-              </select>
-            </label>
-            <button className="org-btn org-btn--primary" disabled={this.state.file === undefined || this.props.user === undefined} type="submit">
-              Last opp
-            </button>
-          </form>
-        </div>
+        <Upload user={this.props.user} />
 
         <div className="transcripts">
           <h2 className="org-text-xl">Transkripsjoner</h2>

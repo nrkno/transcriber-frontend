@@ -90,7 +90,9 @@ class Transcripts extends Component<IProps, IState> {
 
                     return (
                       <tr key={id}>
-                        <td>{transcript.title}</td>
+                        <td>
+                          <Link to={`transcripts/${id}`}>{transcript.title} </Link>
+                        </td>
                         <td>{formattedCreatedAt}</td>
                         <td>
                           {duration.hours() > 0 ? `${duration.hours()} t ` : ""}

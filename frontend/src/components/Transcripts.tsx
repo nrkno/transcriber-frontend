@@ -1,6 +1,5 @@
 import moment from "moment"
 import React, { Component } from "react"
-import Dropzone from "react-dropzone"
 import { Link } from "react-router-dom"
 import { Status } from "../enums"
 import { database } from "../firebaseApp"
@@ -15,13 +14,12 @@ interface IProps {
 interface IState {
   transcripts?: ITranscript[]
   transcriptIds?: string[]
-  modalIsOpen: boolean
 }
 
 class Transcripts extends Component<IProps, IState> {
   constructor(props: IProps) {
     super(props)
-    this.state = { modalIsOpen: false }
+    this.state = {}
   }
   public componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.user !== undefined && this.state.transcripts === undefined) {
@@ -45,8 +43,6 @@ class Transcripts extends Component<IProps, IState> {
             transcriptIds,
             transcripts,
           })
-
-          console.log(querySnapshot.docs)
         })
     }
   }
@@ -54,8 +50,6 @@ class Transcripts extends Component<IProps, IState> {
   public render() {
     return (
       <main id="transcripts">
-        <Upload user={this.props.user} />
-
         <div className="transcripts">
           <h2 className="org-text-xl">Transkripsjoner</h2>
 
@@ -105,6 +99,8 @@ class Transcripts extends Component<IProps, IState> {
             </tbody>
           </table>
         </div>
+
+        <Upload user={this.props.user} />
       </main>
     )
   }

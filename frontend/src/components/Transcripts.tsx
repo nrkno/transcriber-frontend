@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 import { Status } from "../enums"
 import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
-import InProgress from "./InProgress"
+import Progress from "./Progress"
 
 interface IProps {
   user?: firebase.User
@@ -13,7 +13,7 @@ interface IProps {
 
 interface IState {
   transcripts?: ITranscript[]
-  transcriptsInProgressIds?: string[]
+  transcriptsProgressIds?: string[]
   transcriptIds?: string[]
   modalIsOpen: boolean
 }
@@ -29,10 +29,9 @@ class Transcripts extends Component<IProps, IState> {
         .collection("/transcripts")
         .where("ownedBy", "==", this.props.user.uid)
         .orderBy("createdAt", "desc")
-        .get()
-        .then(querySnapshot => {
+        .onSnapshot(querySnapshot => {
           const transcripts = Array<ITranscript>()
-          const transcriptsInProgressIds = Array<string>()
+          const transcriptsProgressIds = Array<string>()
           const transcriptIds = Array<string>()
 
           querySnapshot.forEach(doc => {
@@ -44,7 +43,7 @@ class Transcripts extends Component<IProps, IState> {
               transcriptIds.push(doc.id)
               console.log("success", doc.id)
             } else {
-              transcriptsInProgressIds.push(doc.id)
+              transcriptsProgressIds.push(doc.id)
               console.log("In progress", doc.id)
             }
           })
@@ -52,7 +51,7 @@ class Transcripts extends Component<IProps, IState> {
           this.setState({
             transcriptIds,
             transcripts,
-            transcriptsInProgressIds,
+            transcriptsProgressIds,
           })
 
           console.log(querySnapshot.docs)
@@ -64,7 +63,7 @@ class Transcripts extends Component<IProps, IState> {
     return (
       <main id="transcripts">
         <div className="create">
-          <h2 className=".org-text-l">Ny transkripsjon</h2>
+          <h2 className="org-text-xl">Ny transkripsjon</h2>
 
           <Dropzone accept="audio/*" style={{ position: "relative", width: "100%", height: "100px", borderWidth: "2px", borderColor: "rgb(102, 102, 102)", borderStyle: "dashed", borderRadius: "5px" }}>
             <div
@@ -92,11 +91,11 @@ class Transcripts extends Component<IProps, IState> {
         </div>
 
         <div className="transcripts">
-          <h2 className=".org-text-l">Transkripsjoner</h2>
+          <h2 className="org-text-xl">Transkripsjoner</h2>
           {/* Render transcripts in progress */}
-          {this.state.transcriptsInProgressIds &&
-            this.state.transcriptsInProgressIds.map((id, index) => {
-              return <InProgress id={id} key={id} />
+          {this.state.transcriptsProgressIds &&
+            this.state.transcriptsProgressIds.map((id, index) => {
+              return <Progress id={id} key={id} />
             })}
           <table className="org-table">
             <thead>

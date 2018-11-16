@@ -177,7 +177,11 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
     // Loading from Firebase
     if (transcript === undefined) {
-      return <TranscriptionProgress message={"Laster inn transkripsjon"} status={SweetProgressStatus.Active} symbol={"⏳"} />
+      return (
+        <main id="loading">
+          <TranscriptionProgress message={"Laster"} status={SweetProgressStatus.Active} symbol={"⏳"} />
+        </main>
+      )
     }
     // Transcription not found
     else if (transcript === null) {
@@ -185,23 +189,43 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         action: "Not found",
         category: "Transcription",
       })
-      return <TranscriptionProgress message={"Fant ikke transkripsjonen"} status={SweetProgressStatus.Error} />
+      return (
+        <main id="loading">
+          <TranscriptionProgress message={"Fant ikke transkripsjonen"} status={SweetProgressStatus.Error} />
+        </main>
+      )
     } else {
       const progress = transcript.progress!
 
       switch (progress.status) {
         case Status.Analysing:
           // The file has been uploaded, and we're waiting for the Cloud function to start
-          return <TranscriptionProgress message={"Analyserer"} status={SweetProgressStatus.Active} symbol={"🔍"} />
+          return (
+            <main id="loading">
+              <TranscriptionProgress message={"Analyserer"} status={SweetProgressStatus.Active} symbol={"🔍"} />
+            </main>
+          )
 
         case Status.Transcoding:
-          return <TranscriptionProgress message={"Transkoder"} status={SweetProgressStatus.Active} symbol={"🤖"} />
+          return (
+            <main id="loading">
+              <TranscriptionProgress message={"Transkoder"} status={SweetProgressStatus.Active} symbol={"🤖"} />
+            </main>
+          )
 
         case Status.Transcribing:
-          return <TranscriptionProgress message={"Transkriberer"} status={SweetProgressStatus.Active} percent={progress.percent} />
+          return (
+            <main id="loading">
+              <TranscriptionProgress message={"Transkriberer"} status={SweetProgressStatus.Active} percent={progress.percent} />
+            </main>
+          )
 
         case Status.Saving:
-          return <TranscriptionProgress message={"Lagrer transkripsjon"} percent={progress.percent} />
+          return (
+            <main id="loading">
+              <TranscriptionProgress message={"Lagrer transkripsjon"} percent={progress.percent} />
+            </main>
+          )
 
         case Status.Success:
           // We have a transcription , show it

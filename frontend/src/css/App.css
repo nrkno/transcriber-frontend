@@ -88,6 +88,15 @@ main#transcripts {
   animation: dots 1s steps(5, end) infinite;
 }
 
+/* Loading */
+
+main#loading {
+  display: grid;
+  justify-content: center;
+  justify-items: center;
+  align-content: center;
+}
+
 /* Transcript */
 
 .results .meta {
@@ -167,6 +176,8 @@ main#transcripts {
 .currentTime,
 .duration {
   padding: 0 4px;
+  display: grid;
+  align-content: center;
 }
 
 #player .volume {

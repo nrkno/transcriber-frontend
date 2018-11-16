@@ -1,9 +1,10 @@
 import createHistory from "history/createBrowserHistory"
 import * as React from "react"
 import ReactGA from "react-ga"
-import { BrowserRouter, Route, Switch } from "react-router-dom"
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom"
 import "../css/App.css"
 import { auth } from "../firebaseApp"
+import Login from "./Login"
 import Transcript from "./Transcript"
 import Transcripts from "./Transcripts"
 
@@ -30,7 +31,11 @@ class App extends React.Component<any, IState> {
   public async componentDidMount() {
     auth.onAuthStateChanged(user => {
       if (user) {
+        console.log("HEI")
         this.setState({ user })
+      } else {
+        console.log("hoi")
+        history.push("login")
       }
     })
   }
@@ -55,11 +60,12 @@ class App extends React.Component<any, IState> {
               </g>
             </svg>
             <h1 className="org-text-l">Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</h1>
-            <div className="user">{this.state.user !== undefined ? this.state.user.displayName : ""}</div>
+            <div className="user">{this.state.user !== undefined ? this.state.user.displayName : "Login"}</div>
           </header>
           <Switch>
             <Route path="/" exact={true} render={props => <Transcripts {...props} user={this.state.user} />} />
             <Route path="/transcripts/:id" component={Transcript} />
+            <Route path="/login" exact={true} component={Login} />
           </Switch>
         </div>
       </BrowserRouter>

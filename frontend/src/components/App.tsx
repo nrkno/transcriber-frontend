@@ -31,11 +31,9 @@ class App extends React.Component<any, IState> {
   public async componentDidMount() {
     auth.onAuthStateChanged(user => {
       if (user) {
-        console.log("HEI")
         this.setState({ user })
       } else {
-        console.log("hoi")
-        history.push("login")
+        // history.push("login")
       }
     })
   }

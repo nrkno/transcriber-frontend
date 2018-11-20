@@ -1,0 +1,18 @@
+{
+  "indexes": [
+    {
+      "collectionId": "transcripts",
+      "state": "READY",
+      "fields": [
+        {
+          "fieldPath": "ownedBy",
+          "mode": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "mode": "DESCENDING"
+        }
+      ]
+    }
+  ]
+}

@@ -21,33 +21,17 @@ class Transcripts extends Component<IProps, IState> {
     super(props)
     this.state = {}
   }
+
+  public componentDidMount() {
+    // Check if have the user in props
+    if (this.props.user !== undefined) {
+      this.fetchTranscripts()
+    }
+  }
+
   public componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.user !== undefined && this.state.transcripts === undefined) {
-      database
-        .collection("/transcripts")
-        .where("ownedBy", "==", this.props.user.uid)
-        .orderBy("createdAt", "desc")
-        .onSnapshot(querySnapshot => {
-          const transcripts = Array<ITranscript>()
-          const transcriptIds = Array<string>()
-
-          querySnapshot.forEach(doc => {
-            // doc.data() is never undefined for query doc snapshots
-            const transcript = doc.data() as ITranscript
-
-            transcripts.push(transcript)
-
-            // We only care about the ids of successful transcripts
-            if (transcript.progress && transcript.progress.status === Status.Success) {
-              transcriptIds.push(doc.id)
-            }
-          })
-
-          this.setState({
-            transcriptIds,
-            transcripts,
-          })
-        })
+      this.fetchTranscripts()
     }
   }
 
@@ -107,6 +91,34 @@ class Transcripts extends Component<IProps, IState> {
         <Upload user={this.props.user} />
       </main>
     )
+  }
+
+  private fetchTranscripts() {
+    database
+      .collection("/transcripts")
+      .where("ownedBy", "==", this.props.user.uid)
+      .orderBy("createdAt", "desc")
+      .onSnapshot(querySnapshot => {
+        const transcripts = Array<ITranscript>()
+        const transcriptIds = Array<string>()
+
+        querySnapshot.forEach(doc => {
+          // doc.data() is never undefined for query doc snapshots
+          const transcript = doc.data() as ITranscript
+
+          transcripts.push(transcript)
+
+          // We only care about the ids of successful transcripts
+          if (transcript.progress && transcript.progress.status === Status.Success) {
+            transcriptIds.push(doc.id)
+          }
+        })
+
+        this.setState({
+          transcriptIds,
+          transcripts,
+        })
+      })
   }
 }
 

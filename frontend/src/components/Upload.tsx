@@ -16,7 +16,7 @@ import { ITranscript } from "../interfaces"
 interface IState {
   file?: File
   dropzoneMessage?: string
-  languageCode: string
+  languageCodes: string[]
   uploadProgress: number
 }
 
@@ -30,13 +30,17 @@ class Upload extends React.Component<IProps, IState> {
 
     this.state = {
       file: undefined,
-      languageCode: "nb-NO",
+      languageCodes: ["nb-NO", "", "", ""],
       uploadProgress: 0,
     }
   }
 
-  public handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    this.setState({ languageCode: event.target.value })
+  public handleLanguageChange = (index: number, event: React.ChangeEvent<HTMLSelectElement>) => {
+    const languageCodes = this.state.languageCodes
+    languageCodes[index] = event.target.value
+    this.setState({ languageCodes })
+
+    console.log(languageCodes)
   }
   public handleFileDrop = (acceptedFiles: [File], rejectedFiles: [File]) => {
     if (rejectedFiles.length > 0) {
@@ -57,9 +61,11 @@ class Upload extends React.Component<IProps, IState> {
   public handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const { file, languageCode } = this.state
+    const { file } = this.state
 
-    if (file === undefined || this.props.user === undefined) {
+    const selectedLanguageCodes = this.selectedLanguageCodes()
+
+    if (file === undefined || this.props.user === undefined || selectedLanguageCodes.length === 0) {
       return
     }
 
@@ -114,7 +120,7 @@ class Upload extends React.Component<IProps, IState> {
               url: downloadURL,
             },
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            languageCode,
+            languageCodes: this.selectedLanguageCodes(),
             ownedBy: this.props.user.uid,
             progress: { status: Status.Analysing },
             timestamps: {
@@ -131,7 +137,7 @@ class Upload extends React.Component<IProps, IState> {
               this.setState({
                 dropzoneMessage: undefined,
                 file: undefined,
-                languageCode: "nb-NO",
+                languageCodes: ["nb-NO", "", "", ""],
                 uploadProgress: 0,
               })
             })
@@ -180,129 +186,26 @@ class Upload extends React.Component<IProps, IState> {
             </label>
             <label className="org-label">
               Språk
-              <select data-testid="languages" value={this.state.languageCode} onChange={this.handleLanguageChange}>
-                <option value="af-ZA">Afrikaans</option>
-                <option value="am-ET">Amharisk</option>
-                <option value="ar-DZ">Arabisk (Algerie)</option>
-                <option value="ar-BH">Arabisk (Bahrain)</option>
-                <option value="ar-EG">Arabisk (Egypt)</option>
-                <option value="ar-AE">Arabisk (De forente arabiske emirater)</option>
-                <option value="ar-IQ">Arabisk (Irak)</option>
-                <option value="ar-IL">Arabisk (Israel)</option>
-                <option value="ar-JO">Arabisk (Jordan)</option>
-                <option value="ar-KW">Arabisk (Kuwait)</option>
-                <option value="ar-LB">Arabisk (Libanon)</option>
-                <option value="ar-MA">Arabisk (Marokko)</option>
-                <option value="ar-OM">Arabisk (Oman)</option>
-                <option value="ar-QA">Arabisk (Qatar)</option>
-                <option value="ar-SA">Arabisk (Saudi-Arabia)</option>
-                <option value="ar-PS">Arabisk (Staten Palestina)</option>
-                <option value="ar-TN">Arabisk (Tunisia)</option>
-                <option value="hy-AM">Armensk</option>
-                <option value="az-AZ">Aserbajdsjansk</option>
-                <option value="eu-ES">Baskisk</option>
-                <option value="bn-IN">Bengalsk (India)</option>
-                <option value="bn-BD">Bengalsk (Bangladesh)</option>
-                <option value="bg-BG">Bulgarsk</option>
-                <option value="da-DK">Dansk</option>
-                <option value="en-AU">Engelsk (Australia)</option>
-                <option value="en-CA">Engelsk (Canada)</option>
-                <option value="en-PH">Engelsk (Filippinene)</option>
-                <option value="en-GH">Engelsk (Ghana)</option>
-                <option value="en-IN">Engelsk (India)</option>
-                <option value="en-IE">Engelsk (Ireland)</option>
-                <option value="en-KE">Engelsk (Kenya)</option>
-                <option value="en-NZ">Engelsk (New Zealand)</option>
-                <option value="en-NG">Engelsk (Nigeria)</option>
-                <option value="en-GB">Engelsk (Storbritannia)</option>
-                <option value="en-ZA">Engelsk (Sør-Afrika)</option>
-                <option value="en-TZ">Engelsk (Tanzania)</option>
-                <option value="en-US">Engelsk (USA)</option>
-                <option value="fil-PH">Filippinsk</option>
-                <option value="fi-FI">Finsk</option>
-                <option value="fr-CA">Fransk (Canada)</option>
-                <option value="fr-FR">Fransk (Frankrike)</option>
-                <option value="gl-ES">Galicisk</option>
-                <option value="ka-GE">Georgisk</option>
-                <option value="el-GR">Gresk</option>
-                <option value="gu-IN">Gujarati</option>
-                <option value="he-IL">Hebraisk</option>
-                <option value="hi-IN">Hindi</option>
-                <option value="id-ID">Indonesisk</option>
-                <option value="is-IS">Islandsk</option>
-                <option value="it-IT">Italiensk</option>
-                <option value="ja-JP">Japansk</option>
-                <option value="jv-ID">Javanesisk</option>
-                <option value="kn-IN">Kannada</option>
-                <option value="ca-ES">Katalansk</option>
-                <option value="km-KH">Khmer</option>
-                <option value="yue-Hant-HK">Kinesisk, kantonesisk (tradisjonell, Hong Kong)</option>
-                <option value="cmn-Hans-HK">Kinesisk, mandarin (forenklet, Hong Kong)</option>
-                <option value="cmn-Hans-CN">Kinesisk, mandarin (forenklet, Kina)</option>
-                <option value="cmn-Hant-TW">Kinesisk, mandarin (tradisjonell, Taiwan)</option>
-                <option value="ko-KR">Koreansk</option>
-                <option value="hr-HR">Kroatisk</option>
-                <option value="lo-LA">Lao</option>
-                <option value="lv-LV">Latvisk</option>
-                <option value="lt-LT">Litauisk</option>
-                <option value="ms-MY">Malay</option>
-                <option value="ml-IN">Malayalam</option>
-                <option value="mr-IN">Marathi</option>
-                <option value="nl-NL">Nederlandsk</option>
-                <option value="ne-NP">Nepalsk</option>
-                <option value="nb-NO">Norsk</option>
-                <option value="fa-IR">Persisk</option>
-                <option value="pl-PL">Polsk</option>
-                <option value="pt-BR">Portugisisk (Brasil)</option>
-                <option value="pt-PT">Portugisisk (Portugal)</option>
-                <option value="ro-RO">Rumensk</option>
-                <option value="ru-RU">Russisk</option>
-                <option value="sr-RS">Serbisk</option>
-                <option value="si-LK">Sinhala</option>
-                <option value="sk-SK">Slovakisk</option>
-                <option value="sl-SI">Slovensk</option>
-                <option value="es-AR">Spansk (Argentina)</option>
-                <option value="es-BO">Spansk (Bolivia)</option>
-                <option value="es-CL">Spansk (Chile)</option>
-                <option value="es-CO">Spansk (Colombia)</option>
-                <option value="es-CR">Spansk (Costa Rica)</option>
-                <option value="es-DO">Spansk (Den dominikanske republikk)</option>
-                <option value="es-EC">Spansk (Ecuador)</option>
-                <option value="es-SV">Spansk (El Salvador)</option>
-                <option value="es-GT">Spansk (Guatemala)</option>
-                <option value="es-HN">Spansk (Honduras)</option>
-                <option value="es-MX">Spansk (Mexico)</option>
-                <option value="es-NI">Spansk (Nicaragua)</option>
-                <option value="es-PA">Spansk (Panama)</option>
-                <option value="es-PY">Spansk (Paraguay)</option>
-                <option value="es-PE">Spansk (Peru)</option>
-                <option value="es-PR">Spansk (Puerto Rico)</option>
-                <option value="es-ES">Spansk (Spania)</option>
-                <option value="es-UY">Spansk (Uruguay)</option>
-                <option value="es-US">Spansk (USA)</option>
-                <option value="es-VE">Spansk (Venezuela)</option>
-                <option value="su-ID">Sundanesisk</option>
-                <option value="sv-SE">Svensk</option>
-                <option value="sw-KE">Swahili (Kenya)</option>
-                <option value="sw-TZ">Swahili (Tanzania)</option>
-                <option value="ta-IN">Tamil (India)</option>
-                <option value="ta-MY">Tamil (Malaysia)</option>
-                <option value="ta-SG">Tamil (Singapore)</option>
-                <option value="ta-LK">Tamil (Sri Lanka)</option>
-                <option value="te-IN">Telugu</option>
-                <option value="th-TH">Thai</option>
-                <option value="cs-CZ">Tsjekkia</option>
-                <option value="tr-TR">Tyrkisk</option>
-                <option value="de-DE">Tysk</option>
-                <option value="uk-UA">Ukrainsk</option>
-                <option value="hu-HU">Ungarsk</option>
-                <option value="ur-IN">Urdu (India)</option>
-                <option value="ur-PK">Urdu (Pakistan)</option>
-                <option value="vi-VN">Vietnamesisk</option>
-                <option value="zu-ZA">Zulu</option>
+              <small>
+                Velg opptil 4 språk{" "}
+                <svg width="15" height="15" aria-hidden="true">
+                  <use xlinkHref="#icon-speak" />
+                </svg>
+              </small>
+              <select data-testid="languages" value={this.state.languageCodes[0]} onChange={event => this.handleLanguageChange(0, event)}>
+                {this.availableLanguages()}
+              </select>
+              <select data-testid="languages" value={this.state.languageCodes[1]} onChange={event => this.handleLanguageChange(1, event)}>
+                {this.availableLanguages()}
+              </select>
+              <select data-testid="languages" value={this.state.languageCodes[2]} onChange={event => this.handleLanguageChange(2, event)}>
+                {this.availableLanguages()}
+              </select>
+              <select data-testid="languages" value={this.state.languageCodes[3]} onChange={event => this.handleLanguageChange(3, event)}>
+                {this.availableLanguages()}
               </select>
             </label>
-            <button className="org-btn org-btn--primary" disabled={this.state.file === undefined || this.props.user === undefined} type="submit">
+            <button className="org-btn org-btn--primary" disabled={this.formIsDisabled()} type="submit">
               Last opp
             </button>
           </form>
@@ -319,6 +222,151 @@ class Upload extends React.Component<IProps, IState> {
         </main>
       )
     }
+  }
+
+  private selectedLanguageCodes() {
+    const languageCodes = this.state.languageCodes
+
+    const selectedLanguageCodes = languageCodes.filter(language => {
+      return language !== ""
+    })
+
+    return selectedLanguageCodes
+  }
+
+  private formIsDisabled() {
+    return this.selectedLanguageCodes().length === 0 || this.state.file === undefined || this.props.user === undefined
+  }
+
+  private availableLanguages() {
+    const languages = new Map([
+      ["", "Velg språk.."],
+      ["af-ZA", "Afrikaans"],
+      ["am-ET", "Amharisk"],
+      ["ar-DZ", "Arabisk (Algerie)"],
+      ["ar-BH", "Arabisk (Bahrain)"],
+      ["ar-EG", "Arabisk (Egypt)"],
+      ["ar-AE", "Arabisk (De forente arabiske emirater)"],
+      ["ar-IQ", "Arabisk (Irak)"],
+      ["ar-IL", "Arabisk (Israel)"],
+      ["ar-JO", "Arabisk (Jordan)"],
+      ["ar-KW", "Arabisk (Kuwait)"],
+      ["ar-LB", "Arabisk (Libanon)"],
+      ["ar-MA", "Arabisk (Marokko)"],
+      ["ar-OM", "Arabisk (Oman)"],
+      ["ar-QA", "Arabisk (Qatar)"],
+      ["ar-SA", "Arabisk (Saudi-Arabia)"],
+      ["ar-PS", "Arabisk (Staten Palestina)"],
+      ["ar-TN", "Arabisk (Tunisia)"],
+      ["hy-AM", "Armensk"],
+      ["az-AZ", "Aserbajdsjansk"],
+      ["eu-ES", "Baskisk"],
+      ["bn-IN", "Bengalsk (India)"],
+      ["bn-BD", "Bengalsk (Bangladesh)"],
+      ["bg-BG", "Bulgarsk"],
+      ["da-DK", "Dansk"],
+      ["en-AU", "Engelsk (Australia)"],
+      ["en-CA", "Engelsk (Canada)"],
+      ["en-PH", "Engelsk (Filippinene)"],
+      ["en-GH", "Engelsk (Ghana)"],
+      ["en-IN", "Engelsk (India)"],
+      ["en-IE", "Engelsk (Ireland)"],
+      ["en-KE", "Engelsk (Kenya)"],
+      ["en-NZ", "Engelsk (New Zealand)"],
+      ["en-NG", "Engelsk (Nigeria)"],
+      ["en-GB", "Engelsk (Storbritannia)"],
+      ["en-ZA", "Engelsk (Sør-Afrika)"],
+      ["en-TZ", "Engelsk (Tanzania)"],
+      ["en-US", "Engelsk (USA)"],
+      ["fil-PH", "Filippinsk"],
+      ["fi-FI", "Finsk"],
+      ["fr-CA", "Fransk (Canada)"],
+      ["fr-FR", "Fransk (Frankrike)"],
+      ["gl-ES", "Galicisk"],
+      ["ka-GE", "Georgisk"],
+      ["el-GR", "Gresk"],
+      ["gu-IN", "Gujarati"],
+      ["he-IL", "Hebraisk"],
+      ["hi-IN", "Hindi"],
+      ["id-ID", "Indonesisk"],
+      ["is-IS", "Islandsk"],
+      ["it-IT", "Italiensk"],
+      ["ja-JP", "Japansk"],
+      ["jv-ID", "Javanesisk"],
+      ["kn-IN", "Kannada"],
+      ["ca-ES", "Katalansk"],
+      ["km-KH", "Khmer"],
+      ["yue-Hant-HK", "Kinesisk, kantonesisk (tradisjonell, Hong Kong)"],
+      ["cmn-Hans-HK", "Kinesisk, mandarin (forenklet, Hong Kong)"],
+      ["cmn-Hans-CN", "Kinesisk, mandarin (forenklet, Kina)"],
+      ["cmn-Hant-TW", "Kinesisk, mandarin (tradisjonell, Taiwan)"],
+      ["ko-KR", "Koreansk"],
+      ["hr-HR", "Kroatisk"],
+      ["lo-LA", "Lao"],
+      ["lv-LV", "Latvisk"],
+      ["lt-LT", "Litauisk"],
+      ["ms-MY", "Malay"],
+      ["ml-IN", "Malayalam"],
+      ["mr-IN", "Marathi"],
+      ["nl-NL", "Nederlandsk"],
+      ["ne-NP", "Nepalsk"],
+      ["nb-NO", "Norsk"],
+      ["fa-IR", "Persisk"],
+      ["pl-PL", "Polsk"],
+      ["pt-BR", "Portugisisk (Brasil)"],
+      ["pt-PT", "Portugisisk (Portugal)"],
+      ["ro-RO", "Rumensk"],
+      ["ru-RU", "Russisk"],
+      ["sr-RS", "Serbisk"],
+      ["si-LK", "Sinhala"],
+      ["sk-SK", "Slovakisk"],
+      ["sl-SI", "Slovensk"],
+      ["es-AR", "Spansk (Argentina)"],
+      ["es-BO", "Spansk (Bolivia)"],
+      ["es-CL", "Spansk (Chile)"],
+      ["es-CO", "Spansk (Colombia)"],
+      ["es-CR", "Spansk (Costa Rica)"],
+      ["es-DO", "Spansk (Den dominikanske republikk)"],
+      ["es-EC", "Spansk (Ecuador)"],
+      ["es-SV", "Spansk (El Salvador)"],
+      ["es-GT", "Spansk (Guatemala)"],
+      ["es-HN", "Spansk (Honduras)"],
+      ["es-MX", "Spansk (Mexico)"],
+      ["es-NI", "Spansk (Nicaragua)"],
+      ["es-PA", "Spansk (Panama)"],
+      ["es-PY", "Spansk (Paraguay)"],
+      ["es-PE", "Spansk (Peru)"],
+      ["es-PR", "Spansk (Puerto Rico)"],
+      ["es-ES", "Spansk (Spania)"],
+      ["es-UY", "Spansk (Uruguay)"],
+      ["es-US", "Spansk (USA)"],
+      ["es-VE", "Spansk (Venezuela)"],
+      ["su-ID", "Sundanesisk"],
+      ["sv-SE", "Svensk"],
+      ["sw-KE", "Swahili (Kenya)"],
+      ["sw-TZ", "Swahili (Tanzania)"],
+      ["ta-IN", "Tamil (India)"],
+      ["ta-MY", "Tamil (Malaysia)"],
+      ["ta-SG", "Tamil (Singapore)"],
+      ["ta-LK", "Tamil (Sri Lanka)"],
+      ["te-IN", "Telugu"],
+      ["th-TH", "Thai"],
+      ["cs-CZ", "Tsjekkia"],
+      ["tr-TR", "Tyrkisk"],
+      ["de-DE", "Tysk"],
+      ["uk-UA", "Ukrainsk"],
+      ["hu-HU", "Ungarsk"],
+      ["ur-IN", "Urdu (India)"],
+      ["ur-PK", "Urdu (Pakistan)"],
+      ["vi-VN", "Vietnamesisk"],
+      ["zu-ZA", "Zulu"],
+    ])
+
+    return Array.from(languages).map(([key, value]) => (
+      <option key={key} value={key}>
+        {value}
+      </option>
+    ))
   }
 }
 

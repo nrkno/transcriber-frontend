@@ -19,7 +19,7 @@ exports.transcription = functions
   .onCreate(async (documentSnapshot, eventContext) => {
     const id = documentSnapshot.id
 
-    console.log(`Deployed 15:24 - Start transcription of id: ${id}`)
+    console.log(`Deployed 16:07 - Start transcription of id: ${id}`)
 
     try {
       // Because of indempotency, we need to fetch the transcript from the server and check if it's already in process
@@ -35,7 +35,7 @@ exports.transcription = functions
         throw Error("Transcript missing")
       }
 
-      const languageCode = transcript.languageCode
+      const languageCodes = transcript.languageCodes
 
       // 1. Transcode
 
@@ -45,7 +45,7 @@ exports.transcription = functions
       // 2. Transcribe
 
       await database.setStatus(id, Status.Transcribing)
-      const speechRecognitionResults = await transcribe(id, gcsUri, languageCode)
+      const speechRecognitionResults = await transcribe(id, gcsUri, languageCodes)
 
       // 3. Save transcription
 

@@ -4,7 +4,7 @@ interface ITranscript {
   audio: IAudio
   createdAt: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   error?: any
-  languageCode: string
+  languageCodes: Array<string>
   ownedBy: string
   progress?: {
     percent?: number

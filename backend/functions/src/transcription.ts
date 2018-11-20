@@ -40,17 +40,26 @@ async function trans(operation, id: string) {
   })
 }
 
-export async function transcribe(id: string, gcsUri: string, languageCode: string) {
-  console.log("Start transcribing", id, languageCode)
+export async function transcribe(id: string, gcsUri: string, languageCodes: string[]) {
+  if (languageCodes.length === 0) {
+    throw new Error("At least one language must be specified")
+  }
+
+  const languageCode = languageCodes.shift()
+  const alternativeLanguageCodes = languageCodes.length > 0 ? languageCodes : null
+  const enableAutomaticPunctuation = languageCode === "en-US" // Only working for en-US at the moment
 
   const request = {
     audio: { uri: gcsUri },
     config: {
-      enableAutomaticPunctuation: true, // Only working for en-US at the moment
+      alternativeLanguageCodes,
+      enableAutomaticPunctuation,
       enableWordTimeOffsets: true,
       languageCode,
     },
   }
+
+  console.log("Start transcribing", id, request)
 
   // Detects speech in the audio file. This creates a recognition job that you
   // can wait for now, or get its result later.

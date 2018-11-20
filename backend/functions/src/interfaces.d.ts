@@ -5,7 +5,7 @@ interface ITranscript {
   audio?: IAudio
   createdAt?: Date | admin.firestore.FieldValue
   error?: any
-  languageCode?: string
+  languageCodes?: Array<string>
   ownedBy?: string
   progress?: {
     percent?: number | admin.firestore.FieldValue

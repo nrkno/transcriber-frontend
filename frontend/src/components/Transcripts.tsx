@@ -25,13 +25,13 @@ class Transcripts extends Component<IProps, IState> {
   public componentDidMount() {
     // Check if have the user in props
     if (this.props.user !== undefined) {
-      this.fetchTranscripts()
+      this.fetchTranscripts(this.props.user.uid)
     }
   }
 
   public componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.user !== undefined && this.state.transcripts === undefined) {
-      this.fetchTranscripts()
+      this.fetchTranscripts(this.props.user.uid)
     }
   }
 
@@ -93,10 +93,10 @@ class Transcripts extends Component<IProps, IState> {
     )
   }
 
-  private fetchTranscripts() {
+  private fetchTranscripts(uid: string) {
     database
       .collection("/transcripts")
-      .where("ownedBy", "==", this.props.user.uid)
+      .where("ownedBy", "==", uid)
       .orderBy("createdAt", "desc")
       .onSnapshot(querySnapshot => {
         const transcripts = Array<ITranscript>()

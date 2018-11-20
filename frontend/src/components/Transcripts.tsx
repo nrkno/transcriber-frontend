@@ -36,7 +36,11 @@ class Transcripts extends Component<IProps, IState> {
             const transcript = doc.data() as ITranscript
 
             transcripts.push(transcript)
-            transcriptIds.push(doc.id)
+
+            // We only care about the ids of successful transcripts
+            if (transcript.progress && transcript.progress.status === Status.Success) {
+              transcriptIds.push(doc.id)
+            }
           })
 
           this.setState({

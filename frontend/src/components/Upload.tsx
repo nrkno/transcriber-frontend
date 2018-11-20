@@ -157,16 +157,16 @@ class Upload extends React.Component<IProps, IState> {
               <Dropzone
                 accept="audio/*"
                 style={{
-                  display: "grid",
-                  justifyContent: "center",
                   alignContent: "center",
+                  borderColor: "rgb(102, 102, 102)",
+                  borderRadius: "5px",
+                  borderStyle: "dashed",
+                  borderWidth: "2px",
+                  display: "grid",
+                  height: "100px",
+                  justifyContent: "center",
                   position: "relative",
                   width: "100%",
-                  height: "100px",
-                  borderWidth: "2px",
-                  borderColor: "rgb(102, 102, 102)",
-                  borderStyle: "dashed",
-                  borderRadius: "5px",
                 }}
                 onDrop={this.handleFileDrop}
               >

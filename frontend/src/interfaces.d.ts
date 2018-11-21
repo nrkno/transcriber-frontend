@@ -6,9 +6,10 @@ interface ITranscript {
     playback?: string
   }
   createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+  duration?: number
   error?: any
   languageCodes: Array<string>
-  metadata: IMetadata
+  recognitionMetadata: IRecognitionMetadata
   ownedBy?: string
   progress?: {
     percent?: number
@@ -26,9 +27,8 @@ interface ITranscript {
   title?: string
 }
 
-interface IMetadata {
+interface IRecognitionMetadata {
   audioTopic?: string
-  duration?: number
   industryNaicsCodeOfAudio?: number | string
   interactionType: InteractionType
   microphoneDistance: MicrophoneDistance
@@ -36,9 +36,11 @@ interface IMetadata {
   originalMimeType?: string
   recordingDeviceName?: string
   recordingDeviceType: RecordingDeviceType
-  speechContext?: {
-    phrases: Array<string>
-  }
+  speechContexts?: Array<ISpeechContext>
+}
+
+interface ISpeechContext {
+  phrases: Array<string>
 }
 
 interface IResult {

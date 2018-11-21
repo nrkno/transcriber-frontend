@@ -22,8 +22,8 @@ export enum InteractionType {
   PhoneCall = "PHONE_CALL", // A phone-call or video-conference in which two or more people, who are not in the same room, are actively participating.
   Voicemail = "VOICEMAIL", // A recorded message intended for another person to listen to.
   ProfessionallyProduced = "PROFESSIONALLY_PRODUCED", // Professionally produced audio (eg. TV Show, Podcast).
-  // VoiceSearch = "VOICE_SEARCH", // Transcribe spoken questions and queries into text.
-  // VoiceCommand = "VOICE_COMMAND", // Transcribe voice commands, such as for controlling a device.
+  VoiceSearch = "VOICE_SEARCH", // Transcribe spoken questions and queries into text.
+  VoiceCommand = "VOICE_COMMAND", // Transcribe voice commands, such as for controlling a device.
   Dictation = "DICTATION", // Transcribe speech to text to create a written document, such as a text-message, email or report.
 }
 

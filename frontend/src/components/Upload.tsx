@@ -11,7 +11,7 @@ import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
 import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Status } from "../enums"
 import { database, storage } from "../firebaseApp"
-import { IMetadata, ITranscript } from "../interfaces"
+import { IRecognitionMetadata, ITranscript } from "../interfaces"
 
 interface IState {
   file?: File
@@ -30,7 +30,7 @@ class Upload extends React.Component<IProps, IState> {
     this.state = {
       transcript: {
         languageCodes: ["nb-NO", "", "", ""],
-        metadata: {
+        recognitionMetadata: {
           audioTopic: "",
           industryNaicsCodeOfAudio: "",
           interactionType: InteractionType.Unspecified,
@@ -38,7 +38,7 @@ class Upload extends React.Component<IProps, IState> {
           originalMediaType: OriginalMediaType.Unspecified,
           recordingDeviceName: "",
           recordingDeviceType: RecordingDeviceType.Unspecified,
-          speechContext: { phrases: [""] },
+          speechContexts: [{ phrases: [""] }],
         },
       },
     }
@@ -93,7 +93,7 @@ class Upload extends React.Component<IProps, IState> {
             </label>
             <label className="org-label">
               Type
-              <select value={this.state.transcript.metadata.interactionType} onChange={this.handleInteractionTypeChange}>
+              <select value={this.state.transcript.recognitionMetadata.interactionType} onChange={this.handleInteractionTypeChange}>
                 <option value={InteractionType.Unspecified}>Ukjent eller annen type</option>
                 <option value={InteractionType.Discussion}>Diskusjon - Flere personer i samtale eller diskusjon, for eksempel i møte med to eller flere aktive deltakere</option>
                 <option value={InteractionType.Presentaton}>Presentasjon - En eller flere personer foreleser eller presenterer til andre, stort sett uten avbrudd</option>
@@ -109,12 +109,12 @@ class Upload extends React.Component<IProps, IState> {
               <small>
                 Den 6-sifrede <a href="https://www.naics.com/search/">NAICS-koden</a> som ligger tettest opptil emnene det snakkes om i lydfilen.
               </small>
-              <input value={this.state.transcript.metadata.industryNaicsCodeOfAudio} type="text" onChange={this.handleIndustryNaicsCodeOfAudioChange} />
+              <input value={this.state.transcript.recognitionMetadata.industryNaicsCodeOfAudio} type="text" onChange={this.handleIndustryNaicsCodeOfAudioChange} />
             </label>
 
             <label className="org-label">
               Mikrofonavstand
-              <select value={this.state.transcript.metadata.microphoneDistance} onChange={this.handleMicrophoneDistanceChange}>
+              <select value={this.state.transcript.recognitionMetadata.microphoneDistance} onChange={this.handleMicrophoneDistanceChange}>
                 <option value={MicrophoneDistance.Unspecified}>Ukjent</option>
                 <option value={MicrophoneDistance.Nearfield}>Mindre enn 1 meter</option>
                 <option value={MicrophoneDistance.Midfield}>Mindre enn 3 meter</option>
@@ -123,7 +123,7 @@ class Upload extends React.Component<IProps, IState> {
             </label>
             <label className="org-label">
               Opprinnelig mediatype
-              <select value={this.state.transcript.metadata.originalMediaType} onChange={this.handleOriginalMediaTypeChange}>
+              <select value={this.state.transcript.recognitionMetadata.originalMediaType} onChange={this.handleOriginalMediaTypeChange}>
                 <option value={OriginalMediaType.Unspecified}>Ukjent</option>
                 <option value={OriginalMediaType.Audio}>Audio - Lydopptak</option>
                 <option value={OriginalMediaType.Video}>Video - Lyden kommer opprinnelig fra et video-opptak </option>
@@ -131,7 +131,7 @@ class Upload extends React.Component<IProps, IState> {
             </label>
             <label className="org-label">
               Hvor eller hvordan ble opptaket gjort?
-              <select value={this.state.transcript.metadata.recordingDeviceType} onChange={this.handleRecordingDeviceTypeChange}>
+              <select value={this.state.transcript.recognitionMetadata.recordingDeviceType} onChange={this.handleRecordingDeviceTypeChange}>
                 <option value={RecordingDeviceType.Unspecified}>Ukjent</option>
                 <option value={RecordingDeviceType.Smartphone}>Smarttelefon - Opptaket ble gjort på en smarttelefon</option>
                 <option value={RecordingDeviceType.PC}>PC - Opptaket ble gjort med en PC eller tablet</option>
@@ -145,19 +145,19 @@ class Upload extends React.Component<IProps, IState> {
             <label className="org-label">
               Navn på opptaksutstyr
               <small>Eksempel: iPhone X, Polycom SoundStation IP 6000, POTS, VOIP eller Cardioid Microphone</small>
-              <input value={this.state.transcript.metadata.recordingDeviceName} type="text" onChange={this.handleRecordingDeviceNameChange} />
+              <input value={this.state.transcript.recognitionMetadata.recordingDeviceName} type="text" onChange={this.handleRecordingDeviceNameChange} />
             </label>
 
             <label className="org-label">
               Emne
               <small>Hva handler lydfilen om?</small>
-              <textarea value={this.state.transcript.metadata.audioTopic} onChange={this.handleAudioTopicChange} />
+              <textarea value={this.state.transcript.recognitionMetadata.audioTopic} onChange={this.handleAudioTopicChange} />
             </label>
 
             <label className="org-label">
               Kontekst
               <small>Gi "hint" til talegjenkjenningen for å favorisere bestemte ord og uttrykk i resultatene, i form av en kommaseparert liste.</small>
-              <textarea value={this.state.transcript.metadata.speechContext.phrases} onChange={this.handleSpeechContextChange} />
+              <textarea value={this.state.transcript.recognitionMetadata.speechContexts[0].phrases} onChange={this.handleSpeechContextChange} />
             </label>
 
             <button className="org-btn org-btn--primary" disabled={this.formIsDisabled()} type="submit">
@@ -183,7 +183,7 @@ class Upload extends React.Component<IProps, IState> {
     this.setState({
       transcript: {
         languageCodes: ["nb-NO", "", "", ""],
-        metadata: {
+        recognitionMetadata: {
           audioTopic: "",
           industryNaicsCodeOfAudio: "",
           interactionType: InteractionType.Unspecified,
@@ -191,7 +191,7 @@ class Upload extends React.Component<IProps, IState> {
           originalMediaType: OriginalMediaType.Unspecified,
           recordingDeviceName: "",
           recordingDeviceType: RecordingDeviceType.Unspecified,
-          speechContext: { phrases: [""] },
+          speechContexts: [{ phrases: [""] }],
         },
       },
     })
@@ -211,10 +211,10 @@ class Upload extends React.Component<IProps, IState> {
   private handleInteractionTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const transcript = this.state.transcript
 
-    let interactionType = transcript.metadata.interactionType
+    let interactionType = transcript.recognitionMetadata.interactionType
     interactionType = event.target.value as InteractionType
 
-    transcript.metadata.interactionType = interactionType
+    transcript.recognitionMetadata.interactionType = interactionType
 
     this.setState({ transcript })
   }
@@ -222,10 +222,10 @@ class Upload extends React.Component<IProps, IState> {
   private handleMicrophoneDistanceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const transcript = this.state.transcript
 
-    let microphoneDistance = transcript.metadata.microphoneDistance
+    let microphoneDistance = transcript.recognitionMetadata.microphoneDistance
     microphoneDistance = event.target.value as MicrophoneDistance
 
-    transcript.metadata.microphoneDistance = microphoneDistance
+    transcript.recognitionMetadata.microphoneDistance = microphoneDistance
 
     this.setState({ transcript })
   }
@@ -233,10 +233,10 @@ class Upload extends React.Component<IProps, IState> {
   private handleOriginalMediaTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const transcript = this.state.transcript
 
-    let originalMediaType = transcript.metadata.originalMediaType
+    let originalMediaType = transcript.recognitionMetadata.originalMediaType
     originalMediaType = event.target.value as OriginalMediaType
 
-    transcript.metadata.originalMediaType = originalMediaType
+    transcript.recognitionMetadata.originalMediaType = originalMediaType
 
     this.setState({ transcript })
   }
@@ -244,35 +244,35 @@ class Upload extends React.Component<IProps, IState> {
   private handleRecordingDeviceTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const transcript = this.state.transcript
 
-    let recordingDeviceType = transcript.metadata.recordingDeviceType
+    let recordingDeviceType = transcript.recognitionMetadata.recordingDeviceType
     recordingDeviceType = event.target.value as RecordingDeviceType
 
-    transcript.metadata.recordingDeviceType = recordingDeviceType
+    transcript.recognitionMetadata.recordingDeviceType = recordingDeviceType
 
     this.setState({ transcript })
   }
 
   private handleIndustryNaicsCodeOfAudioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const transcript = this.state.transcript
-    transcript.metadata.industryNaicsCodeOfAudio = event.target.value
+    transcript.recognitionMetadata.industryNaicsCodeOfAudio = event.target.value
     this.setState({ transcript })
   }
 
   private handleRecordingDeviceNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const transcript = this.state.transcript
-    transcript.metadata.recordingDeviceName = event.target.value
+    transcript.recognitionMetadata.recordingDeviceName = event.target.value
     this.setState({ transcript })
   }
 
   private handleAudioTopicChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const transcript = this.state.transcript
-    transcript.metadata.audioTopic = event.target.value
+    transcript.recognitionMetadata.audioTopic = event.target.value
     this.setState({ transcript })
   }
 
   private handleSpeechContextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const transcript = this.state.transcript
-    transcript.metadata.speechContext!.phrases = event.target.value.split(",")
+    transcript.recognitionMetadata.speechContexts[0].phrases = event.target.value.split(",")
     this.setState({ transcript })
   }
 
@@ -358,50 +358,46 @@ class Upload extends React.Component<IProps, IState> {
           transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
           transcript.languageCodes = this.selectedLanguageCodes()
           transcript.ownedBy = this.props.user.uid
-          transcript.progress = { status: Status.Analysing }
-          transcript.timestamps = {
-            analysing: firebase.firestore.FieldValue.serverTimestamp(),
-          }
 
           // Metadata
 
-          const metadata: IMetadata = {
-            interactionType: transcript.metadata.interactionType,
-            microphoneDistance: transcript.metadata.microphoneDistance,
-            originalMediaType: transcript.metadata.originalMediaType,
+          const recognitionMetadata: IRecognitionMetadata = {
+            interactionType: transcript.recognitionMetadata.interactionType,
+            microphoneDistance: transcript.recognitionMetadata.microphoneDistance,
+            originalMediaType: transcript.recognitionMetadata.originalMediaType,
             originalMimeType: file.type,
-            recordingDeviceType: transcript.metadata.recordingDeviceType,
+            recordingDeviceType: transcript.recognitionMetadata.recordingDeviceType,
           }
 
           // Add non empty fields
 
-          if (transcript.metadata.audioTopic !== "") {
-            metadata.audioTopic = transcript.metadata.audioTopic
+          if (transcript.recognitionMetadata.audioTopic !== "") {
+            recognitionMetadata.audioTopic = transcript.recognitionMetadata.audioTopic
           }
 
-          const industryNaicsCodeOfAudio = parseInt(transcript.metadata.industryNaicsCodeOfAudio, 10)
+          const industryNaicsCodeOfAudio = parseInt(transcript.recognitionMetadata.industryNaicsCodeOfAudio, 10)
 
           if (!isNaN(industryNaicsCodeOfAudio)) {
-            transcript.metadata.industryNaicsCodeOfAudio = industryNaicsCodeOfAudio
+            transcript.recognitionMetadata.industryNaicsCodeOfAudio = industryNaicsCodeOfAudio
           }
 
-          if (transcript.metadata.recordingDeviceName !== "") {
-            metadata.recordingDeviceName = transcript.metadata.recordingDeviceName
+          if (transcript.recognitionMetadata.recordingDeviceName !== "") {
+            recognitionMetadata.recordingDeviceName = transcript.recognitionMetadata.recordingDeviceName
           }
 
           // Clean up phrases
 
-          const phrases = transcript.metadata
-            .speechContext!.phrases.filter(phrase => {
+          const phrases = transcript.recognitionMetadata.speechContexts[0].phrases
+            .filter(phrase => {
               return phrase.trim()
             })
             .map(phrase => phrase.trim())
 
           if (phrases.length > 0) {
-            metadata.speechContext = { phrases }
+            recognitionMetadata.speechContexts = [{ phrases }]
           }
 
-          transcript.metadata = metadata
+          transcript.recognitionMetadata = recognitionMetadata
 
           database
             .doc(`transcripts/${id}`)

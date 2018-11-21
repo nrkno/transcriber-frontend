@@ -56,7 +56,7 @@ const database = (() => {
   }
 
   const setDuration = async (id: string, seconds: number) => {
-    const transcript: ITranscript = { audio: { duration: seconds } }
+    const transcript: ITranscript = { duration: seconds }
 
     return updateTranscript(id, transcript)
   }
@@ -65,7 +65,6 @@ const database = (() => {
     const transcript: ITranscript = {
       error: serializeError(error),
       progress: {
-        percent: undefined,
         status: Status.Failed,
       },
     }

@@ -1,23 +1,22 @@
 import firebase from "firebase/app"
 import * as React from "react"
-// import Dropzone from "react-dropzone"
-// Testing not working with normal import right now, see https://github.com/react-dropzone/react-dropzone/issues/554
+import Dropzone from "react-dropzone"
+/* Testing not working with normal import right now, see https://github.com/react-dropzone/react-dropzone/issues/554
 let Dropzone = require("react-dropzone")
 if ("default" in Dropzone) {
   Dropzone = Dropzone.default
-}
+}*/
 import ReactGA from "react-ga"
 import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
-import { Status } from "../enums"
+import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Status } from "../enums"
 import { database, storage } from "../firebaseApp"
-import { ITranscript } from "../interfaces"
+import { IMetadata, ITranscript } from "../interfaces"
 
 interface IState {
   file?: File
   dropzoneMessage?: string
-  languageCodes: string[]
-  uploadProgress: number
+  transcript: ITranscript
 }
 
 interface IProps {
@@ -29,131 +28,24 @@ class Upload extends React.Component<IProps, IState> {
     super(props)
 
     this.state = {
-      file: undefined,
-      languageCodes: ["nb-NO", "", "", ""],
-      uploadProgress: 0,
-    }
-  }
-
-  public handleLanguageChange = (index: number, event: React.ChangeEvent<HTMLSelectElement>) => {
-    const languageCodes = this.state.languageCodes
-    languageCodes[index] = event.target.value
-    this.setState({ languageCodes })
-
-    console.log(languageCodes)
-  }
-  public handleFileDrop = (acceptedFiles: [File], rejectedFiles: [File]) => {
-    if (rejectedFiles.length > 0) {
-      this.setState({ dropzoneMessage: "Filen har feil format", file: undefined })
-
-      ReactGA.event({
-        action: "Wrong file format",
-        category: "Upload",
-      })
-    } else {
-      // Take the first file
-      const [file] = acceptedFiles
-
-      this.setState({ file, dropzoneMessage: file.name })
-    }
-  }
-
-  public handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    const { file } = this.state
-
-    const selectedLanguageCodes = this.selectedLanguageCodes()
-
-    if (file === undefined || this.props.user === undefined || selectedLanguageCodes.length === 0) {
-      return
-    }
-
-    const transcriptRef = database.collection("/users").doc()
-
-    const id = transcriptRef.id
-
-    const metadata = {
-      contentType: file.type,
-    }
-
-    const uploadTask = storage
-      .ref()
-      .child(id)
-      .put(file, metadata)
-
-    uploadTask.on(
-      firebase.storage.TaskEvent.STATE_CHANGED,
-      (snapshot: firebase.storage.UploadTaskSnapshot) => {
-        const uploadProgress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-        this.setState({ uploadProgress })
+      transcript: {
+        languageCodes: ["nb-NO", "", "", ""],
+        metadata: {
+          audioTopic: "",
+          industryNaicsCodeOfAudio: "",
+          interactionType: InteractionType.Unspecified,
+          microphoneDistance: MicrophoneDistance.Unspecified,
+          originalMediaType: OriginalMediaType.Unspecified,
+          recordingDeviceName: "",
+          recordingDeviceType: RecordingDeviceType.Unspecified,
+          speechContext: { phrases: [""] },
+        },
       },
-      error => {
-        ReactGA.exception({
-          description: error.message,
-          fatal: false,
-        })
-
-        /*FIXME https://firebase.google.com/docs/storage/web/handle-errors
-        
-        switch (error.code) {
-          case "storage/unauthorized":
-            // User doesn't have permission to access the object
-            break
-          case "storage/canceled":
-            // User canceled the upload
-            break
-          case "storage/unknown":
-            // Unknown error occurred, inspect error.serverResponse
-            console.error(error)
-            console.log("error during upload from error section")
-            break
-        }*/
-      },
-      () => {
-        uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
-          const title = file.name.substr(0, file.name.lastIndexOf(".")) || file.name
-
-          const transcript: ITranscript = {
-            audio: {
-              type: file.type,
-              url: downloadURL,
-            },
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            languageCodes: this.selectedLanguageCodes(),
-            ownedBy: this.props.user.uid,
-            progress: { status: Status.Analysing },
-            timestamps: {
-              analysing: firebase.firestore.FieldValue.serverTimestamp(),
-            },
-            title,
-          }
-
-          database
-            .doc(`transcripts/${id}`)
-            .set(transcript)
-            .then(success => {
-              // Reset state
-              this.setState({
-                dropzoneMessage: undefined,
-                file: undefined,
-                languageCodes: ["nb-NO", "", "", ""],
-                uploadProgress: 0,
-              })
-            })
-            .catch((error: Error) => {
-              ReactGA.exception({
-                description: error.message,
-                fatal: false,
-              })
-            })
-        })
-      },
-    )
+    }
   }
 
   public render() {
-    if (this.state.uploadProgress === 0 || this.state.uploadProgress === 100) {
+    if (this.state.transcript.progress === undefined) {
       return (
         <div className="create">
           <h2 className="org-text-xl">Ny transkripsjon</h2>
@@ -186,25 +78,88 @@ class Upload extends React.Component<IProps, IState> {
             </label>
             <label className="org-label">
               Språk
-              <small>
-                Velg opptil 4 språk{" "}
-                <svg width="15" height="15" aria-hidden="true">
-                  <use xlinkHref="#icon-speak" />
-                </svg>
-              </small>
-              <select data-testid="languages" value={this.state.languageCodes[0]} onChange={event => this.handleLanguageChange(0, event)}>
+              <select value={this.state.transcript.languageCodes[0]} onChange={event => this.handleLanguageChange(0, event)}>
                 {this.availableLanguages()}
               </select>
-              <select data-testid="languages" value={this.state.languageCodes[1]} onChange={event => this.handleLanguageChange(1, event)}>
+              <select data-testid="languages" value={this.state.transcript.languageCodes[1]} onChange={event => this.handleLanguageChange(1, event)}>
                 {this.availableLanguages()}
               </select>
-              <select data-testid="languages" value={this.state.languageCodes[2]} onChange={event => this.handleLanguageChange(2, event)}>
+              <select data-testid="languages" value={this.state.transcript.languageCodes[2]} onChange={event => this.handleLanguageChange(2, event)}>
                 {this.availableLanguages()}
               </select>
-              <select data-testid="languages" value={this.state.languageCodes[3]} onChange={event => this.handleLanguageChange(3, event)}>
+              <select data-testid="languages" value={this.state.transcript.languageCodes[3]} onChange={event => this.handleLanguageChange(3, event)}>
                 {this.availableLanguages()}
               </select>
             </label>
+            <label className="org-label">
+              Type
+              <select value={this.state.transcript.metadata.interactionType} onChange={this.handleInteractionTypeChange}>
+                <option value={InteractionType.Unspecified}>Ukjent eller annen type</option>
+                <option value={InteractionType.Discussion}>Diskusjon - Flere personer i samtale eller diskusjon, for eksempel i møte med to eller flere aktive deltakere</option>
+                <option value={InteractionType.Presentaton}>Presentasjon - En eller flere personer foreleser eller presenterer til andre, stort sett uten avbrudd</option>
+                <option value={InteractionType.PhoneCall}>Telefon- eller videokonferansesamtale - To eller flere personer, som ikke er i samme rom, deltar aktivt i samtale.</option>
+                <option value={InteractionType.Voicemail}>Talepostmelding/mobilsvar - Opptak som er ment for en annen person å lytte til.</option>
+                <option value={InteractionType.ProfessionallyProduced}>Profesjonelt produsert - Eksempelvis TV-show, podkast</option>
+                <option value={InteractionType.Dictation}>Diksjon - Opplesning av dokumenter som tekstmeldinger, e-post eller rapporter.</option>
+              </select>
+            </label>
+
+            <label className="org-label">
+              NAICS-kode
+              <small>
+                Den 6-sifrede <a href="https://www.naics.com/search/">NAICS-koden</a> som ligger tettest opptil emnene det snakkes om i lydfilen.
+              </small>
+              <input value={this.state.transcript.metadata.industryNaicsCodeOfAudio} type="text" onChange={this.handleIndustryNaicsCodeOfAudioChange} />
+            </label>
+
+            <label className="org-label">
+              Mikrofonavstand
+              <select value={this.state.transcript.metadata.microphoneDistance} onChange={this.handleMicrophoneDistanceChange}>
+                <option value={MicrophoneDistance.Unspecified}>Ukjent</option>
+                <option value={MicrophoneDistance.Nearfield}>Mindre enn 1 meter</option>
+                <option value={MicrophoneDistance.Midfield}>Mindre enn 3 meter</option>
+                <option value={MicrophoneDistance.Farfield}>Mer enn 3 meter</option>
+              </select>
+            </label>
+            <label className="org-label">
+              Opprinnelig mediatype
+              <select value={this.state.transcript.metadata.originalMediaType} onChange={this.handleOriginalMediaTypeChange}>
+                <option value={OriginalMediaType.Unspecified}>Ukjent</option>
+                <option value={OriginalMediaType.Audio}>Audio - Lydopptak</option>
+                <option value={OriginalMediaType.Video}>Video - Lyden kommer opprinnelig fra et video-opptak </option>
+              </select>
+            </label>
+            <label className="org-label">
+              Hvor eller hvordan ble opptaket gjort?
+              <select value={this.state.transcript.metadata.recordingDeviceType} onChange={this.handleRecordingDeviceTypeChange}>
+                <option value={RecordingDeviceType.Unspecified}>Ukjent</option>
+                <option value={RecordingDeviceType.Smartphone}>Smarttelefon - Opptaket ble gjort på en smarttelefon</option>
+                <option value={RecordingDeviceType.PC}>PC - Opptaket ble gjort med en PC eller tablet</option>
+                <option value={RecordingDeviceType.PhoneLine}>Telefonlinje - Opptaket ble gjort over en telefonlinje</option>
+                <option value={RecordingDeviceType.Vehicle}>Kjøretøy - Opptaket ble gjort i et kjøretøy</option>
+                <option value={RecordingDeviceType.OtherOutdoorDevice}>Utendørs - Opptaket ble gjort utendørs</option>
+                <option value={RecordingDeviceType.OtherIndoorDevice}>Innendørs - Opptaket ble gjort innendørs</option>
+              </select>
+            </label>
+
+            <label className="org-label">
+              Navn på opptaksutstyr
+              <small>Eksempel: iPhone X, Polycom SoundStation IP 6000, POTS, VOIP eller Cardioid Microphone</small>
+              <input value={this.state.transcript.metadata.recordingDeviceName} type="text" onChange={this.handleRecordingDeviceNameChange} />
+            </label>
+
+            <label className="org-label">
+              Emne
+              <small>Hva handler lydfilen om?</small>
+              <textarea value={this.state.transcript.metadata.audioTopic} onChange={this.handleAudioTopicChange} />
+            </label>
+
+            <label className="org-label">
+              Kontekst
+              <small>Gi "hint" til talegjenkjenningen for å favorisere bestemte ord og uttrykk i resultatene, i form av en kommaseparert liste.</small>
+              <textarea value={this.state.transcript.metadata.speechContext.phrases} onChange={this.handleSpeechContextChange} />
+            </label>
+
             <button className="org-btn org-btn--primary" disabled={this.formIsDisabled()} type="submit">
               Last opp
             </button>
@@ -212,20 +167,261 @@ class Upload extends React.Component<IProps, IState> {
         </div>
       )
     } else {
-      const status = this.state.uploadProgress < 100 ? "active" : "success"
+      const status = this.state.transcript.progress.percent < 100 ? "active" : "success"
       return (
         <main id="progress">
           <div className="dropForm">
             <p>Laster opp</p>
-            <Progress type="circle" percent={this.state.uploadProgress} status={status} />
+            <Progress type="circle" percent={this.state.transcript.progress.percent} status={status} />
           </div>
         </main>
       )
     }
   }
 
+  private resetForm() {
+    this.setState({
+      transcript: {
+        languageCodes: ["nb-NO", "", "", ""],
+        metadata: {
+          audioTopic: "",
+          industryNaicsCodeOfAudio: "",
+          interactionType: InteractionType.Unspecified,
+          microphoneDistance: MicrophoneDistance.Unspecified,
+          originalMediaType: OriginalMediaType.Unspecified,
+          recordingDeviceName: "",
+          recordingDeviceType: RecordingDeviceType.Unspecified,
+          speechContext: { phrases: [""] },
+        },
+      },
+    })
+  }
+
+  private handleLanguageChange = (index: number, event: React.ChangeEvent<HTMLSelectElement>) => {
+    const transcript = this.state.transcript
+
+    const languageCodes = transcript.languageCodes
+    languageCodes[index] = event.target.value
+
+    transcript.languageCodes = languageCodes
+
+    this.setState({ transcript })
+  }
+
+  private handleInteractionTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const transcript = this.state.transcript
+
+    let interactionType = transcript.metadata.interactionType
+    interactionType = event.target.value as InteractionType
+
+    transcript.metadata.interactionType = interactionType
+
+    this.setState({ transcript })
+  }
+
+  private handleMicrophoneDistanceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const transcript = this.state.transcript
+
+    let microphoneDistance = transcript.metadata.microphoneDistance
+    microphoneDistance = event.target.value as MicrophoneDistance
+
+    transcript.metadata.microphoneDistance = microphoneDistance
+
+    this.setState({ transcript })
+  }
+
+  private handleOriginalMediaTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const transcript = this.state.transcript
+
+    let originalMediaType = transcript.metadata.originalMediaType
+    originalMediaType = event.target.value as OriginalMediaType
+
+    transcript.metadata.originalMediaType = originalMediaType
+
+    this.setState({ transcript })
+  }
+
+  private handleRecordingDeviceTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const transcript = this.state.transcript
+
+    let recordingDeviceType = transcript.metadata.recordingDeviceType
+    recordingDeviceType = event.target.value as RecordingDeviceType
+
+    transcript.metadata.recordingDeviceType = recordingDeviceType
+
+    this.setState({ transcript })
+  }
+
+  private handleIndustryNaicsCodeOfAudioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const transcript = this.state.transcript
+    transcript.metadata.industryNaicsCodeOfAudio = event.target.value
+    this.setState({ transcript })
+  }
+
+  private handleRecordingDeviceNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const transcript = this.state.transcript
+    transcript.metadata.recordingDeviceName = event.target.value
+    this.setState({ transcript })
+  }
+
+  private handleAudioTopicChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const transcript = this.state.transcript
+    transcript.metadata.audioTopic = event.target.value
+    this.setState({ transcript })
+  }
+
+  private handleSpeechContextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const transcript = this.state.transcript
+    transcript.metadata.speechContext!.phrases = event.target.value.split(",")
+    this.setState({ transcript })
+  }
+
+  private handleFileDrop = (acceptedFiles: [File], rejectedFiles: [File]) => {
+    if (rejectedFiles.length > 0) {
+      this.setState({ dropzoneMessage: "Filen har feil format", file: undefined })
+
+      ReactGA.event({
+        action: "Wrong file format",
+        category: "Upload",
+      })
+    } else {
+      // Take the first file
+      const [file] = acceptedFiles
+
+      this.setState({ file, dropzoneMessage: file.name })
+    }
+  }
+
+  private handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const { file } = this.state
+
+    const selectedLanguageCodes = this.selectedLanguageCodes()
+
+    if (file === undefined || this.props.user === undefined || selectedLanguageCodes.length === 0) {
+      return
+    }
+
+    const transcriptRef = database.collection("/users").doc()
+
+    const id = transcriptRef.id
+
+    const uploadTask = storage
+      .ref()
+      .child(id)
+      .put(file)
+
+    uploadTask.on(
+      firebase.storage.TaskEvent.STATE_CHANGED,
+      (snapshot: firebase.storage.UploadTaskSnapshot) => {
+        const transcript = this.state.transcript
+
+        transcript.progress = {
+          percent: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
+          status: Status.Uploading,
+        }
+
+        console.log(transcript)
+
+        this.setState({ transcript })
+      },
+      error => {
+        ReactGA.exception({
+          description: error.message,
+          fatal: false,
+        })
+
+        /*FIXME https://firebase.google.com/docs/storage/web/handle-errors
+        
+        switch (error.code) {
+          case "storage/unauthorized":
+            // User doesn't have permission to access the object
+            break
+          case "storage/canceled":
+            // User canceled the upload
+            break
+          case "storage/unknown":
+            // Unknown error occurred, inspect error.serverResponse
+            console.error(error)
+            console.log("error during upload from error section")
+            break
+        }*/
+      },
+      () => {
+        uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+          const transcript = this.state.transcript
+          transcript.title = file.name.substr(0, file.name.lastIndexOf(".")) || file.name
+          transcript.audioUrls = {
+            original: downloadURL,
+          }
+          transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
+          transcript.languageCodes = this.selectedLanguageCodes()
+          transcript.ownedBy = this.props.user.uid
+          transcript.progress = { status: Status.Analysing }
+          transcript.timestamps = {
+            analysing: firebase.firestore.FieldValue.serverTimestamp(),
+          }
+
+          // Metadata
+
+          const metadata: IMetadata = {
+            interactionType: transcript.metadata.interactionType,
+            microphoneDistance: transcript.metadata.microphoneDistance,
+            originalMediaType: transcript.metadata.originalMediaType,
+            originalMimeType: file.type,
+            recordingDeviceType: transcript.metadata.recordingDeviceType,
+          }
+
+          // Add non empty fields
+
+          if (transcript.metadata.audioTopic !== "") {
+            metadata.audioTopic = transcript.metadata.audioTopic
+          }
+
+          const industryNaicsCodeOfAudio = parseInt(transcript.metadata.industryNaicsCodeOfAudio, 10)
+
+          if (!isNaN(industryNaicsCodeOfAudio)) {
+            transcript.metadata.industryNaicsCodeOfAudio = industryNaicsCodeOfAudio
+          }
+
+          if (transcript.metadata.recordingDeviceName !== "") {
+            metadata.recordingDeviceName = transcript.metadata.recordingDeviceName
+          }
+
+          // Clean up phrases
+
+          const phrases = transcript.metadata
+            .speechContext!.phrases.filter(phrase => {
+              return phrase.trim()
+            })
+            .map(phrase => phrase.trim())
+
+          if (phrases.length > 0) {
+            metadata.speechContext = { phrases }
+          }
+
+          transcript.metadata = metadata
+
+          database
+            .doc(`transcripts/${id}`)
+            .set(transcript)
+            .then(success => {
+              this.resetForm()
+            })
+            .catch((error: Error) => {
+              ReactGA.exception({
+                description: error.message,
+                fatal: false,
+              })
+            })
+        })
+      },
+    )
+  }
+
   private selectedLanguageCodes() {
-    const languageCodes = this.state.languageCodes
+    const languageCodes = this.state.transcript.languageCodes
 
     const selectedLanguageCodes = languageCodes.filter(language => {
       return language !== ""

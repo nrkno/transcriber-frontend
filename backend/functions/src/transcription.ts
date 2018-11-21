@@ -56,6 +56,7 @@ export async function transcribe(id: string, gcsUri: string, languageCodes: stri
       enableAutomaticPunctuation,
       enableWordTimeOffsets: true,
       languageCode,
+      useEnhanced: true,
     },
   }
 

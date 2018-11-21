@@ -1,17 +1,22 @@
-import { Status } from "./enums"
+import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType } from "./enums"
 
 interface ITranscript {
-  audio: IAudio
-  createdAt: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+  audioUrls?: {
+    original?: string
+    playback?: string
+  }
+  createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+  duration?: number
   error?: any
   languageCodes: Array<string>
-  ownedBy: string
+  recognitionMetadata: IRecognitionMetadata
+  ownedBy?: string
   progress?: {
     percent?: number
     status?: Status
   }
   results?: Array<IResult>
-  timestamps: {
+  timestamps?: {
     analysing?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
     transcoding?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
     transcribing?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
@@ -19,13 +24,23 @@ interface ITranscript {
     success?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
     failed?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   }
-  title: string
+  title?: string
 }
 
-interface IAudio {
-  duration?: number
-  type: string
-  url: string
+interface IRecognitionMetadata {
+  audioTopic?: string
+  industryNaicsCodeOfAudio?: number | string
+  interactionType: InteractionType
+  microphoneDistance: MicrophoneDistance
+  originalMediaType: OriginalMediaType
+  originalMimeType?: string
+  recordingDeviceName?: string
+  recordingDeviceType: RecordingDeviceType
+  speechContexts?: Array<ISpeechContext>
+}
+
+interface ISpeechContext {
+  phrases: Array<string>
 }
 
 interface IResult {

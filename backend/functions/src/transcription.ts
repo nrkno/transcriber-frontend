@@ -5,6 +5,7 @@
 
 import speech from "@google-cloud/speech"
 import database from "./database"
+import { ILongRunningRegonize, ITranscript } from "./interfaces"
 
 const client = new speech.v1p1beta1.SpeechClient()
 
@@ -40,31 +41,39 @@ async function trans(operation, id: string) {
   })
 }
 
-export async function transcribe(id: string, gcsUri: string, languageCodes: string[]) {
-  if (languageCodes.length === 0) {
-    throw new Error("At least one language must be specified")
+export async function transcribe(id: string, transcript: ITranscript, uri: string) {
+  if (!transcript.languageCodes || transcript.languageCodes.length === 0) {
+    throw new Error("Language codes missing")
   }
 
-  const languageCode = languageCodes.shift()
-  const alternativeLanguageCodes = languageCodes.length > 0 ? languageCodes : null
+  if (!transcript.audioUrls) {
+    throw new Error("Audio URLs missing")
+  }
+
+  const languageCode = transcript.languageCodes.shift()!
   const enableAutomaticPunctuation = languageCode === "en-US" // Only working for en-US at the moment
 
-  const request = {
-    audio: { uri: gcsUri },
+  const recognitionRequest: ILongRunningRegonize = {
+    audio: { uri },
     config: {
-      alternativeLanguageCodes,
       enableAutomaticPunctuation,
       enableWordTimeOffsets: true,
       languageCode,
+      metadata: transcript.recognitionMetadata,
+      useEnhanced: true,
     },
   }
 
-  console.log("Start transcribing", id, request)
+  if (transcript.languageCodes.length > 0) {
+    recognitionRequest.config.alternativeLanguageCodes = transcript.languageCodes
+  }
+
+  console.log("Start transcribing", id, recognitionRequest)
 
   // Detects speech in the audio file. This creates a recognition job that you
   // can wait for now, or get its result later.
 
-  const responses = await client.longRunningRecognize(request)
+  const responses = await client.longRunningRecognize(recognitionRequest)
 
   const operation = responses[0]
 

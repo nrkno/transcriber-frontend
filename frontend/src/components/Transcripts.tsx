@@ -68,7 +68,7 @@ class Transcripts extends Component<IProps, IState> {
                       .locale("nb")
                       .calendar()
                     const id = this.state.transcriptIds[index]
-                    const duration = moment.duration(transcript.audio.duration * 1000)
+                    const duration = moment.duration(transcript.duration * 1000)
 
                     return (
                       <tr key={id}>

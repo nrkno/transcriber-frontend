@@ -289,7 +289,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                   })}
                 </div>
               </main>
-              <Player ref={this.playerRef} fileUrl={transcript.audio.url} handleTimeUpdate={this.handleTimeUpdate} />
+              <Player ref={this.playerRef} fileUrl={transcript.audioUrls.original} handleTimeUpdate={this.handleTimeUpdate} />
             </>
           )
 

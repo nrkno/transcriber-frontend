@@ -43,7 +43,7 @@ class App extends React.Component<any, IState> {
       <BrowserRouter>
         <div className="container">
           <header className="org-color-dark">
-            <svg height="17" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 55.9 20" enable-background="new 0 0 55.9 20" xmlSpace="preserve">
+            <svg height="17" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 55.9 20" enableBackground="new 0 0 55.9 20" xmlSpace="preserve">
               <g>
                 <rect x="0" y="0.4" fill="#FFFFFF" width="6.9" height="19.6" />
                 <rect x="19.6" y="0.4" fill="#FFFFFF" width="6.9" height="19.6" />

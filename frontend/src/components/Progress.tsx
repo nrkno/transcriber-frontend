@@ -1,7 +1,6 @@
 import * as React from "react"
 import ReactGA from "react-ga"
 import { Status, SweetProgressStatus } from "../enums"
-import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 import TranscriptionProgress from "./TranscriptionProgress"
 
@@ -10,8 +9,8 @@ interface IProps {
 }
 
 class Progress extends React.Component<IProps, any> {
-  public componentDidUpdate(_prevProps: any, prevState: any /*, _snapshot*/) {
-    /* if (this.state.transcript && this.state.transcript.progress && this.state.transcript.progress.status) {
+  public componentDidUpdate(prevProps: any, prevState: any /*, _snapshot*/) {
+    if (this.state.transcript && this.state.transcript.progress && this.state.transcript.progress.status) {
       // Log errors
       if (this.state.transcript.progress.status === Status.Failed && this.state.transcript.error) {
         ReactGA.exception({
@@ -28,7 +27,6 @@ class Progress extends React.Component<IProps, any> {
         })
       }
     }
-    */
   }
 
   public render() {

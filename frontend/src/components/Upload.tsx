@@ -432,7 +432,12 @@ class Upload extends React.Component<IProps, IState> {
 
   private availableLanguages() {
     const languages = new Map([
-      ["", "Velg språk.."],
+      ["nb-NO", "Norsk"],
+      ["sv-SE", "Svensk"],
+      ["da-DK", "Dansk"],
+      ["en-GB", "Engelsk (Storbritannia)"],
+      ["en-US", "Engelsk (USA)"],
+      ["", "---"],
       ["af-ZA", "Afrikaans"],
       ["am-ET", "Amharisk"],
       ["ar-DZ", "Arabisk (Algerie)"],

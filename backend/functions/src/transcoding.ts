@@ -16,7 +16,7 @@ import { storage } from "./storage"
 /**
  * Utility method to convert audio to mono channel using FFMPEG.
  */
-async function reencodeToMono(tempFilePath: string, targetTempFilePath: string, id: string) {
+async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: string, id: string) {
   return new Promise((resolve, reject) => {
     ffmpeg(tempFilePath)
       .setFfmpegPath(ffmpeg_static.path)
@@ -44,30 +44,73 @@ async function reencodeToMono(tempFilePath: string, targetTempFilePath: string, 
 }
 
 /**
+ * Utility method to convert audio to MP4.
+ */
+async function reencodeToM4a(tempFilePath: string, targetTempFilePath: string, id: string) {
+  return new Promise((resolve, reject) => {
+    ffmpeg(tempFilePath)
+      .setFfmpegPath(ffmpeg_static.path)
+      .format("aac")
+      .on("error", err => {
+        reject(err)
+      })
+      .on("end", () => {
+        resolve()
+      })
+      .save(targetTempFilePath)
+  })
+}
+
+/**
  * When an audio is uploaded in the Storage bucket we generate a mono channel audio automatically using
  * node-fluent-ffmpeg.
  */
-export async function transcode(id: string) {
+export async function transcode(id: string): Promise<string> {
   // Getting the bucket reference from Google Cloud Runtime Configuration API
 
-  const uploadsBucketReference = functions.config().bucket.uploads
+  const bucketName = functions.config().bucket.name
 
-  if (uploadsBucketReference === undefined) {
-    throw Error("Environment variable 'bucket.upload' not set up")
+  if (bucketName === undefined) {
+    throw Error("Environment variable 'bucket.name' not set up")
   }
-  const uploadsBucket = storage.bucket(uploadsBucketReference)
+  const bucket = storage.bucket(bucketName)
 
-  /*const fileBucket = objectMetaData.bucket // The Storage bucket that contains the file.
-    const contentType = objectMetaData.contentType // File content type.
-  
-    // Exit if this is triggered on a file that is not an audio.
-    if (contentType === undefined || !contentType.startsWith("audio/")) {
-      throw Error("Uploaded file is not audio")
-    }
-  */
-  // Get the file name.
-  const fileName = path.basename(id)
+  // -----------------
+  // 1. Check metadata
+  // -----------------
 
+  // Check if ownedBy is present
+
+  const file = bucket.file(`incoming/${id}`)
+
+  const metadataPromise = await file.getMetadata()
+
+  const fileMetadata = metadataPromise[0]
+
+  // Exit if owned by is missing
+  if (fileMetadata.metadata === undefined || fileMetadata.metadata.ownedBy === undefined) {
+    throw new Error("Metadata missing from uploaded file")
+  }
+
+  // Check if it's an audio file
+
+  const contentType = fileMetadata.contentType
+
+  // Exit if this is triggered on a file that is not an audio.
+  if (contentType === undefined || !contentType.startsWith("audio/")) {
+    throw Error("Uploaded file is not an audio file")
+  }
+
+  // ---------------------------------
+  // 2. Move file into users directory
+  // ---------------------------------
+
+  const ownedBy = fileMetadata.metadata.ownedBy
+
+  const movedFile = await file.move(`media/${ownedBy}`)
+
+  return ""
+  /*
   // Download file from uploads bucket.
   const tempFilePath = path.join(os.tmpdir(), fileName)
   // We add a '.flac' suffix to target audio file name. That's where we'll upload the converted audio.
@@ -75,12 +118,12 @@ export async function transcode(id: string) {
   const targetTempFilePath = path.join(os.tmpdir(), targetTempFileName)
   const targetStorageFilePath = path.join(path.dirname(id), targetTempFileName)
 
-  await uploadsBucket.file(id).download({ destination: tempFilePath })
+  await bucket.file(`incoming/${id}`).download({ destination: tempFilePath })
 
   console.log("Audio downloaded locally to", tempFilePath)
 
   // Convert the audio to mono channel using FFMPEG.
-  await reencodeToMono(tempFilePath, targetTempFilePath, id)
+  await reencodeToFlacMono(tempFilePath, targetTempFilePath, id)
 
   console.log("Output audio created at", targetTempFilePath)
 
@@ -123,4 +166,6 @@ export async function transcode(id: string) {
   }
 
   return `gs://${bucket}/${name}`
+
+  */
 }

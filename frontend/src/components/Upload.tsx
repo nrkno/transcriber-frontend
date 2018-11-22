@@ -299,18 +299,23 @@ class Upload extends React.Component<IProps, IState> {
 
     const selectedLanguageCodes = this.selectedLanguageCodes()
 
-    if (file === undefined || this.props.user === undefined || selectedLanguageCodes.length === 0) {
+    if (file === undefined || this.props.user === undefined || this.props.user.uid === undefined || selectedLanguageCodes.length === 0) {
       return
     }
+    const uid = this.props.user.uid
 
-    const transcriptRef = database.collection("/users").doc()
+    const id = database.collection("/transcripts").doc().id
 
-    const id = transcriptRef.id
+    const uploadMetadata: firebase.storage.UploadMetadata = {
+      customMetadata: {
+        ownedBy: uid,
+      },
+    }
 
     const uploadTask = storage
-      .ref()
+      .ref("/incoming")
       .child(id)
-      .put(file)
+      .put(file, uploadMetadata)
 
     uploadTask.on(
       firebase.storage.TaskEvent.STATE_CHANGED,
@@ -357,7 +362,7 @@ class Upload extends React.Component<IProps, IState> {
           }
           transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
           transcript.languageCodes = this.selectedLanguageCodes()
-          transcript.ownedBy = this.props.user.uid
+          transcript.ownedBy = uid
 
           // Metadata
 

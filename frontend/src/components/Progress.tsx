@@ -44,6 +44,11 @@ class Progress extends React.Component<IProps, any> {
           const progress = transcript.progress
 
           switch (progress.status) {
+            case Status.Uploading:
+              // The file has been uploaded, and we're waiting for the Cloud function to start
+              return <TranscriptionProgress message="Laster opp" title={transcript.title} status={SweetProgressStatus.Active} symbol={"⬆️"} />
+
+            case Status.Transcoding:
             case Status.Analysing:
               // The file has been uploaded, and we're waiting for the Cloud function to start
               return <TranscriptionProgress message="Analyserer" title={transcript.title} status={SweetProgressStatus.Active} symbol={"🔍"} />

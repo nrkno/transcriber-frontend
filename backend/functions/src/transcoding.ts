@@ -46,18 +46,18 @@ async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: stri
 /**
  * Utility method to convert audio to MP4.
  */
-async function reencodeToM4a(tempFilePath: string, targetTempFilePath: string, id: string) {
+async function reencodeToM4a(input: string, output: string) {
   return new Promise((resolve, reject) => {
-    ffmpeg(tempFilePath)
+    ffmpeg(input)
       .setFfmpegPath(ffmpeg_static.path)
-      .format("aac")
+      .format("mp4")
       .on("error", err => {
         reject(err)
       })
       .on("end", () => {
         resolve()
       })
-      .save(targetTempFilePath)
+      .save(output)
   })
 }
 
@@ -81,13 +81,10 @@ export async function transcode(id: string): Promise<string> {
 
   // Check if ownedBy is present
 
-  const file = bucket.file(`incoming/${id}`)
+  const incomingFile = bucket.file(path.join("incoming", id))
 
-  const metadataPromise = await file.getMetadata()
+  const [fileMetadata] = await incomingFile.getMetadata()
 
-  const fileMetadata = metadataPromise[0]
-
-  // Exit if owned by is missing
   if (fileMetadata.metadata === undefined || fileMetadata.metadata.ownedBy === undefined) {
     throw new Error("Metadata missing from uploaded file")
   }
@@ -101,71 +98,69 @@ export async function transcode(id: string): Promise<string> {
     throw Error("Uploaded file is not an audio file")
   }
 
-  // ---------------------------------
-  // 2. Move file into users directory
-  // ---------------------------------
+  // ----------------------------------------
+  // 2. Move file into user's media directory
+  // ----------------------------------------
 
   const ownedBy = fileMetadata.metadata.ownedBy
 
-  const movedFile = await file.move(`media/${ownedBy}`)
+  const mediaPath = path.join("media", ownedBy)
 
-  return ""
-  /*
-  // Download file from uploads bucket.
-  const tempFilePath = path.join(os.tmpdir(), fileName)
-  // We add a '.flac' suffix to target audio file name. That's where we'll upload the converted audio.
-  const targetTempFileName = fileName.replace(/\.[^/.]+$/, "") + ".flac"
-  const targetTempFilePath = path.join(os.tmpdir(), targetTempFileName)
-  const targetStorageFilePath = path.join(path.dirname(id), targetTempFileName)
+  const [file] = await incomingFile.move(path.join(mediaPath, id))
 
-  await bucket.file(`incoming/${id}`).download({ destination: tempFilePath })
+  // ------------------------------
+  // 3. Download file and transcode
+  // ------------------------------
+
+  const tempFilePath = path.join(os.tmpdir(), id)
+
+  await file.download({ destination: tempFilePath })
 
   console.log("Audio downloaded locally to", tempFilePath)
 
-  // Convert the audio to mono channel using FFMPEG.
-  await reencodeToFlacMono(tempFilePath, targetTempFilePath, id)
+  // Transcode to m4a
 
-  console.log("Output audio created at", targetTempFilePath)
+  const playbackFileName = `${id}.m4a`
+  const playbackTempFilePath = path.join(os.tmpdir(), playbackFileName)
 
-  // Getting the bucket reference from Google Cloud Runtime Configuration API
-  const transcodedBucketReference = functions.config().bucket.transcoded
+  await reencodeToM4a(tempFilePath, playbackTempFilePath)
 
-  if (transcodedBucketReference === undefined) {
-    throw Error("Environment variable 'bucket.transcoded' not set up")
-  }
+  const playbackStorageFilePath = path.join(mediaPath, playbackFileName)
 
-  const transcodedBucket = storage.bucket(transcodedBucketReference)
+  const [playbackFile] = await bucket.upload(playbackTempFilePath, {
+    destination: playbackStorageFilePath,
+    resumable: false,
+  })
+  console.log("Uploaded m4a to ", playbackStorageFilePath)
 
-  // Uploading the audio to transcoded bucket.
-  const [transcodedFile] = await transcodedBucket.upload(targetTempFilePath, {
+  const [playbackUrl] = await playbackFile.getSignedUrl({
+    action: "read",
+    expires: "03-09-2491",
+  })
+
+  console.log("Playback url ", playbackUrl)
+  await database.setPlaybackUrl(id, playbackUrl)
+
+  // Transcode to FLAC mono
+
+  const transcribeFileName = `${id}.flac`
+  const transcribeTempFilePath = path.join(os.tmpdir(), transcribeFileName)
+
+  await reencodeToFlacMono(tempFilePath, transcribeTempFilePath, id)
+
+  const targetStorageFilePath = path.join(mediaPath, transcribeFileName)
+
+  const [transcodedFile] = await bucket.upload(transcribeTempFilePath, {
     destination: targetStorageFilePath,
     resumable: false,
   })
 
-  console.log("Output audio uploaded to", targetStorageFilePath)
+  console.log("Output flac to", targetStorageFilePath)
 
   // Once the audio has been uploaded delete the local file to free up disk space.
   fs.unlinkSync(tempFilePath)
-  fs.unlinkSync(targetTempFilePath)
+  fs.unlinkSync(playbackTempFilePath)
+  fs.unlinkSync(transcribeTempFilePath)
 
-  console.log("Temporary files removed.", targetTempFilePath)
-
-  // Finally, transcribe the transcoded audio file
-
-  console.log(transcodedFile)
-
-  if (transcodedFile.metadata === undefined) {
-    throw new Error("Metadata missing on transcoded file")
-  }
-
-  const bucket = transcodedFile.metadata.bucket
-  const name = transcodedFile.metadata.name
-
-  if (bucket === undefined || name === undefined) {
-    throw new Error("Error in metadata on transcoded file")
-  }
-
-  return `gs://${bucket}/${name}`
-
-  */
+  return `gs://${bucket.name}/${targetStorageFilePath}`
 }

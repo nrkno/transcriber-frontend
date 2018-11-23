@@ -96,7 +96,13 @@ const database = (() => {
     return transcript.progress.status
   }
 
-  return { addResult, errorOccured, setDuration, setStatus, setPercent, getStatus, getResults }
+  const setPlaybackUrl = async (id: string, url: string) => {
+    const transcript: ITranscript = { audioUrls: { playback: url } }
+
+    return updateTranscript(id, transcript)
+  }
+
+  return { addResult, errorOccured, setDuration, setStatus, setPercent, getStatus, getResults, setPlaybackUrl }
 })()
 
 export default database

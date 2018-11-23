@@ -3,7 +3,7 @@ import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, Recordi
 
 interface ITranscript {
   audioUrls?: {
-    original: string
+    original?: string
     playback?: string
   }
   createdAt?: Date

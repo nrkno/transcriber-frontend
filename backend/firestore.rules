@@ -4,12 +4,12 @@ service cloud.firestore {
    match /transcripts/{transcriptId} {
       match /results/{resultId} {
       	allow list;
-        allow create: if request.auth.uid != null && request.resource.data.ownedBy == request.auth.uid;
+        allow create: if request.auth.uid != null && request.resource.data.userId == request.auth.uid;
       }
    		
       allow get;
-      allow create: if request.auth.uid != null && request.resource.data.ownedBy == request.auth.uid;
-      allow list, update: if request.auth.uid != null && resource.data.ownedBy == request.auth.uid;
+      allow create: if request.auth.uid != null && request.resource.data.userId == request.auth.uid;
+      allow list, update: if request.auth.uid != null && resource.data.userId == request.auth.uid;
     }
   }
 }

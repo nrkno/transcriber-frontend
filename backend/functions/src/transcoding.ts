@@ -65,7 +65,7 @@ async function reencodeToM4a(input: string, output: string) {
  * When an audio is uploaded in the Storage bucket we generate a mono channel audio automatically using
  * node-fluent-ffmpeg.
  */
-export async function transcode(id: string): Promise<string> {
+export async function transcode(transcriptId: string, userId: string): Promise<string> {
   // Getting the bucket reference from Google Cloud Runtime Configuration API
 
   const bucketName = functions.config().bucket.name
@@ -75,21 +75,15 @@ export async function transcode(id: string): Promise<string> {
   }
   const bucket = storage.bucket(bucketName)
 
-  // -----------------
-  // 1. Check metadata
-  // -----------------
+  // -----------------------------------
+  // 1. Check that we have an audio file
+  // -----------------------------------
 
-  // Check if ownedBy is present
+  const mediaPath = path.join("media", userId)
 
-  const incomingFile = bucket.file(path.join("incoming", id))
+  const file = bucket.file(path.join(mediaPath, transcriptId))
 
-  const [fileMetadata] = await incomingFile.getMetadata()
-
-  if (fileMetadata.metadata === undefined || fileMetadata.metadata.ownedBy === undefined) {
-    throw new Error("Metadata missing from uploaded file")
-  }
-
-  // Check if it's an audio file
+  const [fileMetadata] = await file.getMetadata()
 
   const contentType = fileMetadata.contentType
 
@@ -98,21 +92,11 @@ export async function transcode(id: string): Promise<string> {
     throw Error("Uploaded file is not an audio file")
   }
 
-  // ----------------------------------------
-  // 2. Move file into user's media directory
-  // ----------------------------------------
-
-  const ownedBy = fileMetadata.metadata.ownedBy
-
-  const mediaPath = path.join("media", ownedBy)
-
-  const [file] = await incomingFile.move(path.join(mediaPath, id))
-
   // ------------------------------
-  // 3. Download file and transcode
+  // 2. Download file and transcode
   // ------------------------------
 
-  const tempFilePath = path.join(os.tmpdir(), id)
+  const tempFilePath = path.join(os.tmpdir(), transcriptId)
 
   await file.download({ destination: tempFilePath })
 
@@ -120,7 +104,7 @@ export async function transcode(id: string): Promise<string> {
 
   // Transcode to m4a
 
-  const playbackFileName = `${id}.m4a`
+  const playbackFileName = `${transcriptId}.m4a`
   const playbackTempFilePath = path.join(os.tmpdir(), playbackFileName)
 
   await reencodeToM4a(tempFilePath, playbackTempFilePath)
@@ -133,24 +117,23 @@ export async function transcode(id: string): Promise<string> {
   })
   console.log("Uploaded m4a to ", playbackStorageFilePath)
 
-  const [playbackUrl] = await playbackFile.getSignedUrl({
-    action: "read",
-    expires: "03-09-2491",
-  })
+  await playbackFile.makePublic()
+
+  const playbackUrl = path.join("https://storage.googleapis.com", bucketName, mediaPath, playbackFileName)
 
   console.log("Playback url ", playbackUrl)
-  await database.setPlaybackUrl(id, playbackUrl)
+  await database.setPlaybackUrl(transcriptId, playbackUrl)
 
   // Transcode to FLAC mono
 
-  const transcribeFileName = `${id}.flac`
+  const transcribeFileName = `${transcriptId}.flac`
   const transcribeTempFilePath = path.join(os.tmpdir(), transcribeFileName)
 
-  await reencodeToFlacMono(tempFilePath, transcribeTempFilePath, id)
+  await reencodeToFlacMono(tempFilePath, transcribeTempFilePath, transcriptId)
 
   const targetStorageFilePath = path.join(mediaPath, transcribeFileName)
 
-  const [transcodedFile] = await bucket.upload(transcribeTempFilePath, {
+  await bucket.upload(transcribeTempFilePath, {
     destination: targetStorageFilePath,
     resumable: false,
   })

@@ -58,7 +58,10 @@ class App extends React.Component<any, IState> {
               </g>
             </svg>
             <h1 className="org-text-l">Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</h1>
-            <div className="user">{this.state.user !== undefined ? this.state.user.displayName : "Login"}</div>
+            <div className="user">
+              {this.state.user !== undefined ? this.state.user.displayName : "Login"}
+              {process.env.NODE_ENV === "development" && this.state.user !== undefined ? ` (${this.state.user.uid})` : ""}
+            </div>
           </header>
           <Switch>
             <Route path="/" exact={true} render={props => <Transcripts {...props} user={this.state.user} />} />

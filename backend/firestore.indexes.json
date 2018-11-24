@@ -5,7 +5,7 @@
       "state": "READY",
       "fields": [
         {
-          "fieldPath": "ownedBy",
+          "fieldPath": "userId",
           "mode": "ASCENDING"
         },
         {

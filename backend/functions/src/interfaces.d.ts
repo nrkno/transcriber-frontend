@@ -11,7 +11,7 @@ interface ITranscript {
   error?: any
   languageCodes?: Array<string>
   recognitionMetadata?: IRecognitionMetadata
-  ownedBy?: string
+  userId?: string
   progress?: {
     percent?: number | admin.firestore.FieldValue
     status?: Status

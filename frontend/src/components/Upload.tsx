@@ -306,16 +306,10 @@ class Upload extends React.Component<IProps, IState> {
 
     const id = database.collection("/transcripts").doc().id
 
-    const uploadMetadata: firebase.storage.UploadMetadata = {
-      customMetadata: {
-        ownedBy: uid,
-      },
-    }
-
     const uploadTask = storage
       .ref("/incoming")
       .child(id)
-      .put(file, uploadMetadata)
+      .put(file)
 
     uploadTask.on(
       firebase.storage.TaskEvent.STATE_CHANGED,
@@ -362,7 +356,7 @@ class Upload extends React.Component<IProps, IState> {
           }
           transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
           transcript.languageCodes = this.selectedLanguageCodes()
-          transcript.ownedBy = uid
+          transcript.userId = uid
 
           // Metadata
 

@@ -96,7 +96,7 @@ class Transcripts extends Component<IProps, IState> {
   private fetchTranscripts(uid: string) {
     database
       .collection("/transcripts")
-      .where("ownedBy", "==", uid)
+      .where("userId", "==", uid)
       .orderBy("createdAt", "desc")
       .onSnapshot(querySnapshot => {
         const transcripts = Array<ITranscript>()

@@ -75,11 +75,13 @@ export async function transcode(transcriptId: string, userId: string): Promise<s
   }
   const bucket = storage.bucket(bucketName)
 
-  // ------------------------------------------------
-  // 1. Check metadata that the file is an audio file
-  // ------------------------------------------------
+  // -----------------------------------
+  // 1. Check that we have an audio file
+  // -----------------------------------
 
-  const file = bucket.file(path.join("media", userId, transcriptId))
+  const mediaPath = path.join("media", userId)
+
+  const file = bucket.file(path.join(mediaPath, transcriptId))
 
   const [fileMetadata] = await file.getMetadata()
 
@@ -115,10 +117,9 @@ export async function transcode(transcriptId: string, userId: string): Promise<s
   })
   console.log("Uploaded m4a to ", playbackStorageFilePath)
 
-  const [playbackUrl] = await playbackFile.getSignedUrl({
-    action: "read",
-    expires: "03-09-2491",
-  })
+  await playbackFile.makePublic()
+
+  const playbackUrl = path.join("https://storage.googleapis.com", bucketName, mediaPath, playbackFileName)
 
   console.log("Playback url ", playbackUrl)
   await database.setPlaybackUrl(transcriptId, playbackUrl)
@@ -132,7 +133,7 @@ export async function transcode(transcriptId: string, userId: string): Promise<s
 
   const targetStorageFilePath = path.join(mediaPath, transcribeFileName)
 
-  const [transcodedFile] = await bucket.upload(transcribeTempFilePath, {
+  await bucket.upload(transcribeTempFilePath, {
     destination: targetStorageFilePath,
     resumable: false,
   })

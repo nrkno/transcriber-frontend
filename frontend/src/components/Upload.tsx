@@ -302,13 +302,13 @@ class Upload extends React.Component<IProps, IState> {
     if (file === undefined || this.props.user === undefined || this.props.user.uid === undefined || selectedLanguageCodes.length === 0) {
       return
     }
-    const uid = this.props.user.uid
+    const userId = this.props.user.uid
 
-    const id = database.collection("/transcripts").doc().id
+    const transcriptId = database.collection("/transcripts").doc().id
 
     const uploadTask = storage
-      .ref("/incoming")
-      .child(id)
+      .ref(`/media/${userId}`)
+      .child(transcriptId)
       .put(file)
 
     uploadTask.on(
@@ -356,7 +356,7 @@ class Upload extends React.Component<IProps, IState> {
           }
           transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
           transcript.languageCodes = this.selectedLanguageCodes()
-          transcript.userId = uid
+          transcript.userId = userId
 
           // Metadata
 
@@ -399,7 +399,7 @@ class Upload extends React.Component<IProps, IState> {
           transcript.recognitionMetadata = recognitionMetadata
 
           database
-            .doc(`transcripts/${id}`)
+            .doc(`transcripts/${transcriptId}`)
             .set(transcript)
             .then(success => {
               this.resetForm()

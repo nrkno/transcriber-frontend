@@ -1,12 +1,8 @@
 service firebase.storage {
   match /b/{bucket}/o {
-
-    match /uploads {
-      allow write: if request.auth != null;
-    }
-
-    match /{allPaths=**} {
-      allow read, write;
+    match /media/{userId}/{allMedia=**} {
+      allow read
+      allow write: if request.auth.uid == userId;
     }
   }
 }

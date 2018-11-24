@@ -17,13 +17,13 @@ exports.transcription = functions
   .region("europe-west1")
   .firestore.document("transcripts/{transcriptId}")
   .onCreate(async (documentSnapshot, eventContext) => {
-    const id = documentSnapshot.id
+    const transcriptId = documentSnapshot.id
 
-    console.log(`Deployed 15:53 - Start transcription of id: ${id}`)
+    console.log(`Deployed 15:53 - Start transcription of id: ${transcriptId}`)
 
     try {
       // Because of indempotency, we need to fetch the transcript from the server and check if it's already in process
-      const status = await database.getStatus(id)
+      const status = await database.getStatus(transcriptId)
       if (status !== Status.Uploading) {
         console.warn("Transcript already processed, returning")
         return
@@ -31,36 +31,36 @@ exports.transcription = functions
 
       const transcript = documentSnapshot.data() as ITranscript
 
-      if (transcript === undefined) {
-        throw Error("Transcript missing")
+      if (transcript === undefined || transcript.userId === undefined) {
+        throw Error("Transcript or user id missing")
       }
 
       const languageCodes = transcript.languageCodes
 
       // 1. Transcode
 
-      await database.setStatus(id, Status.Transcoding)
-      const uri = await transcode(id)
+      await database.setStatus(transcriptId, Status.Transcoding)
+      const uri = await transcode(transcriptId, transcript.userId)
 
       // 2. Transcribe
 
-      await database.setStatus(id, Status.Transcribing)
-      const speechRecognitionResults = await transcribe(id, transcript, uri)
+      await database.setStatus(transcriptId, Status.Transcribing)
+      const speechRecognitionResults = await transcribe(transcriptId, transcript, uri)
 
       // 3. Save transcription
 
-      await database.setStatus(id, Status.Saving)
-      await saveResult(speechRecognitionResults, id)
+      await database.setStatus(transcriptId, Status.Saving)
+      await saveResult(speechRecognitionResults, transcriptId)
 
       // 4. Done
 
-      await database.setStatus(id, Status.Success)
-      console.log("End transcribing with id: ", id)
+      await database.setStatus(transcriptId, Status.Success)
+      console.log("End transcribing with id: ", transcriptId)
     } catch (error) {
       console.log("Error in main function")
       console.error(error)
 
-      await database.errorOccured(id, error)
+      await database.errorOccured(transcriptId, error)
 
       throw error
     }

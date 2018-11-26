@@ -9,6 +9,7 @@ import ffmpeg from "fluent-ffmpeg"
 import fs from "fs"
 import os from "os"
 import path from "path"
+import url from "url"
 import database from "./database"
 import { hoursMinutesSecondsToSeconds } from "./helpers"
 import { storage } from "./storage"
@@ -118,8 +119,8 @@ export async function transcode(transcriptId: string, userId: string): Promise<s
   console.log("Uploaded m4a to ", playbackStorageFilePath)
 
   await playbackFile.makePublic()
-
-  const playbackUrl = path.join("https://storage.googleapis.com", bucketName, mediaPath, playbackFileName)
+  const playbackFilePath = path.join(bucketName, mediaPath, playbackFileName)
+  const playbackUrl = url.resolve("https://storage.googleapis.com", playbackFilePath)
 
   console.log("Playback url ", playbackUrl)
   await database.setPlaybackUrl(transcriptId, playbackUrl)

@@ -1,6 +1,6 @@
 import firebase from "firebase/app"
 import * as React from "react"
-import Dropzone from "react-dropzone"
+import Dropzone, { DropFilesEventHandler } from "react-dropzone"
 /* Testing not working with normal import right now, see https://github.com/react-dropzone/react-dropzone/issues/554
 let Dropzone = require("react-dropzone")
 if ("default" in Dropzone) {
@@ -50,32 +50,31 @@ class Upload extends React.Component<IProps, IState> {
         <div className="create">
           <h2 className="org-text-xl">Ny transkripsjon</h2>
           <form className="dropForm" onSubmit={this.handleSubmit}>
-            <label className="org-label">
-              Lydfil
-              <Dropzone
-                accept="audio/*"
-                style={{
-                  alignContent: "center",
-                  borderColor: "rgb(102, 102, 102)",
-                  borderRadius: "5px",
-                  borderStyle: "dashed",
-                  borderWidth: "2px",
-                  display: "grid",
-                  height: "100px",
-                  justifyContent: "center",
-                  position: "relative",
-                  width: "100%",
-                }}
-                onDrop={this.handleFileDrop}
-              >
-                <div>
-                  <svg width="20" height="20" focusable="false" aria-hidden="true">
-                    <use xlinkHref="#icon-lyd" />
-                  </svg>
-                  {this.state.dropzoneMessage}
-                </div>
-              </Dropzone>
-            </label>
+            <label className="org-label">Lydfil</label>
+            <Dropzone
+              accept="audio/*"
+              style={{
+                alignContent: "center",
+                borderColor: "rgb(102, 102, 102)",
+                borderRadius: "5px",
+                borderStyle: "dashed",
+                borderWidth: "2px",
+                display: "grid",
+                height: "100px",
+                justifyContent: "center",
+                position: "relative",
+                width: "100%",
+              }}
+              onDrop={this.handleFileDrop}
+            >
+              <div>
+                <svg width="20" height="20" focusable="false" aria-hidden="true">
+                  <use xlinkHref="#icon-lyd" />
+                </svg>
+                {this.state.dropzoneMessage}
+              </div>
+            </Dropzone>
+
             <label className="org-label">
               Språk
               <select value={this.state.transcript.languageCodes[0]} onChange={event => this.handleLanguageChange(0, event)}>
@@ -276,7 +275,9 @@ class Upload extends React.Component<IProps, IState> {
     this.setState({ transcript })
   }
 
-  private handleFileDrop = (acceptedFiles: [File], rejectedFiles: [File]) => {
+  private handleFileDrop: DropFilesEventHandler = (acceptedFiles: [File], rejectedFiles: [File]) => {
+    console.log("YO")
+
     if (rejectedFiles.length > 0) {
       this.setState({ dropzoneMessage: "Filen har feil format", file: undefined })
 

@@ -1,4 +1,4 @@
-import { hoursMinutesSecondsToSeconds } from "../helpers"
+import { hoursMinutesSecondsToSeconds } from "../transcribe/helpers"
 
 test("One hour is 3600 seconds", () => {
   expect(hoursMinutesSecondsToSeconds("1:00:00")).toBe(3600)

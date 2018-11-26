@@ -10,7 +10,7 @@ import fs from "fs"
 import os from "os"
 import path from "path"
 import url from "url"
-import database from "./database"
+import database from "../database"
 import { hoursMinutesSecondsToSeconds } from "./helpers"
 import { storage } from "./storage"
 

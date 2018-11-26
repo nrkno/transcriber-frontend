@@ -4,8 +4,8 @@
  */
 
 import speech from "@google-cloud/speech"
-import database from "./database"
-import { ILongRunningRegonize, ITranscript } from "./interfaces"
+import database from "../database"
+import { ILongRunningRegonize, ITranscript } from "../interfaces"
 
 const client = new speech.v1p1beta1.SpeechClient()
 

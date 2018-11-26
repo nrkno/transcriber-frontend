@@ -3,8 +3,8 @@
  * @author Andreas Schjønhaug
  */
 
-import database from "./database"
-import { IResult } from "./interfaces"
+import database from "../database"
+import { IResult } from "../interfaces"
 
 export async function saveResult(speechRecognitionResults: any, id: string) {
   console.log(speechRecognitionResults)

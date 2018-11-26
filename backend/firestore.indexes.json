@@ -9,7 +9,7 @@
           "mode": "ASCENDING"
         },
         {
-          "fieldPath": "createdAt",
+          "fieldPath": "timestamps.createdAt",
           "mode": "DESCENDING"
         }
       ]

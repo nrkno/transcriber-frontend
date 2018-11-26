@@ -63,7 +63,7 @@ class Transcripts extends Component<IProps, IState> {
                 this.state.transcripts
                   .filter(transcript => transcript.progress.status === Status.Success)
                   .map((transcript, index) => {
-                    const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
+                    const createdAt = (transcript.timestamps.createdAt as firebase.firestore.Timestamp).toDate()
                     const formattedCreatedAt = moment(createdAt)
                       .locale("nb")
                       .calendar()
@@ -97,7 +97,7 @@ class Transcripts extends Component<IProps, IState> {
     database
       .collection("/transcripts")
       .where("userId", "==", uid)
-      .orderBy("createdAt", "desc")
+      .orderBy("timestamps.createdAt", "desc")
       .onSnapshot(querySnapshot => {
         const transcripts = Array<ITranscript>()
         const transcriptIds = Array<string>()

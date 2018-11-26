@@ -13,7 +13,7 @@ interface IState {
   currentResultIndex: number | undefined
   currentTime: number
   currentWordIndex: number | undefined
-  transcript?: ITranscript
+  transcript: ITranscript | null
 }
 
 class Transcript extends React.Component<RouteComponentProps<any>, IState> {
@@ -24,10 +24,10 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
       currentResultIndex: undefined,
       currentTime: 0,
       currentWordIndex: undefined,
-      transcript: undefined,
+      transcript: null,
     }
   }
-  public componentDidUpdate(_prevProps: any, prevState: IState /*, _snapshot*/) {
+  public componentDidUpdate(prevProps: any, prevState: IState /*, _snapshot*/) {
     if (this.state.transcript && this.state.transcript.progress && this.state.transcript.progress.status) {
       // Log errors
       if (this.state.transcript.progress.status === Status.Failed && this.state.transcript.error) {
@@ -50,6 +50,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   public async componentDidMount() {
     database.doc(`transcripts/${this.props.match.params.id}`).onSnapshot(documentSnapshot => {
       const transcript = documentSnapshot.data() as ITranscript
+
+      console.log("transcript", documentSnapshot.data())
 
       this.setState({
         transcript,
@@ -176,7 +178,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     const transcript = this.state.transcript
 
     // Loading from Firebase
-    if (transcript === undefined) {
+    if (transcript === null) {
       return (
         <main id="loading">
           <TranscriptionProgress message={"Laster"} status={SweetProgressStatus.Active} symbol={"⏳"} />
@@ -184,7 +186,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
       )
     }
     // Transcription not found
-    else if (transcript === null) {
+    else if (transcript === undefined) {
       ReactGA.event({
         action: "Not found",
         category: "Transcription",
@@ -198,14 +200,6 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
       const progress = transcript.progress!
 
       switch (progress.status) {
-        case Status.Analysing:
-          // The file has been uploaded, and we're waiting for the Cloud function to start
-          return (
-            <main id="loading">
-              <TranscriptionProgress message={"Analyserer"} status={SweetProgressStatus.Active} symbol={"🔍"} />
-            </main>
-          )
-
         case Status.Transcoding:
           return (
             <main id="loading">

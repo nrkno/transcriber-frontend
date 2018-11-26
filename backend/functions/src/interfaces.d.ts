@@ -1,8 +1,7 @@
 import admin from "firebase-admin"
-import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, AudioEncoding } from "./enums"
+import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, AudioEncoding, Timestamp } from "./enums"
 
 interface ITranscript {
-  createdAt?: Date
   duration?: number
   error?: any
   languageCodes?: Array<string>
@@ -14,14 +13,7 @@ interface ITranscript {
     status?: Status
   }
   results?: Array<IResult>
-  timestamps?: {
-    analysing?: Date | admin.firestore.FieldValue
-    transcoding?: Date | admin.firestore.FieldValue
-    transcribing?: Date | admin.firestore.FieldValue
-    saving?: Date | admin.firestore.FieldValue
-    success?: Date | admin.firestore.FieldValue
-    failed?: Date | admin.firestore.FieldValue
-  }
+  timestamps?: { [x in Timestamp]?: admin.firestore.FieldValue }
   title?: string
 }
 

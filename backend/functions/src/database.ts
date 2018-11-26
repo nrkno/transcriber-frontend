@@ -25,7 +25,20 @@ const database = (() => {
   }
 
   const setStatus = async (id: string, status: Status) => {
-    const transcript: ITranscript = { progress: { status }, timestamps: { [`${status}`]: admin.firestore.Timestamp.now() } }
+    const transcript: ITranscript = { progress: { status } }
+
+    // Add timestamp
+    switch (status) {
+      case Status.Transcribing:
+        transcript.timestamps = { transcodedAt: admin.firestore.Timestamp.now() }
+        break
+      case Status.Saving:
+        transcript.timestamps = { transcribedAt: admin.firestore.Timestamp.now() }
+        break
+      case Status.Success:
+        transcript.timestamps = { savedAt: admin.firestore.Timestamp.now() }
+        break
+    }
 
     // We get completion percentages when transcribing and saving, so setting them to zero.
     if (status === Status.Transcribing || status === Status.Saving) {
@@ -66,6 +79,9 @@ const database = (() => {
       error: serializeError(error),
       progress: {
         status: Status.Failed,
+      },
+      timestamps: {
+        failedAt: admin.firestore.Timestamp.now(),
       },
     }
     return updateTranscript(id, transcript)

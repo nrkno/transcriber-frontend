@@ -35,8 +35,6 @@ exports.transcription = functions
         throw Error("Transcript or user id missing")
       }
 
-      const languageCodes = transcript.languageCodes
-
       // 1. Transcode
 
       await database.setStatus(transcriptId, Status.Transcoding)

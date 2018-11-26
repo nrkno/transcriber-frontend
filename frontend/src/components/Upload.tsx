@@ -9,7 +9,7 @@ if ("default" in Dropzone) {
 import ReactGA from "react-ga"
 import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
-import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Status } from "../enums"
+import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Status, Timestamp } from "../enums"
 import { database, storage } from "../firebaseApp"
 import { IRecognitionMetadata, ITranscript } from "../interfaces"
 
@@ -350,7 +350,7 @@ class Upload extends React.Component<IProps, IState> {
       () => {
         const transcript = this.state.transcript
         transcript.title = file.name.substr(0, file.name.lastIndexOf(".")) || file.name
-        transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
+        transcript.timestamps = { createdAt: firebase.firestore.FieldValue.serverTimestamp() }
         transcript.languageCodes = this.selectedLanguageCodes()
         transcript.userId = userId
 

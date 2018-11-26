@@ -1,7 +1,6 @@
-import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType } from "./enums"
+import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Timestamp } from "./enums"
 
 interface ITranscript {
-  createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   duration?: number
   error?: any
   languageCodes: Array<string>
@@ -13,14 +12,7 @@ interface ITranscript {
     status?: Status
   }
   results?: Array<IResult>
-  timestamps?: {
-    analysing?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
-    transcoding?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
-    transcribing?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
-    saving?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
-    success?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
-    failed?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
-  }
+  timestamps?: { [x in Timestamp]?: firebase.firestore.Timestamp | firebase.firestore.FieldValue }
   title?: string
 }
 

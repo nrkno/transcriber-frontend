@@ -28,7 +28,7 @@ To track events to [Google Analytics](https://analytics.google.com/analytics/web
 
 - Process
 
-  - Analysing
+  - Uploading
   - Transcoding
   - Transcribing
   - Saving

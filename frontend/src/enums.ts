@@ -6,12 +6,19 @@ export enum SweetProgressStatus {
 
 export enum Status {
   Uploading = "UPLOADING",
-  Analysing = "ANALYSING",
   Transcoding = "TRANSCODING",
   Transcribing = "TRANSCRIBING",
   Saving = "SAVING",
   Success = "SUCCESS",
   Failed = "FAILED",
+}
+
+export enum Timestamp {
+  CreatedAt = "createdAt",
+  TranscodedAt = "transcodedAt",
+  TranscribedAt = "transcribedAt",
+  SavedAt = "savedAt",
+  FailedAt = "failedAt",
 }
 
 // Use case categories that the audio recognition request can be described by.

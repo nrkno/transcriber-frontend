@@ -97,7 +97,7 @@ const database = (() => {
   }
 
   const setPlaybackUrl = async (id: string, url: string) => {
-    const transcript: ITranscript = { audioUrls: { playback: url } }
+    const transcript: ITranscript = { playbackUrl: url }
 
     return updateTranscript(id, transcript)
   }

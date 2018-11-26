@@ -2,16 +2,13 @@ import admin from "firebase-admin"
 import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, AudioEncoding } from "./enums"
 
 interface ITranscript {
-  audioUrls?: {
-    original?: string
-    playback?: string
-  }
   createdAt?: Date
   duration?: number
   error?: any
   languageCodes?: Array<string>
   recognitionMetadata?: IRecognitionMetadata
   userId?: string
+  playbackUrl?: string
   progress?: {
     percent?: number | admin.firestore.FieldValue
     status?: Status

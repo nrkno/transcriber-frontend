@@ -1,16 +1,13 @@
 import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType } from "./enums"
 
 interface ITranscript {
-  audioUrls?: {
-    original?: string
-    playback?: string
-  }
   createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   duration?: number
   error?: any
   languageCodes: Array<string>
   recognitionMetadata: IRecognitionMetadata
   userId?: string
+  playbackUrl?: string
   progress?: {
     percent?: number
     status?: Status

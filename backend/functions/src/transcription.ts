@@ -46,10 +46,6 @@ export async function transcribe(id: string, transcript: ITranscript, uri: strin
     throw new Error("Language codes missing")
   }
 
-  if (!transcript.audioUrls) {
-    throw new Error("Audio URLs missing")
-  }
-
   const languageCode = transcript.languageCodes.shift()!
   const enableAutomaticPunctuation = languageCode === "en-US" // Only working for en-US at the moment
 

@@ -348,69 +348,64 @@ class Upload extends React.Component<IProps, IState> {
         }*/
       },
       () => {
-        uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
-          const transcript = this.state.transcript
-          transcript.title = file.name.substr(0, file.name.lastIndexOf(".")) || file.name
-          transcript.audioUrls = {
-            original: downloadURL,
-          }
-          transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
-          transcript.languageCodes = this.selectedLanguageCodes()
-          transcript.userId = userId
+        const transcript = this.state.transcript
+        transcript.title = file.name.substr(0, file.name.lastIndexOf(".")) || file.name
+        transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
+        transcript.languageCodes = this.selectedLanguageCodes()
+        transcript.userId = userId
 
-          // Metadata
+        // Metadata
 
-          const recognitionMetadata: IRecognitionMetadata = {
-            interactionType: transcript.recognitionMetadata.interactionType,
-            microphoneDistance: transcript.recognitionMetadata.microphoneDistance,
-            originalMediaType: transcript.recognitionMetadata.originalMediaType,
-            originalMimeType: file.type,
-            recordingDeviceType: transcript.recognitionMetadata.recordingDeviceType,
-          }
+        const recognitionMetadata: IRecognitionMetadata = {
+          interactionType: transcript.recognitionMetadata.interactionType,
+          microphoneDistance: transcript.recognitionMetadata.microphoneDistance,
+          originalMediaType: transcript.recognitionMetadata.originalMediaType,
+          originalMimeType: file.type,
+          recordingDeviceType: transcript.recognitionMetadata.recordingDeviceType,
+        }
 
-          // Add non empty fields
+        // Add non empty fields
 
-          if (transcript.recognitionMetadata.audioTopic !== "") {
-            recognitionMetadata.audioTopic = transcript.recognitionMetadata.audioTopic
-          }
+        if (transcript.recognitionMetadata.audioTopic !== "") {
+          recognitionMetadata.audioTopic = transcript.recognitionMetadata.audioTopic
+        }
 
-          const industryNaicsCodeOfAudio = parseInt(transcript.recognitionMetadata.industryNaicsCodeOfAudio, 10)
+        const industryNaicsCodeOfAudio = parseInt(transcript.recognitionMetadata.industryNaicsCodeOfAudio, 10)
 
-          if (!isNaN(industryNaicsCodeOfAudio)) {
-            transcript.recognitionMetadata.industryNaicsCodeOfAudio = industryNaicsCodeOfAudio
-          }
+        if (!isNaN(industryNaicsCodeOfAudio)) {
+          transcript.recognitionMetadata.industryNaicsCodeOfAudio = industryNaicsCodeOfAudio
+        }
 
-          if (transcript.recognitionMetadata.recordingDeviceName !== "") {
-            recognitionMetadata.recordingDeviceName = transcript.recognitionMetadata.recordingDeviceName
-          }
+        if (transcript.recognitionMetadata.recordingDeviceName !== "") {
+          recognitionMetadata.recordingDeviceName = transcript.recognitionMetadata.recordingDeviceName
+        }
 
-          // Clean up phrases
+        // Clean up phrases
 
-          const phrases = transcript.recognitionMetadata.speechContexts[0].phrases
-            .filter(phrase => {
-              return phrase.trim()
+        const phrases = transcript.recognitionMetadata.speechContexts[0].phrases
+          .filter(phrase => {
+            return phrase.trim()
+          })
+          .map(phrase => phrase.trim())
+
+        if (phrases.length > 0) {
+          recognitionMetadata.speechContexts = [{ phrases }]
+        }
+
+        transcript.recognitionMetadata = recognitionMetadata
+
+        database
+          .doc(`transcripts/${transcriptId}`)
+          .set(transcript)
+          .then(success => {
+            this.resetForm()
+          })
+          .catch((error: Error) => {
+            ReactGA.exception({
+              description: error.message,
+              fatal: false,
             })
-            .map(phrase => phrase.trim())
-
-          if (phrases.length > 0) {
-            recognitionMetadata.speechContexts = [{ phrases }]
-          }
-
-          transcript.recognitionMetadata = recognitionMetadata
-
-          database
-            .doc(`transcripts/${transcriptId}`)
-            .set(transcript)
-            .then(success => {
-              this.resetForm()
-            })
-            .catch((error: Error) => {
-              ReactGA.exception({
-                description: error.message,
-                fatal: false,
-              })
-            })
-        })
+          })
       },
     )
   }

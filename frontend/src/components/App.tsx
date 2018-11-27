@@ -5,6 +5,7 @@ import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom"
 import "../css/App.css"
 import { auth } from "../firebaseApp"
 import Login from "./Login"
+import Statistics from "./Statistics"
 import Transcript from "./Transcript"
 import Transcripts from "./Transcripts"
 
@@ -67,6 +68,7 @@ class App extends React.Component<any, IState> {
             <Route path="/" exact={true} render={props => <Transcripts {...props} user={this.state.user} />} />
             <Route path="/transcripts/:id" component={Transcript} />
             <Route path="/login" exact={true} component={Login} />
+            <Route path="/statistics" exact={true} component={Statistics} />
           </Switch>
         </div>
       </BrowserRouter>

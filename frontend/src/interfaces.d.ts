@@ -49,3 +49,23 @@ interface ITime {
   nanos: number
   seconds: string
 }
+
+// -----------
+// Statistics
+// -----------
+
+interface ITranscripts {
+  summaries?: Map<string, ITranscriptSummary>
+  duration: number
+  words: number
+}
+
+interface ITranscriptSummary {
+  createdAt: firebase.firestore.Timestamp
+  duration: number
+  languageCodes: Array<string>
+  mimeType: string
+  paragraphs: number
+  processingDuration: number
+  words: number
+}

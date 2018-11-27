@@ -1,6 +1,9 @@
 import admin from "firebase-admin"
 import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, AudioEncoding, Timestamp } from "./enums"
 
+// -----------
+// Transcript
+// -----------
 interface ITranscript {
   duration?: number
   error?: any
@@ -13,7 +16,7 @@ interface ITranscript {
     status?: Status
   }
   results?: Array<IResult>
-  timestamps?: { [x in Timestamp]?: admin.firestore.FieldValue }
+  timestamps?: { [x in Timestamp]?: admin.firestore.FieldValue | admin.firestore.Timestamp }
   title?: string
 }
 
@@ -79,4 +82,24 @@ interface IRecognitionConfig {
   sampleRateHertz?: number
   speechContexts?: Array<ISpeechContext>
   useEnhanced?: boolean
+}
+
+// -----------
+// Statistics
+// -----------
+
+interface ITranscripts {
+  summaries?: Map<string, ITranscriptSummary>
+  duration: number
+  words: number
+}
+
+interface ITranscriptSummary {
+  createdAt: admin.firestore.FieldValue
+  duration: number
+  languageCodes: Array<string>
+  mimeType: string
+  paragraphs: number
+  processingDuration: number
+  words: number
 }

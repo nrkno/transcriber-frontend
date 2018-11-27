@@ -118,7 +118,13 @@ const database = (() => {
     return updateTranscript(id, transcript)
   }
 
-  return { addResult, errorOccured, setDuration, setStatus, setPercent, getStatus, getResults, setPlaybackUrl }
+  const getTranscript = async (transcriptId: string): Promise<ITranscript> => {
+    const doc = await db.doc(`transcripts/${transcriptId}`).get()
+
+    return doc.data() as ITranscript
+  }
+
+  return { addResult, errorOccured, setDuration, setStatus, setPercent, getStatus, getResults, setPlaybackUrl, getTranscript }
 })()
 
 export default database

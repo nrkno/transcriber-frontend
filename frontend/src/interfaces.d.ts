@@ -57,6 +57,7 @@ interface ITime {
 interface ITranscripts {
   summaries?: Map<string, ITranscriptSummary>
   duration: number
+  transcripts: number
   words: number
 }
 

@@ -7,46 +7,45 @@ async function statistics(message: functions.pubsub.Message, context: functions.
   try {
     const transcriptId = message.json.transcriptId
 
-    // Load transcript
+    // Load results and calculate number of words
+
+    const results = await database.getResults(transcriptId)
+
+    const words = results.reduce((accumulator, result) => accumulator + result.words.length, 0)
+
+    // Load transcript, and check that all mandatory values are present
 
     const transcript = await database.getTranscript(transcriptId)
 
-    console.log(transcript)
+    const duration = transcript.duration
+    const languageCodes = transcript.languageCodes
 
-    // Create a new statistic
-
-    // Calculate processing duration
-
-    if (!transcript.timestamps) {
-      return
+    if (transcript.timestamps === undefined) {
+      throw new Error(`Timestamps missing from transcript ${transcriptId}`)
+    } else if (duration === undefined) {
+      throw new Error(`Duration missing from transcript ${transcriptId}`)
+    } else if (languageCodes === undefined) {
+      throw new Error(`Language codes missing from transcript ${transcriptId}`)
+    } else if (transcript.recognitionMetadata === undefined || transcript.recognitionMetadata.originalMimeType === undefined) {
+      throw new Error(`Original mime type missing from transcript ${transcriptId}`)
     }
 
     const start = transcript.timestamps.createdAt as admin.firestore.Timestamp
     const end = transcript.timestamps.savedAt as admin.firestore.Timestamp
 
-    console.log(start, end)
-    console.log(start.toMillis(), end.toMillis())
-
     const processingDuration = (end.toMillis() - start.toMillis()) / 1000
 
     const transcriptSummary: ITranscriptSummary = {
       createdAt: admin.firestore.Timestamp.now(),
-      duration: transcript.duration,
-      languageCodes: transcript.languageCodes,
+      duration,
+      languageCodes,
       mimeType: transcript.recognitionMetadata.originalMimeType,
-      paragraphs: 5,
       processingDuration,
-      words: 100,
+      words,
     }
-
-    console.log(transcriptSummary)
 
     await database.addTranscriptSummary(transcriptSummary)
 
-    /*
-paragraphs?: number
-processingDuration?: number
-words?: number*/
     // For all metrics, we log
     // * All time
     // * Yearly

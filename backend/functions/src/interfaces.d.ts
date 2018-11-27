@@ -91,6 +91,7 @@ interface IRecognitionConfig {
 interface ITranscripts {
   summaries?: Map<string, ITranscriptSummary>
   duration: number
+  transcripts: number
   words: number
 }
 
@@ -99,7 +100,6 @@ interface ITranscriptSummary {
   duration: number
   languageCodes: Array<string>
   mimeType: string
-  paragraphs: number
   processingDuration: number
   words: number
 }

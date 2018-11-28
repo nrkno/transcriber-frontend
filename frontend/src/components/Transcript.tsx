@@ -1,7 +1,7 @@
 import * as React from "react"
 import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"
-import { Status, SweetProgressStatus } from "../enums"
+import { Step, SweetProgressStatus } from "../enums"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWordInfo } from "../interfaces"
 import secondsToTime from "../secondsToTime"
@@ -27,24 +27,27 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
       transcript: null,
     }
   }
+
   public componentDidUpdate(prevProps: any, prevState: IState /*, _snapshot*/) {
-    if (this.state.transcript && this.state.transcript.progress && this.state.transcript.progress.status) {
+    /*TODO
+    if (this.state.transcript && this.state.transcript.process && this.state.transcript.process.step) {
       // Log errors
-      if (this.state.transcript.progress.status === Status.Failed && this.state.transcript.error) {
+      if (this.state.transcript.process.step === Step.Failed && this.state.transcript.process.error) {
         ReactGA.exception({
-          description: this.state.transcript.error.message,
+          description: this.state.transcript.process.error.message,
         })
       }
 
       // Logging progress status
-      else if (prevState.transcript === undefined || (prevState.transcript && prevState.transcript.progress && prevState.transcript.progress.status && prevState.transcript.progress.status !== this.state.transcript.progress.status)) {
+      else if (prevState.transcript === undefined || (prevState.transcript && prevState.transcript.process && prevState.transcript.process.step && prevState.transcript.process.step !== this.state.transcript.process.step)) {
         ReactGA.event({
-          action: this.state.transcript.progress.status,
+          action: this.state.transcript.process.step,
           category: "Progress",
           nonInteraction: true,
         })
       }
     }
+    */
   }
 
   public async componentDidMount() {
@@ -197,103 +200,70 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         </main>
       )
     } else {
-      const progress = transcript.progress!
+      const progress = transcript.process!
 
-      switch (progress.status) {
-        case Status.Transcoding:
-          return (
-            <main id="loading">
-              <TranscriptionProgress message={"Transkoder"} status={SweetProgressStatus.Active} symbol={"🤖"} />
-            </main>
-          )
+      // Read results
 
-        case Status.Transcribing:
-          return (
-            <main id="loading">
-              <TranscriptionProgress message={"Transkriberer"} status={SweetProgressStatus.Active} percent={progress.percent} />
-            </main>
-          )
+      if (transcript.results === undefined) {
+        transcript.results = Array<IResult>()
 
-        case Status.Saving:
-          return (
-            <main id="loading">
-              <TranscriptionProgress message={"Lagrer transkripsjon"} percent={progress.percent} />
-            </main>
-          )
+        database
+          .collection(`transcripts/${this.props.match.params.id}/results`)
+          .orderBy("startTime")
+          .get()
+          .then(querySnapshot => {
+            querySnapshot.forEach(doc => {
+              const result = doc.data() as IResult
 
-        case Status.Success:
-          // We have a transcription , show it
+              transcript.results.push(result)
+            })
 
-          // Read results
-
-          if (transcript.results === undefined) {
-            transcript.results = Array<IResult>()
-
-            database
-              .collection(`transcripts/${this.props.match.params.id}/results`)
-              .orderBy("startTime")
-              .get()
-              .then(querySnapshot => {
-                querySnapshot.forEach(doc => {
-                  const result = doc.data() as IResult
-
-                  transcript.results.push(result)
-                })
-
-                this.setState({
-                  transcript,
-                })
-              })
-          }
-
-          return (
-            <>
-              <main id="transcript">
-                <div className="results">
-                  <div className="meta">
-                    <h1 className="org-text-xl">{transcript.title}</h1>
-                    <form onSubmit={this.handleExportToWord}>
-                      <button className="org-btn" type="submit">
-                        <svg width="20" height="20" focusable="false" aria-hidden="true">
-                          <use xlinkHref="#icon-download" />
-                        </svg>{" "}
-                        Last ned som Word
-                      </button>
-                    </form>
-                  </div>
-                  {transcript.results.map((result, i) => {
-                    const startTime = result.startTime || 0
-
-                    const formattedStartTime = secondsToTime(startTime)
-
-                    return (
-                      <React.Fragment key={i}>
-                        <div key={`startTime-${i}`} className="startTime">
-                          {i > 0 ? formattedStartTime : ""}
-                        </div>
-
-                        <div key={`result-${i}`} className="result">
-                          {result.words.map((word, j) => {
-                            const isCurrentWord = this.state.currentResultIndex === i && this.state.currentWordIndex === j
-                            return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
-                          })}
-                        </div>
-                      </React.Fragment>
-                    )
-                  })}
-                </div>
-              </main>
-              <Player ref={this.playerRef} fileUrl={transcript.playbackUrl} handleTimeUpdate={this.handleTimeUpdate} />
-            </>
-          )
-
-        case Status.Failed:
-          const error = transcript.error
-          return <TranscriptionProgress message={error!.message} status={SweetProgressStatus.Error} />
-
-        default:
-          return <TranscriptionProgress message={"Noe gikk galt!"} status={SweetProgressStatus.Error} />
+            this.setState({
+              transcript,
+            })
+          })
       }
+
+      return (
+        <>
+          <main id="transcript">
+            <div className="results">
+              <div className="meta">
+                <h1 className="org-text-xl">{transcript.name}</h1>
+                <form onSubmit={this.handleExportToWord}>
+                  <button className="org-btn" type="submit">
+                    <svg width="20" height="20" focusable="false" aria-hidden="true">
+                      <use xlinkHref="#icon-download" />
+                    </svg>{" "}
+                    Last ned som Word
+                  </button>
+                </form>
+              </div>
+              {transcript.results.map((result, i) => {
+                const startTime = result.startTime || 0
+
+                const formattedStartTime = secondsToTime(startTime)
+
+                return (
+                  <React.Fragment key={i}>
+                    <div key={`startTime-${i}`} className="startTime">
+                      {i > 0 ? formattedStartTime : ""}
+                    </div>
+
+                    <div key={`result-${i}`} className="result">
+                      {result.words.map((word, j) => {
+                        const isCurrentWord = this.state.currentResultIndex === i && this.state.currentWordIndex === j
+                        return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
+                      })}
+                    </div>
+                  </React.Fragment>
+                )
+              })}
+            </div>
+          </main>
+          <Player ref={this.playerRef} fileUrl={transcript.playbackUrl} handleTimeUpdate={this.handleTimeUpdate} />
+        </>
+      )
     }
   }
 

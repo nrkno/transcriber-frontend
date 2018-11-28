@@ -1,10 +1,9 @@
-export enum Status {
+export enum Step {
   Uploading = "UPLOADING",
   Transcoding = "TRANSCODING",
   Transcribing = "TRANSCRIBING",
   Saving = "SAVING",
-  Success = "SUCCESS",
-  Failed = "FAILED",
+  Done = "DONE",
 }
 
 export enum Timestamp {

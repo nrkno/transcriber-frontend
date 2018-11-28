@@ -22,9 +22,9 @@ class Statistics extends Component<any, IState> {
           Duration:
           {this.state.transcripts.duration}
           Words:
-          {this.state.transcripts.words}
+          {this.state.transcripts.numberOfWords}
           Number of transcripts:
-          {this.state.transcripts.transcripts}
+          {this.state.transcripts.numberOfTranscripts}
         </div>
       )
     } else {

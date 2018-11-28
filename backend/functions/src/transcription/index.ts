@@ -1,5 +1,5 @@
 import database from "../database"
-import { Status } from "../enums"
+import { Step } from "../enums"
 import { ITranscript } from "../interfaces"
 import { saveResult } from "./persistence"
 import { transcode } from "./transcoding"
@@ -12,8 +12,8 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     const transcriptId = documentSnapshot.id
 
     // Because of indempotency, we need to fetch the transcript from the server and check if it's already in process
-    const status = await database.getStatus(transcriptId)
-    if (status !== Status.Uploading) {
+    const step = await database.getStep(transcriptId)
+    if (step !== Step.Uploading) {
       console.warn("Transcript already processed, returning")
       return
     }
@@ -26,23 +26,23 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
 
     // 1. Transcode
 
-    await database.setStatus(transcriptId, Status.Transcoding)
+    await database.setStep(transcriptId, Step.Transcoding)
     const uri = await transcode(transcriptId, transcript.userId)
 
     // 2. Transcribe
 
-    await database.setStatus(transcriptId, Status.Transcribing)
+    await database.setStep(transcriptId, Step.Transcribing)
     const speechRecognitionResults = await transcribe(transcriptId, transcript, uri)
 
     // 3. Save transcription
 
-    await database.setStatus(transcriptId, Status.Saving)
+    await database.setStep(transcriptId, Step.Saving)
     await saveResult(speechRecognitionResults, transcriptId)
 
     // 4. Done
 
-    await database.setStatus(transcriptId, Status.Success)
-    console.log("End transcribing with id: ", transcriptId)
+    await database.setStep(transcriptId, Step.Done)
+    console.log("End transcribing of id: ", transcriptId)
   } catch (error) {
     console.log("Error in main function")
     console.error(error)

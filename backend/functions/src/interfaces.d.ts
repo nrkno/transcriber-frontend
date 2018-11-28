@@ -1,34 +1,37 @@
 import admin from "firebase-admin"
-import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, AudioEncoding, Timestamp } from "./enums"
+import { Step, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, AudioEncoding, Timestamp } from "./enums"
 
 // -----------
 // Transcript
 // -----------
+
 interface ITranscript {
-  duration?: number
-  error?: any
-  languageCodes?: Array<string>
-  recognitionMetadata?: IRecognitionMetadata
-  userId?: string
+  name?: string
   playbackUrl?: string
-  progress?: {
-    percent?: number | admin.firestore.FieldValue
-    status?: Status
-  }
+  process?: IProcess
+  metadata?: IMetadata
   results?: Array<IResult>
   timestamps?: { [x in Timestamp]?: admin.firestore.FieldValue | admin.firestore.Timestamp }
-  title?: string
+  userId?: string
 }
 
-interface IRecognitionMetadata {
+interface IProcess {
+  error?: any
+  percent?: number
+  step?: Step
+}
+
+interface IMetadata {
+  audioDuration?: number
   audioTopic?: string
   industryNaicsCodeOfAudio?: number
-  interactionType: InteractionType
-  microphoneDistance: MicrophoneDistance
-  originalMediaType: OriginalMediaType
+  interactionType?: InteractionType
+  languageCodes?: Array<string>
+  microphoneDistance?: MicrophoneDistance
+  originalMediaType?: OriginalMediaType
   originalMimeType?: string
   recordingDeviceName?: string
-  recordingDeviceType: RecordingDeviceType
+  recordingDeviceType?: RecordingDeviceType
   speechContexts?: Array<ISpeechContext>
 }
 
@@ -82,6 +85,18 @@ interface IRecognitionConfig {
   sampleRateHertz?: number
   speechContexts?: Array<ISpeechContext>
   useEnhanced?: boolean
+}
+
+interface IRecognitionMetadata {
+  audioTopic?: string
+  industryNaicsCodeOfAudio?: number
+  interactionType?: InteractionType
+  microphoneDistance?: MicrophoneDistance
+  originalMediaType?: OriginalMediaType
+  originalMimeType?: string
+  recordingDeviceName?: string
+  recordingDeviceType?: RecordingDeviceType
+  speechContexts?: Array<ISpeechContext>
 }
 
 // -----------

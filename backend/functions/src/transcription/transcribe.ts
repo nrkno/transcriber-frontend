@@ -42,11 +42,11 @@ async function trans(operation, id: string) {
 }
 
 export async function transcribe(id: string, transcript: ITranscript, uri: string) {
-  if (!transcript.languageCodes || transcript.languageCodes.length === 0) {
+  if (!transcript.metadata || !transcript.metadata.languageCodes || transcript.metadata.languageCodes.length === 0) {
     throw new Error("Language codes missing")
   }
 
-  const languageCode = transcript.languageCodes.shift()!
+  const languageCode = transcript.metadata.languageCodes.shift()!
   const enableAutomaticPunctuation = languageCode === "en-US" // Only working for en-US at the moment
 
   const recognitionRequest: ILongRunningRegonize = {
@@ -55,13 +55,13 @@ export async function transcribe(id: string, transcript: ITranscript, uri: strin
       enableAutomaticPunctuation,
       enableWordTimeOffsets: true,
       languageCode,
-      metadata: transcript.recognitionMetadata,
+      metadata: transcript.metadata,
       useEnhanced: true,
     },
   }
 
-  if (transcript.languageCodes.length > 0) {
-    recognitionRequest.config.alternativeLanguageCodes = transcript.languageCodes
+  if (transcript.metadata.languageCodes.length > 0) {
+    recognitionRequest.config.alternativeLanguageCodes = transcript.metadata.languageCodes
   }
 
   console.log("Start transcribing", id, recognitionRequest)

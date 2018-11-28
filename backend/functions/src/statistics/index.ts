@@ -17,8 +17,13 @@ async function statistics(message: functions.pubsub.Message, context: functions.
 
     const transcript = await database.getTranscript(transcriptId)
 
-    const duration = transcript.duration
-    const languageCodes = transcript.languageCodes
+    const metadata = transcript.metadata
+
+    if (metadata === undefined) {
+      throw new Error(`Metadata missing from transcript ${transcriptId}`)
+    }
+    const duration = metadata.audioDuration
+    const languageCodes = metadata.languageCodes
 
     if (transcript.timestamps === undefined) {
       throw new Error(`Timestamps missing from transcript ${transcriptId}`)
@@ -26,7 +31,7 @@ async function statistics(message: functions.pubsub.Message, context: functions.
       throw new Error(`Duration missing from transcript ${transcriptId}`)
     } else if (languageCodes === undefined) {
       throw new Error(`Language codes missing from transcript ${transcriptId}`)
-    } else if (transcript.recognitionMetadata === undefined || transcript.recognitionMetadata.originalMimeType === undefined) {
+    } else if (transcript.metadata === undefined || transcript.metadata.originalMimeType === undefined) {
       throw new Error(`Original mime type missing from transcript ${transcriptId}`)
     }
 
@@ -39,36 +44,12 @@ async function statistics(message: functions.pubsub.Message, context: functions.
       createdAt: admin.firestore.Timestamp.now(),
       duration,
       languageCodes,
-      mimeType: transcript.recognitionMetadata.originalMimeType,
+      mimeType: transcript.metadata.originalMimeType,
       processingDuration,
       words,
     }
 
     await database.addTranscriptSummary(transcriptSummary)
-
-    // For all metrics, we log
-    // * All time
-    // * Yearly
-    // * Monthly
-    // * Weekly?
-    // * Daily
-
-    // Number of transcripts
-
-    // statistics/numberOfTranscript ++
-    // statistics/2017
-
-    // Original mime type
-
-    // Duration
-
-    // Language codes
-
-    // Completion time
-
-    // Word count
-
-    // 100 ord / 1000 sec = 0.1 ord/sec
 
     console.log(transcriptId)
   } catch (error) {

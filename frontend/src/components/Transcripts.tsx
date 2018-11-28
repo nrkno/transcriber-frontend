@@ -1,7 +1,7 @@
 import moment from "moment"
 import React, { Component } from "react"
 import { Link } from "react-router-dom"
-import { Status } from "../enums"
+import { Step } from "../enums"
 import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 import Progress from "./Progress"
@@ -44,7 +44,7 @@ class Transcripts extends Component<IProps, IState> {
           {/* Render transcripts in progress */}
           {this.state.transcripts &&
             this.state.transcripts
-              .filter(transcript => transcript.progress!.status !== Status.Success)
+              .filter(transcript => transcript.process.step !== Step.Done)
               .map((transcript, index) => {
                 return <Progress transcript={transcript} key={index} />
               })}
@@ -57,11 +57,11 @@ class Transcripts extends Component<IProps, IState> {
               </tr>
             </thead>
             <tbody>
-              {/* Inserting transcripts from Firestore */}
+              {/* Render finished transcripts */}
               {this.state.transcripts !== undefined &&
                 this.state.transcriptIds !== undefined &&
                 this.state.transcripts
-                  .filter(transcript => transcript.progress.status === Status.Success)
+                  .filter(transcript => transcript.process.step === Step.Done)
                   .map((transcript, index) => {
                     const createdAt = (transcript.timestamps.createdAt as firebase.firestore.Timestamp).toDate()
                     const formattedCreatedAt = moment(createdAt)
@@ -73,7 +73,7 @@ class Transcripts extends Component<IProps, IState> {
                     return (
                       <tr key={id}>
                         <td>
-                          <Link to={`transcripts/${id}`}>{transcript.title} </Link>
+                          <Link to={`transcripts/${id}`}>{transcript.name} </Link>
                         </td>
                         <td>{formattedCreatedAt}</td>
                         <td>
@@ -109,7 +109,8 @@ class Transcripts extends Component<IProps, IState> {
           transcripts.push(transcript)
 
           // We only care about the ids of successful transcripts
-          if (transcript.progress && transcript.progress.status === Status.Success) {
+
+          if (transcript.process && transcript.process.step === Step.Done) {
             transcriptIds.push(doc.id)
           }
         })

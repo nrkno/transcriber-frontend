@@ -40,9 +40,35 @@ interface ISpeechContext {
 }
 
 interface IResult {
-  startTime: number
   confidence: number
+  startTime: number
   transcript: string
+  words: Array<IWord>
+}
+
+interface IWord {
+  word: string
+  endTime: number
+  startTime: number
+}
+
+// -----------------
+// Google Speech API
+// -----------------
+
+interface ILongRunningRegonize {
+  audio: IRecognitionAudio
+  config: IRecognitionConfig
+}
+
+interface IRecognitionAudio {
+  content?: string
+  uri?: string
+}
+
+interface ISpeechRecognitionResult {
+  transcript: string
+  confidence: number
   words: Array<IWordInfo>
 }
 
@@ -53,18 +79,8 @@ interface IWordInfo {
 }
 
 interface ITime {
-  nanos: number
-  seconds: string
-}
-
-interface ILongRunningRegonize {
-  audio: IRecognitionAudio
-  config: IRecognitionConfig
-}
-
-interface IRecognitionAudio {
-  content?: string
-  uri?: string
+  nanos?: number
+  seconds?: string
 }
 
 interface IRecognitionConfig {

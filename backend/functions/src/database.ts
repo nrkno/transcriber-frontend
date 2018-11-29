@@ -55,15 +55,7 @@ const database = (() => {
   }
 
   const addResult = async (transcriptId: string, result: IResult) => {
-    // We insert the start time of the first word, it will be used to sort the results
-
-    const startTime = parseInt(result.words[0].startTime.seconds, 10) || 0
-
-    const resultWithStartTimeInSeconds = { ...result, startTime }
-
-    const data = JSON.parse(JSON.stringify(resultWithStartTimeInSeconds))
-
-    return db.collection(`transcripts/${transcriptId}/results`).add(data)
+    return db.collection(`transcripts/${transcriptId}/results`).add(result)
   }
 
   const setDuration = async (id: string, seconds: number): Promise<FirebaseFirestore.WriteResult> => {

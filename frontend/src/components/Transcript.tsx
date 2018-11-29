@@ -1,9 +1,9 @@
 import * as React from "react"
 import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"
-import { Step, SweetProgressStatus } from "../enums"
+import { SweetProgressStatus } from "../enums"
 import { database } from "../firebaseApp"
-import { IResult, ITranscript, IWordInfo } from "../interfaces"
+import { IResult, ITranscript, IWord } from "../interfaces"
 import secondsToTime from "../secondsToTime"
 import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
@@ -78,17 +78,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     if (currentResultIndex !== undefined && currentWordIndex !== undefined) {
       const currentWord = results[currentResultIndex].words[currentWordIndex]
 
-      let end = 0
-      if (currentWord.endTime !== undefined) {
-        if (currentWord.endTime.seconds !== undefined) {
-          end += parseFloat(currentWord.endTime.seconds)
-        }
-        if (currentWord.endTime.nanos !== undefined) {
-          end += currentWord.endTime.nanos / 1000000000
-        }
-      }
-
-      if (currentTime < end) {
+      if (currentTime < currentWord.endTime * 1e-9) {
         return
       }
     }
@@ -119,32 +109,12 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
         const { startTime, endTime } = word
 
-        let start = 0
-        if (startTime !== undefined) {
-          if (startTime.seconds !== undefined) {
-            start += parseFloat(startTime.seconds)
-          }
-          if (startTime.nanos !== undefined) {
-            start += startTime.nanos / 1000000000
-          }
-        }
-
-        if (currentTime < start) {
+        if (currentTime < startTime * 1e-9) {
           // This word hasn't started yet, returning and waiting to be called again on new current time update
           return
         }
 
-        let end = 0
-        if (endTime !== undefined) {
-          if (endTime.seconds !== undefined) {
-            end += parseFloat(endTime.seconds)
-          }
-          if (endTime.nanos !== undefined) {
-            end += endTime.nanos / 1000000000
-          }
-        }
-
-        if (currentTime > end) {
+        if (currentTime > endTime * 1e-9) {
           // This word is no longer being said, go to next
           continue
         }
@@ -158,18 +128,8 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     }
   }
 
-  public setCurrentWord = (word: IWordInfo, resultIndex: number, wordIndex: number) => {
-    let time = 0
-    if (word.startTime !== undefined) {
-      if (word.startTime.seconds !== undefined) {
-        time += parseFloat(word.startTime.seconds)
-      }
-      if (word.startTime.nanos !== undefined) {
-        time += word.startTime.nanos / 1000000000
-      }
-    }
-
-    this.playerRef.current!.setTime(time)
+  public setCurrentWord = (word: IWord, resultIndex: number, wordIndex: number) => {
+    this.playerRef.current!.setTime(word.startTime * 1e-9)
 
     this.setState({
       currentResultIndex: resultIndex,
@@ -240,9 +200,9 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
                 </form>
               </div>
               {transcript.results.map((result, i) => {
-                const startTime = result.startTime || 0
+                const startTime = result.startTime
 
-                const formattedStartTime = secondsToTime(startTime)
+                const formattedStartTime = secondsToTime(startTime * 1e-9)
 
                 return (
                   <React.Fragment key={i}>

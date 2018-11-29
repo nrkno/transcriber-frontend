@@ -36,18 +36,13 @@ interface IResult {
   startTime: number
   confidence: number
   transcript: string
-  words: Array<IWordInfo>
+  words: Array<IWord>
 }
 
-interface IWordInfo {
+interface IWord {
   word: string
-  endTime: ITime
-  startTime?: ITime
-}
-
-interface ITime {
-  nanos: number
-  seconds: string
+  endTime: number
+  startTime: number
 }
 
 // -----------

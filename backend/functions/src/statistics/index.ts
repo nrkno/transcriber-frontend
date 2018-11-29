@@ -54,12 +54,11 @@ async function statistics(message: functions.pubsub.Message, context: functions.
     }
 
     const eventParams: EventParams = {
-      cd1: admin.firestore.Timestamp.now(), // createdAt
-      cd2: duration,
-      cd3: languageCodes,
-      cd4: transcript.metadata.originalMimeType,
-      cd5: processingDuration,
-      cd6: words,
+      cd1: duration,
+      cd2: languageCodes,
+      cd3: transcript.metadata.originalMimeType,
+      cd4: processingDuration,
+      cd5: words,
       ea: "done",
       ec: "transcription",
     }

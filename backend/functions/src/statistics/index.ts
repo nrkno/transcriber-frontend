@@ -1,9 +1,13 @@
 import admin from "firebase-admin"
 import * as functions from "firebase-functions"
+import ua, { EventParams } from "universal-analytics"
 import database from "../database"
 import { ITranscriptSummary } from "../interfaces"
 
 async function statistics(message: functions.pubsub.Message, context: functions.EventContext) {
+  const visitor = ua("")
+  visitor.debug(true)
+
   try {
     const transcriptId = message.json.transcriptId
 
@@ -49,7 +53,22 @@ async function statistics(message: functions.pubsub.Message, context: functions.
       words,
     }
 
-    await database.addTranscriptSummary(transcriptSummary)
+    const eventParams: EventParams = {
+      cd1: admin.firestore.Timestamp.now(), // createdAt
+      cd2: duration,
+      cd3: languageCodes,
+      cd4: transcript.metadata.originalMimeType,
+      cd5: processingDuration,
+      cd6: words,
+      ea: "done",
+      ec: "transcription",
+    }
+
+    console.log("Sending to GA", eventParams)
+
+    visitor.event(eventParams).send()
+
+    // await database.addTranscriptSummary(transcriptSummary)
 
     console.log(transcriptId)
   } catch (error) {

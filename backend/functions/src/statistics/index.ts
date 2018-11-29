@@ -26,12 +26,12 @@ async function statistics(message: functions.pubsub.Message, context: functions.
     if (metadata === undefined) {
       throw new Error(`Metadata missing from transcript ${transcriptId}`)
     }
-    const duration = metadata.audioDuration
+    const audioDuration = metadata.audioDuration
     const languageCodes = metadata.languageCodes
 
     if (transcript.timestamps === undefined) {
       throw new Error(`Timestamps missing from transcript ${transcriptId}`)
-    } else if (duration === undefined) {
+    } else if (audioDuration === undefined) {
       throw new Error(`Duration missing from transcript ${transcriptId}`)
     } else if (languageCodes === undefined) {
       throw new Error(`Language codes missing from transcript ${transcriptId}`)
@@ -44,18 +44,18 @@ async function statistics(message: functions.pubsub.Message, context: functions.
 
     const processingDuration = (end.toMillis() - start.toMillis()) / 1000
 
-    const transcriptSummary: ITranscriptSummary = {
+    /*const transcriptSummary: ITranscriptSummary = {
       createdAt: admin.firestore.Timestamp.now(),
-      duration,
+      audioDuration,
       languageCodes,
       mimeType: transcript.metadata.originalMimeType,
       processingDuration,
       words,
-    }
+    }*/
 
     const eventParams: EventParams = {
-      cd1: duration,
-      cd2: languageCodes,
+      cd1: audioDuration,
+      cd2: languageCodes.join(","),
       cd3: transcript.metadata.originalMimeType,
       cd4: processingDuration,
       cd5: words,

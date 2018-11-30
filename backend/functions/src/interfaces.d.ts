@@ -114,23 +114,3 @@ interface IRecognitionMetadata {
   recordingDeviceType?: RecordingDeviceType
   speechContexts?: Array<ISpeechContext>
 }
-
-// -----------
-// Statistics
-// -----------
-
-interface ITranscripts {
-  summaries?: Map<string, ITranscriptSummary>
-  duration: number
-  transcripts: number
-  words: number
-}
-
-interface ITranscriptSummary {
-  createdAt: admin.firestore.FieldValue
-  duration: number
-  languageCodes: Array<string>
-  mimeType: string
-  processingDuration: number
-  words: number
-}

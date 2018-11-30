@@ -2,7 +2,6 @@ import admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import ua, { EventParams } from "universal-analytics"
 import database from "../database"
-import { ITranscriptSummary } from "../interfaces"
 
 async function statistics(message: functions.pubsub.Message, context: functions.EventContext) {
   const visitor = ua("")
@@ -15,7 +14,7 @@ async function statistics(message: functions.pubsub.Message, context: functions.
 
     const results = await database.getResults(transcriptId)
 
-    const words = results.reduce((accumulator, result) => accumulator + result.words.length, 0)
+    const numberOfWords = results.reduce((accumulator, result) => accumulator + result.words.length, 0)
 
     // Load transcript, and check that all mandatory values are present
 
@@ -26,7 +25,7 @@ async function statistics(message: functions.pubsub.Message, context: functions.
     if (metadata === undefined) {
       throw new Error(`Metadata missing from transcript ${transcriptId}`)
     }
-    const audioDuration = metadata.audioDuration
+    const audioDuration = Math.round(metadata.audioDuration!)
     const languageCodes = metadata.languageCodes
 
     if (transcript.timestamps === undefined) {
@@ -39,26 +38,28 @@ async function statistics(message: functions.pubsub.Message, context: functions.
       throw new Error(`Original mime type missing from transcript ${transcriptId}`)
     }
 
-    const start = transcript.timestamps.createdAt as admin.firestore.Timestamp
-    const end = transcript.timestamps.savedAt as admin.firestore.Timestamp
+    const createdAt = (transcript.timestamps.createdAt as admin.firestore.Timestamp).toMillis() / 1000
+    const transcodedAt = (transcript.timestamps.transcodedAt as admin.firestore.Timestamp).toMillis() / 1000
+    const transcribedAt = (transcript.timestamps.transcribedAt as admin.firestore.Timestamp).toMillis() / 1000
+    const savedAt = (transcript.timestamps.savedAt as admin.firestore.Timestamp).toMillis() / 1000
 
-    const processingDuration = (end.toMillis() - start.toMillis()) / 1000
+    // Calculating the different process step durations
 
-    /*const transcriptSummary: ITranscriptSummary = {
-      createdAt: admin.firestore.Timestamp.now(),
-      audioDuration,
-      languageCodes,
-      mimeType: transcript.metadata.originalMimeType,
-      processingDuration,
-      words,
-    }*/
+    const transcodingDuration = Math.round(transcodedAt - createdAt)
+    const transcribingDuration = Math.round(transcribedAt - transcodedAt)
+    const savingDuration = Math.round(savedAt - transcribedAt)
 
     const eventParams: EventParams = {
-      cd1: audioDuration,
-      cd2: languageCodes.join(","),
-      cd3: transcript.metadata.originalMimeType,
-      cd4: processingDuration,
-      cd5: words,
+      // Custom dimensions
+      cd1: languageCodes.join(","),
+      cd2: transcript.metadata.originalMimeType,
+      // Custom metrics
+      cm1: audioDuration,
+      cm2: numberOfWords,
+      cm3: transcodingDuration,
+      cm4: transcribingDuration,
+      cm5: savingDuration,
+      // Category and action
       ea: "done",
       ec: "transcription",
     }
@@ -66,8 +67,6 @@ async function statistics(message: functions.pubsub.Message, context: functions.
     console.log("Sending to GA", eventParams)
 
     visitor.event(eventParams).send()
-
-    // await database.addTranscriptSummary(transcriptSummary)
 
     console.log(transcriptId)
   } catch (error) {

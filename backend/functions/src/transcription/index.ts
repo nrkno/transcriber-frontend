@@ -1,3 +1,4 @@
+import ua, { EventParams } from "universal-analytics"
 import database from "../database"
 import { Step } from "../enums"
 import { ITranscript } from "../interfaces"
@@ -6,6 +7,10 @@ import { transcode } from "./transcoding"
 import { transcribe } from "./transcribe"
 
 async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapshot, eventContext) {
+  const visitor = ua("")
+  visitor.debug(true)
+  const startDate = new Date()
+
   try {
     console.log(`Deployed 15:53 - Start transcription of id: ${documentSnapshot.id}`)
 
@@ -22,22 +27,115 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
 
     if (transcript === undefined || transcript.userId === undefined) {
       throw Error("Transcript or user id missing")
+    } else if (transcript.metadata === undefined) {
+      throw Error("Metadata missing")
+    } else if (transcript.metadata.languageCodes === undefined) {
+      throw Error("Language codes missing")
+    } else if (transcript.metadata.originalMimeType === undefined) {
+      throw Error("Original mime type missing")
     }
+
+    // Google analytics
+
+    // Setting custom dimensions
+
+    visitor.set("cd1", transcript.metadata.languageCodes.join(","))
+    visitor.set("cd2", transcript.metadata.originalMimeType)
+
+    if (transcript.metadata.industryNaicsCodeOfAudio) {
+      visitor.set("cd3", transcript.metadata.industryNaicsCodeOfAudio)
+    }
+
+    if (transcript.metadata.interactionType) {
+      visitor.set("cd4", transcript.metadata.interactionType)
+    }
+
+    if (transcript.metadata.microphoneDistance) {
+      visitor.set("cd5", transcript.metadata.microphoneDistance)
+    }
+
+    if (transcript.metadata.originalMediaType) {
+      visitor.set("cd6", transcript.metadata.originalMediaType)
+    }
+
+    if (transcript.metadata.recordingDeviceName) {
+      visitor.set("cd7", transcript.metadata.recordingDeviceName)
+    }
+
+    if (transcript.metadata.recordingDeviceType) {
+      visitor.set("cd8", transcript.metadata.recordingDeviceType)
+    }
+
+    // Setting custom metrics
+
+    visitor.set("cm1", transcript.metadata.audioTopic ? transcript.metadata.audioTopic.split(" ").length : 0)
+    visitor.set("cm2", transcript.metadata.speechContexts ? transcript.metadata.speechContexts[0].phrases.length : 0)
 
     // 1. Transcode
 
     await database.setStep(transcriptId, Step.Transcoding)
-    const uri = await transcode(transcriptId, transcript.userId)
+    const { audioDuration, gsUri } = await transcode(transcriptId, transcript.userId)
+    visitor.set("cm3", Math.round(audioDuration))
+
+    const transcodedDate = new Date()
+    const transcodedDuration = transcodedDate.getTime() - startDate.getTime()
+    visitor.timing("transcription", "transcoding", Math.round(transcodedDuration)).send()
+
+    console.log("transcodedDuration", transcodedDuration)
+
+    const transcodedEventParams: EventParams = {
+      cm5: Math.round(transcodedDuration / 1000),
+      ea: "transcoded",
+      ec: "transcription",
+    }
+
+    visitor.event(transcodedEventParams).send()
 
     // 2. Transcribe
 
     await database.setStep(transcriptId, Step.Transcribing)
-    const speechRecognitionResults = await transcribe(transcriptId, transcript, uri)
+    const speechRecognitionResults = await transcribe(transcriptId, transcript, gsUri)
 
-    // 3. Save transcription
+    console.log("speechRecognitionResults", speechRecognitionResults)
+
+    const numberOfWords = speechRecognitionResults.reduce((accumulator, result) => accumulator + result.alternatives[0].transcript.split(" ").length, 0)
+    console.log("Number of words", numberOfWords)
+
+    visitor.set("cm4", numberOfWords)
+
+    const transcribedDate = new Date()
+    const transcribedDuration = transcribedDate.getTime() - transcodedDate.getTime()
+    visitor.timing("transcription", "transcribing", Math.round(transcribedDuration)).send()
+
+    console.log("transcribedDuration", transcribedDuration)
+
+    const transcribedEventParams: EventParams = {
+      cm6: Math.round(transcribedDuration / 1000),
+      ea: "transcribed",
+      ec: "transcription",
+    }
+
+    visitor.event(transcribedEventParams).send()
+
+    // 3. Save
 
     await database.setStep(transcriptId, Step.Saving)
     await saveResult(speechRecognitionResults, transcriptId)
+
+    const savedDate = new Date()
+    const savedDuration = savedDate.getTime() - transcribedDate.getTime()
+
+    console.log("savedDuration", savedDuration)
+
+    visitor.timing("transcription", "saving", Math.round(savedDuration)).send()
+
+    const savedEventParams: EventParams = {
+      cm7: Math.round(savedDuration / 1000),
+      ea: "saved",
+      ec: "transcription",
+    }
+
+    visitor.event(savedEventParams).send()
 
     // 4. Done
 

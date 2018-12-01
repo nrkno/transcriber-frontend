@@ -5,7 +5,6 @@ import database from "../database"
 
 async function statistics(message: functions.pubsub.Message, context: functions.EventContext) {
   const visitor = ua("")
-  visitor.debug(true)
 
   try {
     const transcriptId = message.json.transcriptId

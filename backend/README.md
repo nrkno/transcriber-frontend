@@ -24,3 +24,27 @@ FIREBASE_TRANSCODED_BUCKET = name-of-transcoded-bucket
 firebase use development (or production)
 npm run-script deploy
 ```
+
+## Google Analytics
+
+### Custom dimensions
+
+- cd1: Language codes
+- cd2: Original mime type
+- cd3: Industry naics code of audio
+- cd4: Interaction type
+- cd5: Microphone distance
+- cd6: Original media type
+- cd7: Recording device name
+- cd8: Recording device type
+
+### Custom metrics
+
+- cm1: Number of audio topic words
+- cm2: Number of speech contexts phrases
+- cm3: Audio duration
+- cm4: Number of words
+
+* cm4: Transcoding duration
+* cm5: Transcribing duration
+* cm6: Saving duration

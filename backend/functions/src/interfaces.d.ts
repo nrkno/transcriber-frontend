@@ -67,6 +67,10 @@ interface IRecognitionAudio {
 }
 
 interface ISpeechRecognitionResult {
+  alternatives: Array<ISpeechRecognitionAlternative>
+}
+
+interface ISpeechRecognitionAlternative {
   transcript: string
   confidence: number
   words: Array<IWordInfo>

@@ -44,23 +44,3 @@ interface IWord {
   endTime: number
   startTime: number
 }
-
-// -----------
-// Statistics
-// -----------
-
-interface ITranscripts {
-  summaries?: Map<string, ITranscriptSummary>
-  totalDuration: number
-  numberOfTranscripts: number
-  numberOfWords: number
-}
-
-interface ITranscriptSummary {
-  audioDuration: number
-  createdAt: firebase.firestore.Timestamp
-  languageCodes: Array<string>
-  numberOfWords: number
-  originalMimeType: string
-  processDuration: number
-}

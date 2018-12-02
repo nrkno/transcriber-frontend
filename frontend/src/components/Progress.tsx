@@ -9,26 +9,6 @@ interface IProps {
 }
 
 class Progress extends React.Component<IProps, any> {
-  public componentDidUpdate(prevProps: any, prevState: any /*, _snapshot*/) {
-    if (this.props.transcript && this.props.transcript.process && this.props.transcript.process.step) {
-      // Log errors
-      if (this.props.transcript.process.error) {
-        ReactGA.exception({
-          description: this.props.transcript.process.error.message,
-        })
-      }
-
-      // Logging progress status
-      else if (prevProps.transcript === undefined || (prevProps.transcript && prevProps.transcript.progress && prevProps.transcript.progress.status && prevProps.transcript.progress.status !== this.props.transcript.process.step)) {
-        ReactGA.event({
-          action: this.props.transcript.process.step,
-          category: "Progress",
-          nonInteraction: true,
-        })
-      }
-    }
-  }
-
   public render() {
     const transcript = this.props.transcript
 

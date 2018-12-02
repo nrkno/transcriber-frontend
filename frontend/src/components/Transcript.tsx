@@ -28,28 +28,6 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     }
   }
 
-  public componentDidUpdate(prevProps: any, prevState: IState /*, _snapshot*/) {
-    /*TODO
-    if (this.state.transcript && this.state.transcript.process && this.state.transcript.process.step) {
-      // Log errors
-      if (this.state.transcript.process.step === Step.Failed && this.state.transcript.process.error) {
-        ReactGA.exception({
-          description: this.state.transcript.process.error.message,
-        })
-      }
-
-      // Logging progress status
-      else if (prevState.transcript === undefined || (prevState.transcript && prevState.transcript.process && prevState.transcript.process.step && prevState.transcript.process.step !== this.state.transcript.process.step)) {
-        ReactGA.event({
-          action: this.state.transcript.process.step,
-          category: "Progress",
-          nonInteraction: true,
-        })
-      }
-    }
-    */
-  }
-
   public async componentDidMount() {
     database.doc(`transcripts/${this.props.match.params.id}`).onSnapshot(documentSnapshot => {
       const transcript = documentSnapshot.data() as ITranscript

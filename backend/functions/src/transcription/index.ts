@@ -1,5 +1,5 @@
 import * as functions from "firebase-functions"
-import ua from "universal-analytics"
+import ua, { Visitor } from "universal-analytics"
 import database from "../database"
 import { Step } from "../enums"
 import { ITranscript } from "../interfaces"
@@ -8,9 +8,22 @@ import { transcode } from "./transcoding"
 import { transcribe } from "./transcribe"
 
 async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapshot /*, eventContext*/) {
+  console.log(`Deployed 15:53 - Start transcription of id: ${documentSnapshot.id}`)
+
+  // ----------------
+  // Google analytics
+  // ----------------
+
+  const accountId = functions.config().analytics.account_id
+
+  if (!accountId) {
+    console.warn("Google Analytics account ID missing")
+  }
+
+  const visitor = ua(accountId)
+
   try {
     const startDate = Date.now()
-    console.log(`Deployed 15:53 - Start transcription of id: ${documentSnapshot.id}`)
 
     const transcriptId = documentSnapshot.id
 
@@ -37,18 +50,6 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     } else if (transcript.metadata.originalMimeType === undefined) {
       throw Error("Original mime type missing")
     }
-
-    // ----------------
-    // Google analytics
-    // ----------------
-
-    const accountId = functions.config().analytics.account_id
-
-    if (!accountId) {
-      console.warn("Google Analytics account ID missing")
-    }
-
-    const visitor = ua(accountId)
 
     // Setting custom dimensions
 
@@ -144,8 +145,15 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
 
     await database.setStep(transcriptId, Step.Done)
   } catch (error) {
-    console.log("Error in main function")
+    // Log error to console
+
     console.error(error)
+
+    // Log error to Google Analytics
+
+    visitor.exception(error.message, true).send()
+
+    // Log error to database
 
     await database.errorOccured(documentSnapshot.id, error)
 

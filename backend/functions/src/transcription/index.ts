@@ -141,6 +141,8 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     visitor.event("transcription", "saved").send()
     visitor.timing("transcription", "saving", Math.round(savedDuration)).send()
 
+    visitor.event("transcription", "done", transcriptId, Math.round(audioDuration)).send()
+
     // Done
 
     await database.setStep(transcriptId, Step.Done)

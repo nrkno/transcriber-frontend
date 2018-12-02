@@ -1,4 +1,5 @@
-import ua, { EventParams } from "universal-analytics"
+import * as functions from "firebase-functions"
+import ua from "universal-analytics"
 import database from "../database"
 import { Step } from "../enums"
 import { ITranscript } from "../interfaces"
@@ -6,27 +7,29 @@ import { saveResult } from "./persistence"
 import { transcode } from "./transcoding"
 import { transcribe } from "./transcribe"
 
-async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapshot, eventContext) {
-  const visitor = ua("")
-  visitor.debug(true)
-  const startDate = new Date()
-
+async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapshot /*, eventContext*/) {
   try {
+    const startDate = Date.now()
     console.log(`Deployed 15:53 - Start transcription of id: ${documentSnapshot.id}`)
 
     const transcriptId = documentSnapshot.id
 
-    // Because of indempotency, we need to fetch the transcript from the server and check if it's already in process
+    // Because of indempotency, we need to fetch the transcript from
+    // the server and check if it's already in process
     const step = await database.getStep(transcriptId)
     if (step !== Step.Uploading) {
       console.warn("Transcript already processed, returning")
       return
     }
 
+    // Check for mandatory fields
+
     const transcript = documentSnapshot.data() as ITranscript
 
-    if (transcript === undefined || transcript.userId === undefined) {
-      throw Error("Transcript or user id missing")
+    if (transcript === undefined) {
+      throw Error("Transcript missing")
+    } else if (transcript.userId === undefined) {
+      throw Error("User id missing")
     } else if (transcript.metadata === undefined) {
       throw Error("Metadata missing")
     } else if (transcript.metadata.languageCodes === undefined) {
@@ -35,7 +38,17 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
       throw Error("Original mime type missing")
     }
 
+    // ----------------
     // Google analytics
+    // ----------------
+
+    const accountId = functions.config().analytics.account_id
+
+    if (!accountId) {
+      console.warn("Google Analytics account ID missing")
+    }
+
+    const visitor = ua(accountId)
 
     // Setting custom dimensions
 
@@ -71,27 +84,26 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     visitor.set("cm1", transcript.metadata.audioTopic ? transcript.metadata.audioTopic.split(" ").length : 0)
     visitor.set("cm2", transcript.metadata.speechContexts ? transcript.metadata.speechContexts[0].phrases.length : 0)
 
-    // 1. Transcode
+    // -----------------
+    // Step 1: Transcode
+    // -----------------
 
     await database.setStep(transcriptId, Step.Transcoding)
     const { audioDuration, gsUri } = await transcode(transcriptId, transcript.userId)
     visitor.set("cm3", Math.round(audioDuration))
 
-    const transcodedDate = new Date()
-    const transcodedDuration = transcodedDate.getTime() - startDate.getTime()
+    const transcodedDate = Date.now()
+    const transcodedDuration = transcodedDate - startDate
+
+    visitor.set("cm5", Math.round(transcodedDuration / 1000))
+    visitor.event("transcription", "transcoded").send()
     visitor.timing("transcription", "transcoding", Math.round(transcodedDuration)).send()
 
     console.log("transcodedDuration", transcodedDuration)
 
-    const transcodedEventParams: EventParams = {
-      cm5: Math.round(transcodedDuration / 1000),
-      ea: "transcoded",
-      ec: "transcription",
-    }
-
-    visitor.event(transcodedEventParams).send()
-
-    // 2. Transcribe
+    // ------------------
+    // Step 2: Transcribe
+    // ------------------
 
     await database.setStep(transcriptId, Step.Transcribing)
     const speechRecognitionResults = await transcribe(transcriptId, transcript, gsUri)
@@ -103,44 +115,34 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
 
     visitor.set("cm4", numberOfWords)
 
-    const transcribedDate = new Date()
-    const transcribedDuration = transcribedDate.getTime() - transcodedDate.getTime()
+    const transcribedDate = Date.now()
+    const transcribedDuration = transcribedDate - transcodedDate
+
+    visitor.set("cm6", Math.round(transcribedDuration / 1000))
+    visitor.event("transcription", "transcribed").send()
     visitor.timing("transcription", "transcribing", Math.round(transcribedDuration)).send()
 
     console.log("transcribedDuration", transcribedDuration)
 
-    const transcribedEventParams: EventParams = {
-      cm6: Math.round(transcribedDuration / 1000),
-      ea: "transcribed",
-      ec: "transcription",
-    }
-
-    visitor.event(transcribedEventParams).send()
-
-    // 3. Save
+    // ------------
+    // Step 3: Save
+    // ------------
 
     await database.setStep(transcriptId, Step.Saving)
     await saveResult(speechRecognitionResults, transcriptId)
 
-    const savedDate = new Date()
-    const savedDuration = savedDate.getTime() - transcribedDate.getTime()
+    const savedDate = Date.now()
+    const savedDuration = savedDate - transcribedDate
 
     console.log("savedDuration", savedDuration)
 
+    visitor.set("cm7", Math.round(savedDuration / 1000))
+    visitor.event("transcription", "saved").send()
     visitor.timing("transcription", "saving", Math.round(savedDuration)).send()
 
-    const savedEventParams: EventParams = {
-      cm7: Math.round(savedDuration / 1000),
-      ea: "saved",
-      ec: "transcription",
-    }
-
-    visitor.event(savedEventParams).send()
-
-    // 4. Done
+    // Done
 
     await database.setStep(transcriptId, Step.Done)
-    console.log("End transcribing of id: ", transcriptId)
   } catch (error) {
     console.log("Error in main function")
     console.error(error)

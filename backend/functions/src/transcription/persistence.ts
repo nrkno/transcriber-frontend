@@ -3,15 +3,12 @@
  * @author Andreas Schjønhaug
  */
 
-import { start } from "repl"
 import database from "../database"
-import { IResult, ISpeechRecognitionResult, IWord } from "../interfaces"
+import { IResult, ISpeechRecognitionAlternative, IWord } from "../interfaces"
 
-export async function saveResult(speechRecognitionResults: any, id: string) {
-  console.log("length", speechRecognitionResults.length)
-
+export async function saveResult(speechRecognitionResults: any, transcriptId: string) {
   for (const index of speechRecognitionResults.keys()) {
-    const recognitionResult = speechRecognitionResults[index].alternatives[0] as ISpeechRecognitionResult
+    const recognitionResult = speechRecognitionResults[index].alternatives[0] as ISpeechRecognitionAlternative
 
     const words = recognitionResult.words.map(wordInfo => {
       let startTime = 0
@@ -50,12 +47,11 @@ export async function saveResult(speechRecognitionResults: any, id: string) {
       words,
     }
 
-    await database.addResult(id, result)
-
-    const percent = Math.round(((index + 1) / speechRecognitionResults.length) * 100)
+    await database.addResult(transcriptId, result)
 
     if (index + 1 < speechRecognitionResults.length) {
-      await database.setPercent(id, percent)
+      const percent = Math.round(((index + 1) / speechRecognitionResults.length) * 100)
+      await database.setPercent(transcriptId, percent)
     }
   }
 }

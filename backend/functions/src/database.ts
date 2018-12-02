@@ -7,7 +7,7 @@ import admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import serializeError from "serialize-error"
 import { Step } from "./enums"
-import { IResult, ITranscript, ITranscripts, ITranscriptSummary } from "./interfaces"
+import { IResult, ITranscript } from "./interfaces"
 // Only initialise the app once
 if (!admin.apps.length) {
   admin.initializeApp(functions.config().firebase)
@@ -27,22 +27,10 @@ const database = (() => {
   const setStep = async (transcriptId: string, step: Step): Promise<FirebaseFirestore.WriteResult> => {
     const transcript: ITranscript = { process: { step } }
 
-    // Add timestamp and percent
-
-    switch (step) {
-      case Step.Transcribing:
-        transcript.timestamps = { transcodedAt: admin.firestore.Timestamp.now() }
-        transcript.process!.percent = 0
-
-        break
-      case Step.Saving:
-        transcript.timestamps = { transcribedAt: admin.firestore.Timestamp.now() }
-        transcript.process!.percent = 0
-        break
-      case Step.Done:
-        transcript.timestamps = { savedAt: admin.firestore.Timestamp.now() }
-        transcript.process.percent = admin.firestore.FieldValue.delete()
-        break
+    if (step === Step.Transcoding || step === Step.Saving) {
+      transcript.process!.percent = 0
+    } else if (step === Step.Done) {
+      transcript.process.percent = admin.firestore.FieldValue.delete()
     }
 
     return updateTranscript(transcriptId, transcript)
@@ -68,9 +56,6 @@ const database = (() => {
     const transcript: ITranscript = {
       process: {
         error: serializeError(error),
-      },
-      timestamps: {
-        failedAt: admin.firestore.Timestamp.now(),
       },
     }
     return updateTranscript(transcriptId, transcript)

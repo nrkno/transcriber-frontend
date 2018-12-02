@@ -1,6 +1,7 @@
 import { Step, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Timestamp } from "./enums"
 
 interface ITranscript {
+  createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   name?: string
   playbackUrl?: string
   process?: {
@@ -10,7 +11,6 @@ interface ITranscript {
   }
   metadata: IMetadata
   results?: Array<IResult>
-  timestamps?: { [x in Timestamp]?: firebase.firestore.Timestamp | firebase.firestore.FieldValue }
   userId?: string
 }
 

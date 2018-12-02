@@ -351,7 +351,7 @@ class Upload extends React.Component<IProps, IState> {
       () => {
         const transcript = this.state.transcript
         transcript.name = file.name.substr(0, file.name.lastIndexOf(".")) || file.name
-        transcript.timestamps = { createdAt: firebase.firestore.FieldValue.serverTimestamp() }
+        transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
         transcript.userId = userId
 
         // Metadata

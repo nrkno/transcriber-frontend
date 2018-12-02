@@ -12,14 +12,6 @@ export enum Step {
   Done = "DONE",
 }
 
-export enum Timestamp {
-  CreatedAt = "createdAt",
-  TranscodedAt = "transcodedAt",
-  TranscribedAt = "transcribedAt",
-  SavedAt = "savedAt",
-  FailedAt = "failedAt",
-}
-
 // Use case categories that the audio recognition request can be described by.
 export enum InteractionType {
   Unspecified = "INTERACTION_TYPE_UNSPECIFIED", // Use case is either unknown or is something other than one of the other values below.

@@ -276,14 +276,13 @@ class Upload extends React.Component<IProps, IState> {
   }
 
   private handleFileDrop: DropFilesEventHandler = (acceptedFiles: [File], rejectedFiles: [File]) => {
-    console.log("YO")
-
     if (rejectedFiles.length > 0) {
       this.setState({ dropzoneMessage: "Filen har feil format", file: undefined })
 
       ReactGA.event({
-        action: "Wrong file format",
-        category: "Upload",
+        action: "wrong file format",
+        category: "upload",
+        label: rejectedFiles[0].type,
       })
     } else {
       // Take the first file

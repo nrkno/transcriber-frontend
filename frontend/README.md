@@ -26,15 +26,6 @@ To track events to [Google Analytics](https://analytics.google.com/analytics/web
 
   - Not found
 
-- Process
-
-  - Uploading
-  - Transcoding
-  - Transcribing
-  - Saving
-  - Success
-  - Failed
-
 - Player
   - Play button pressed
   - Pause button pressed

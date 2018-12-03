@@ -129,8 +129,9 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     // Transcription not found
     else if (transcript === undefined) {
       ReactGA.event({
-        action: "Not found",
-        category: "Transcription",
+        action: "transcript not found",
+        category: "transcript",
+        label: this.props.match.params.id,
       })
       return (
         <main id="loading">
@@ -206,6 +207,12 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   }
 
   private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {
+    ReactGA.event({
+      action: "export button pressed",
+      category: "transcript",
+      label: "docx",
+    })
+
     event.preventDefault()
 
     const id = this.props.match.params.id

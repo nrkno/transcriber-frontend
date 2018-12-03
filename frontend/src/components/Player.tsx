@@ -26,8 +26,8 @@ class Player extends React.Component<IProps, IState> {
     this.play()
 
     ReactGA.event({
-      action: "Play button pressed",
-      category: "Player",
+      action: "play button pressed",
+      category: "player",
     })
   }
   public handlePause = (event: React.FormEvent<HTMLButtonElement>) => {
@@ -37,15 +37,15 @@ class Player extends React.Component<IProps, IState> {
 
     this.setState({ isPlaying: false, timer: undefined })
     ReactGA.event({
-      action: "Pause button pressed",
-      category: "Player",
+      action: "pause button pressed",
+      category: "player",
     })
   }
   public handleVolume = (event: React.FormEvent<HTMLInputElement>) => {
     this.audioRef.current!.volume = Number(event.currentTarget.value)
     ReactGA.event({
-      action: "Volume changed",
-      category: "Player",
+      action: "volume changed",
+      category: "player",
     })
   }
   public setTime = (time: number) => {
@@ -54,8 +54,8 @@ class Player extends React.Component<IProps, IState> {
     this.play()
 
     ReactGA.event({
-      action: "Word selected",
-      category: "Player",
+      action: "word selected",
+      category: "player",
     })
   }
   public render() {

@@ -1,5 +1,5 @@
 import * as functions from "firebase-functions"
-import ua, { Visitor } from "universal-analytics"
+import ua from "universal-analytics"
 import database from "../database"
 import { Step } from "../enums"
 import { ITranscript } from "../interfaces"

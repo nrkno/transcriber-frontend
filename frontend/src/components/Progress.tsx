@@ -1,5 +1,4 @@
 import * as React from "react"
-import ReactGA from "react-ga"
 import { Step, SweetProgressStatus } from "../enums"
 import { ITranscript } from "../interfaces"
 import TranscriptionProgress from "./TranscriptionProgress"

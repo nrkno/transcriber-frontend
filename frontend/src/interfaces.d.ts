@@ -1,25 +1,25 @@
-import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Timestamp } from "./enums"
+import { Step, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Timestamp } from "./enums"
 
 interface ITranscript {
-  duration?: number
-  error?: any
-  languageCodes: Array<string>
-  recognitionMetadata: IRecognitionMetadata
-  userId?: string
+  createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+  name?: string
   playbackUrl?: string
-  progress?: {
+  process?: {
+    error?: any
     percent?: number
-    status?: Status
+    step?: Step
   }
+  metadata: IMetadata
   results?: Array<IResult>
-  timestamps?: { [x in Timestamp]?: firebase.firestore.Timestamp | firebase.firestore.FieldValue }
-  title?: string
+  userId?: string
 }
 
-interface IRecognitionMetadata {
+interface IMetadata {
+  audioDuration?: number
   audioTopic?: string
   industryNaicsCodeOfAudio?: number | string
   interactionType: InteractionType
+  languageCodes: Array<string>
   microphoneDistance: MicrophoneDistance
   originalMediaType: OriginalMediaType
   originalMimeType?: string
@@ -36,16 +36,11 @@ interface IResult {
   startTime: number
   confidence: number
   transcript: string
-  words: Array<IWordInfo>
+  words: Array<IWord>
 }
 
-interface IWordInfo {
+interface IWord {
   word: string
-  endTime: ITime
-  startTime?: ITime
-}
-
-interface ITime {
-  nanos: number
-  seconds: string
+  endTime: number
+  startTime: number
 }

@@ -11,7 +11,7 @@ firebaseFunctionsTest({
 import admin from "firebase-admin"
 import serializeError from "serialize-error"
 import database from "../database"
-import { Status } from "../enums"
+import { Step } from "../enums"
 import { IWord } from "../interfaces"
 
 test("Set duration in seconds", async () => {
@@ -28,14 +28,14 @@ test("Set duration in seconds", async () => {
 
 test("Update status", async () => {
   expect.assertions(1)
-  await database.setStatus("test", Status.Analysing)
+  await database.setStatus("test", Step.Analysing)
   const dataSnapshot = await admin
     .database()
     .ref("transcripts/test/progress/status")
     .once("value")
 
   const value = dataSnapshot.val()
-  expect(value).toBe(Status.Analysing)
+  expect(value).toBe(Step.Analysing)
 })
 
 test("Update percent", async () => {

@@ -5,18 +5,18 @@
 
 import speech from "@google-cloud/speech"
 import database from "../database"
-import { ILongRunningRegonize, ITranscript } from "../interfaces"
+import { ILongRunningRegonize, ISpeechRecognitionResult, ITranscript } from "../interfaces"
 
 const client = new speech.v1p1beta1.SpeechClient()
 
-async function trans(operation, id: string) {
-  return new Promise((resolve, reject) => {
+async function trans(operation, id: string): Promise<ISpeechRecognitionResult[]> {
+  return new Promise<ISpeechRecognitionResult[]>((resolve, reject) => {
     operation
       .on("complete", (longRunningRecognizeResponse /*, longRunningRecognizeMetadata, finalApiResponse*/) => {
         // Adding a listener for the "complete" event starts polling for the
         // completion of the operation.
 
-        const speechRecognitionResults = longRunningRecognizeResponse.results
+        const speechRecognitionResults = longRunningRecognizeResponse.results as ISpeechRecognitionResult[]
         resolve(speechRecognitionResults)
       })
       .on("progress", async (longRunningRecognizeMetadata /*, apiResponse*/) => {
@@ -41,12 +41,12 @@ async function trans(operation, id: string) {
   })
 }
 
-export async function transcribe(id: string, transcript: ITranscript, uri: string) {
-  if (!transcript.languageCodes || transcript.languageCodes.length === 0) {
+export async function transcribe(id: string, transcript: ITranscript, uri: string): Promise<ISpeechRecognitionResult[]> {
+  if (!transcript.metadata || !transcript.metadata.languageCodes || transcript.metadata.languageCodes.length === 0) {
     throw new Error("Language codes missing")
   }
 
-  const languageCode = transcript.languageCodes.shift()!
+  const languageCode = transcript.metadata.languageCodes.shift()!
   const enableAutomaticPunctuation = languageCode === "en-US" // Only working for en-US at the moment
 
   const recognitionRequest: ILongRunningRegonize = {
@@ -55,13 +55,13 @@ export async function transcribe(id: string, transcript: ITranscript, uri: strin
       enableAutomaticPunctuation,
       enableWordTimeOffsets: true,
       languageCode,
-      metadata: transcript.recognitionMetadata,
+      metadata: transcript.metadata,
       useEnhanced: true,
     },
   }
 
-  if (transcript.languageCodes.length > 0) {
-    recognitionRequest.config.alternativeLanguageCodes = transcript.languageCodes
+  if (transcript.metadata.languageCodes.length > 0) {
+    recognitionRequest.config.alternativeLanguageCodes = transcript.metadata.languageCodes
   }
 
   console.log("Start transcribing", id, recognitionRequest)

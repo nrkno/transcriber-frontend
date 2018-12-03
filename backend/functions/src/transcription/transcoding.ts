@@ -14,6 +14,13 @@ import database from "../database"
 import { hoursMinutesSecondsToSeconds } from "./helpers"
 import { storage } from "./storage"
 
+let audioDuration: number
+
+interface IDurationAndGsUrl {
+  audioDuration: number
+  gsUri: string
+}
+
 /**
  * Utility method to convert audio to mono channel using FFMPEG.
  */
@@ -32,9 +39,9 @@ async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: stri
       })
       .on("codecData", async data => {
         // Saving duration to database
-        const duration = hoursMinutesSecondsToSeconds(data.duration)
+        audioDuration = hoursMinutesSecondsToSeconds(data.duration)
         try {
-          await database.setDuration(id, duration)
+          await database.setDuration(id, audioDuration)
         } catch (error) {
           console.log("Error in transcoding on('codecData')")
           console.error(error)
@@ -66,7 +73,7 @@ async function reencodeToM4a(input: string, output: string) {
  * When an audio is uploaded in the Storage bucket we generate a mono channel audio automatically using
  * node-fluent-ffmpeg.
  */
-export async function transcode(transcriptId: string, userId: string): Promise<string> {
+export async function transcode(transcriptId: string, userId: string): Promise<IDurationAndGsUrl> {
   // Getting the bucket reference from Google Cloud Runtime Configuration API
 
   const bucketName = functions.config().bucket.name
@@ -146,5 +153,8 @@ export async function transcode(transcriptId: string, userId: string): Promise<s
   fs.unlinkSync(playbackTempFilePath)
   fs.unlinkSync(transcribeTempFilePath)
 
-  return `gs://${bucket.name}/${targetStorageFilePath}`
+  return {
+    audioDuration,
+    gsUri: `gs://${bucket.name}/${targetStorageFilePath}`,
+  }
 }

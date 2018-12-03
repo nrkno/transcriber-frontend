@@ -6,7 +6,7 @@
 import admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import serializeError from "serialize-error"
-import { Status } from "./enums"
+import { Step } from "./enums"
 import { IResult, ITranscript } from "./interfaces"
 // Only initialise the app once
 if (!admin.apps.length) {
@@ -20,76 +20,50 @@ const settings = { timestampsInSnapshots: true }
 db.settings(settings)
 
 const database = (() => {
-  const updateTranscript = async (id: string, transcript: ITranscript) => {
+  const updateTranscript = async (id: string, transcript: ITranscript): Promise<FirebaseFirestore.WriteResult> => {
     return db.doc(`transcripts/${id}`).set({ ...transcript }, { merge: true })
   }
 
-  const setStatus = async (id: string, status: Status) => {
-    const transcript: ITranscript = { progress: { status } }
+  const setStep = async (transcriptId: string, step: Step): Promise<FirebaseFirestore.WriteResult> => {
+    const transcript: ITranscript = { process: { step } }
 
-    // Add timestamp
-    switch (status) {
-      case Status.Transcribing:
-        transcript.timestamps = { transcodedAt: admin.firestore.Timestamp.now() }
-        break
-      case Status.Saving:
-        transcript.timestamps = { transcribedAt: admin.firestore.Timestamp.now() }
-        break
-      case Status.Success:
-        transcript.timestamps = { savedAt: admin.firestore.Timestamp.now() }
-        break
+    if (step === Step.Transcoding || step === Step.Saving) {
+      transcript.process!.percent = 0
+    } else if (step === Step.Done) {
+      transcript.process.percent = admin.firestore.FieldValue.delete()
     }
 
-    // We get completion percentages when transcribing and saving, so setting them to zero.
-    if (status === Status.Transcribing || status === Status.Saving) {
-      transcript.progress!.percent = 0
-    } else {
-      transcript.progress!.percent = admin.firestore.FieldValue.delete()
-    }
+    return updateTranscript(transcriptId, transcript)
+  }
+
+  const setPercent = async (transcriptId: string, percent: number): Promise<FirebaseFirestore.WriteResult> => {
+    const transcript: ITranscript = { process: { percent } }
+
+    return updateTranscript(transcriptId, transcript)
+  }
+
+  const addResult = async (transcriptId: string, result: IResult) => {
+    return db.collection(`transcripts/${transcriptId}/results`).add(result)
+  }
+
+  const setDuration = async (id: string, seconds: number): Promise<FirebaseFirestore.WriteResult> => {
+    const transcript: ITranscript = { metadata: { audioDuration: seconds } }
 
     return updateTranscript(id, transcript)
   }
 
-  const setPercent = async (id: string, percent: number) => {
-    const transcript: ITranscript = { progress: { percent } }
-
-    return updateTranscript(id, transcript)
-  }
-
-  const addResult = async (id: string, result: IResult) => {
-    // We insert the start time of the first word, it will be used to sort the results
-
-    const startTime = parseInt(result.words[0].startTime.seconds, 10) || 0
-
-    const resultWithStartTimeInSeconds = { ...result, startTime }
-
-    const data = JSON.parse(JSON.stringify(resultWithStartTimeInSeconds))
-
-    return db.collection(`transcripts/${id}/results`).add(data)
-  }
-
-  const setDuration = async (id: string, seconds: number) => {
-    const transcript: ITranscript = { duration: seconds }
-
-    return updateTranscript(id, transcript)
-  }
-
-  const errorOccured = async (id: string, error: Error) => {
+  const errorOccured = async (transcriptId: string, error: Error): Promise<FirebaseFirestore.WriteResult> => {
     const transcript: ITranscript = {
-      error: serializeError(error),
-      progress: {
-        status: Status.Failed,
-      },
-      timestamps: {
-        failedAt: admin.firestore.Timestamp.now(),
+      process: {
+        error: serializeError(error),
       },
     }
-    return updateTranscript(id, transcript)
+    return updateTranscript(transcriptId, transcript)
   }
 
-  const getResults = async (id: string): Promise<IResult[]> => {
+  const getResults = async (transcriptId: string): Promise<IResult[]> => {
     const querySnapshot = await db
-      .collection(`transcripts/${id}/results`)
+      .collection(`transcripts/${transcriptId}/results`)
       .orderBy("startTime")
       .get()
 
@@ -104,12 +78,12 @@ const database = (() => {
     return results
   }
 
-  const getStatus = async (id: string) => {
+  const getStep = async (id: string): Promise<Step> => {
     const doc = await db.doc(`transcripts/${id}`).get()
 
     const transcript = doc.data() as ITranscript
 
-    return transcript.progress.status
+    return transcript.process.step
   }
 
   const setPlaybackUrl = async (id: string, url: string) => {
@@ -118,7 +92,43 @@ const database = (() => {
     return updateTranscript(id, transcript)
   }
 
-  return { addResult, errorOccured, setDuration, setStatus, setPercent, getStatus, getResults, setPlaybackUrl }
+  const getTranscript = async (transcriptId: string): Promise<ITranscript> => {
+    const doc = await db.doc(`transcripts/${transcriptId}`).get()
+
+    return doc.data() as ITranscript
+  }
+
+  const addTranscriptSummary = async (transcriptSummary: ITranscriptSummary): Promise<FirebaseFirestore.WriteResult[]> => {
+    const transcriptsRef = db.doc("statistics/transcripts")
+
+    const doc = await transcriptsRef.get()
+
+    const transcripts: ITranscripts = (doc.data() as ITranscripts) || { duration: 0, transcripts: 0, words: 0 }
+
+    // Adding duration and words from transcriptSummary
+    transcripts.duration += transcriptSummary.duration
+    transcripts.transcripts += 1
+    transcripts.words += transcriptSummary.words
+
+    // Get a new write batch
+    const batch = db.batch()
+
+    // Set the values of duration and words
+    batch.set(transcriptsRef, transcripts)
+
+    // Add to transcript summary
+
+    const autoGeneratedId = db.collection("statistics").doc().id
+
+    const summariesRef = transcriptsRef.collection("summaries").doc(autoGeneratedId)
+
+    batch.set(summariesRef, transcriptSummary)
+
+    // Commit the batch
+    return batch.commit()
+  }
+
+  return { addResult, errorOccured, setDuration, setStep, setPercent, getStep, getResults, setPlaybackUrl, getTranscript, addTranscriptSummary }
 })()
 
 export default database

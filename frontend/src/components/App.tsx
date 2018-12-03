@@ -1,7 +1,7 @@
 import createHistory from "history/createBrowserHistory"
 import * as React from "react"
 import ReactGA from "react-ga"
-import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom"
+import { BrowserRouter, Route, Switch } from "react-router-dom"
 import "../css/App.css"
 import { auth } from "../firebaseApp"
 import Login from "./Login"

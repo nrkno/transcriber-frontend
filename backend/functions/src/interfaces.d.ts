@@ -1,31 +1,37 @@
 import admin from "firebase-admin"
-import { Status, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, AudioEncoding, Timestamp } from "./enums"
+import { Step, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, AudioEncoding, Timestamp } from "./enums"
+
+// -----------
+// Transcript
+// -----------
 
 interface ITranscript {
-  duration?: number
-  error?: any
-  languageCodes?: Array<string>
-  recognitionMetadata?: IRecognitionMetadata
-  userId?: string
+  createdAt?: admin.firestore.FieldValue | admin.firestore.Timestamp
+  name?: string
   playbackUrl?: string
-  progress?: {
-    percent?: number | admin.firestore.FieldValue
-    status?: Status
-  }
+  process?: IProcess
+  metadata?: IMetadata
   results?: Array<IResult>
-  timestamps?: { [x in Timestamp]?: admin.firestore.FieldValue }
-  title?: string
+  userId?: string
 }
 
-interface IRecognitionMetadata {
+interface IProcess {
+  error?: any
+  percent?: number
+  step?: Step
+}
+
+interface IMetadata {
+  audioDuration?: number
   audioTopic?: string
   industryNaicsCodeOfAudio?: number
-  interactionType: InteractionType
-  microphoneDistance: MicrophoneDistance
-  originalMediaType: OriginalMediaType
+  interactionType?: InteractionType
+  languageCodes?: Array<string>
+  microphoneDistance?: MicrophoneDistance
+  originalMediaType?: OriginalMediaType
   originalMimeType?: string
   recordingDeviceName?: string
-  recordingDeviceType: RecordingDeviceType
+  recordingDeviceType?: RecordingDeviceType
   speechContexts?: Array<ISpeechContext>
 }
 
@@ -34,9 +40,39 @@ interface ISpeechContext {
 }
 
 interface IResult {
-  startTime: number
   confidence: number
+  startTime: number
   transcript: string
+  words: Array<IWord>
+}
+
+interface IWord {
+  word: string
+  endTime: number
+  startTime: number
+}
+
+// -----------------
+// Google Speech API
+// -----------------
+
+interface ILongRunningRegonize {
+  audio: IRecognitionAudio
+  config: IRecognitionConfig
+}
+
+interface IRecognitionAudio {
+  content?: string
+  uri?: string
+}
+
+interface ISpeechRecognitionResult {
+  alternatives: Array<ISpeechRecognitionAlternative>
+}
+
+interface ISpeechRecognitionAlternative {
+  transcript: string
+  confidence: number
   words: Array<IWordInfo>
 }
 
@@ -47,18 +83,8 @@ interface IWordInfo {
 }
 
 interface ITime {
-  nanos: number
-  seconds: string
-}
-
-interface ILongRunningRegonize {
-  audio: IRecognitionAudio
-  config: IRecognitionConfig
-}
-
-interface IRecognitionAudio {
-  content?: string
-  uri?: string
+  nanos?: number
+  seconds?: string
 }
 
 interface IRecognitionConfig {
@@ -79,4 +105,16 @@ interface IRecognitionConfig {
   sampleRateHertz?: number
   speechContexts?: Array<ISpeechContext>
   useEnhanced?: boolean
+}
+
+interface IRecognitionMetadata {
+  audioTopic?: string
+  industryNaicsCodeOfAudio?: number
+  interactionType?: InteractionType
+  microphoneDistance?: MicrophoneDistance
+  originalMediaType?: OriginalMediaType
+  originalMimeType?: string
+  recordingDeviceName?: string
+  recordingDeviceType?: RecordingDeviceType
+  speechContexts?: Array<ISpeechContext>
 }

@@ -37,7 +37,7 @@ main#transcript {
 
 /* Navigation */
 
-header div.user button a {
+header div.user a {
   color: white;
   text-decoration: none;
 }

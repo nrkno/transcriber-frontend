@@ -32,6 +32,8 @@ class App extends React.Component<any, IState> {
     auth.onAuthStateChanged(user => {
       if (user) {
         this.setState({ user })
+        // Set Google Analytics ID
+        ReactGA.set({ userId: user.uid })
       } else {
         // history.push("login")
       }

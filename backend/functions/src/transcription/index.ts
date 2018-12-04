@@ -51,6 +51,10 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
       throw Error("Original mime type missing")
     }
 
+    // Setting user id
+
+    visitor.set("uid", transcript.userId)
+
     // Setting custom dimensions
 
     visitor.set("cd1", transcript.metadata.languageCodes.join(","))

@@ -3,8 +3,8 @@
   "workbench.colorCustomizations": {
     "titleBar.activeForeground": "#000",
     "titleBar.inactiveForeground": "#000000CC",
-    "titleBar.activeBackground": "#FFC600",
-    "titleBar.inactiveBackground": "#FFC600CC"
+    "titleBar.activeBackground": "#85d8f7",
+    "titleBar.inactiveBackground": "#85d8f7cc"
   },
   "search.exclude": {
     "**/node_modules": true

@@ -1,8 +1,8 @@
 // Place your settings in this file to overwrite default and user settings.
 {
   "workbench.colorCustomizations": {
-    "titleBar.activeBackground": "#FF2C70",
-    "titleBar.inactiveBackground": "#FF2C70CC"
+    "titleBar.activeBackground": "#326b1b",
+    "titleBar.inactiveBackground": "#326b1bCC"
   },
   "search.exclude": {
     "**/node_modules": true

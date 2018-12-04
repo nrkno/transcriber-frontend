@@ -1,10 +1,10 @@
 import createHistory from "history/createBrowserHistory"
 import * as React from "react"
 import ReactGA from "react-ga"
-import { BrowserRouter, Route, Switch } from "react-router-dom"
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom"
 import "../css/App.css"
 import { auth } from "../firebaseApp"
-import Login from "./Login"
+import Index from "./Index"
 import Transcript from "./Transcript"
 import Transcripts from "./Transcripts"
 
@@ -66,9 +66,9 @@ class App extends React.Component<any, IState> {
             </div>
           </header>
           <Switch>
-            <Route path="/" exact={true} render={props => <Transcripts {...props} user={this.state.user} />} />
+            <Route exact={true} path="/" render={() => (this.state.user ? <Redirect to="/transcripts" /> : <Index />)} />
+            <Route path="/transcripts" exact={true} render={props => <Transcripts {...props} user={this.state.user} />} />
             <Route path="/transcripts/:id" component={Transcript} />
-            <Route path="/login" exact={true} component={Login} />
           </Switch>
         </div>
       </BrowserRouter>

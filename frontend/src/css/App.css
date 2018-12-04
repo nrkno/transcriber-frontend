@@ -35,6 +35,13 @@ main#transcript {
   align-content: start;
 }
 
+/* Navigation */
+
+header div.user button a {
+  color: white;
+  text-decoration: none;
+}
+
 /* Transcripts */
 
 hr {

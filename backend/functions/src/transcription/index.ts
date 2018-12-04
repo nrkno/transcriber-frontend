@@ -97,8 +97,8 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     const transcodedDuration = transcodedDate - startDate
 
     visitor.set("cm5", Math.round(transcodedDuration / 1000))
-    visitor.event("transcription", "transcoded").send()
-    visitor.timing("transcription", "transcoding", Math.round(transcodedDuration)).send()
+    visitor.event("transcription", "transcoded", transcriptId).send()
+    visitor.timing("transcription", "transcoding", Math.round(transcodedDuration), transcriptId).send()
 
     console.log("transcodedDuration", transcodedDuration)
 
@@ -120,8 +120,8 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     const transcribedDuration = transcribedDate - transcodedDate
 
     visitor.set("cm6", Math.round(transcribedDuration / 1000))
-    visitor.event("transcription", "transcribed").send()
-    visitor.timing("transcription", "transcribing", Math.round(transcribedDuration)).send()
+    visitor.event("transcription", "transcribed", transcriptId).send()
+    visitor.timing("transcription", "transcribing", Math.round(transcribedDuration), transcriptId).send()
 
     console.log("transcribedDuration", transcribedDuration)
 
@@ -138,8 +138,11 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     console.log("savedDuration", savedDuration)
 
     visitor.set("cm7", Math.round(savedDuration / 1000))
-    visitor.event("transcription", "saved").send()
-    visitor.timing("transcription", "saving", Math.round(savedDuration)).send()
+    visitor.event("transcription", "saved", transcriptId).send()
+    visitor.timing("transcription", "saving", Math.round(savedDuration), transcriptId).send()
+
+    const processDuration = savedDate - startDate
+    visitor.set("cm8", Math.round(processDuration / 1000))
 
     visitor.event("transcription", "done", transcriptId, Math.round(audioDuration)).send()
 

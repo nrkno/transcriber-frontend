@@ -22,6 +22,11 @@ class Player extends React.Component<IProps, IState> {
     }
   }
 
+  public componentWillUnmount() {
+    clearInterval(this.state.timer)
+    this.setState({ isPlaying: false, timer: undefined })
+  }
+
   public handlePlay = (event: React.FormEvent<HTMLButtonElement>) => {
     this.play()
 

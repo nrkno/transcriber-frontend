@@ -126,3 +126,11 @@ Thumbs.db
 .idea
 *.sublime-project
 *.sublime-workspace
+
+
+
+##########
+# Custom #
+##########
+
+env-config.js

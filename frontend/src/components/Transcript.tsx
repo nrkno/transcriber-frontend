@@ -32,8 +32,6 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     database.doc(`transcripts/${this.props.match.params.id}`).onSnapshot(documentSnapshot => {
       const transcript = documentSnapshot.data() as ITranscript
 
-      console.log("transcript", documentSnapshot.data())
-
       this.setState({
         transcript,
       })
@@ -96,8 +94,6 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
           // This word is no longer being said, go to next
           continue
         }
-
-        // console.log(word)
 
         this.setState({ currentTime, currentResultIndex: i, currentWordIndex: j })
 

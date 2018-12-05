@@ -321,8 +321,6 @@ class Upload extends React.Component<IProps, IState> {
           step: Step.Uploading,
         }
 
-        console.log(transcript)
-
         this.setState({ transcript })
       },
       error => {

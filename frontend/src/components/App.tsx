@@ -10,6 +10,7 @@ import Transcripts from "./Transcripts"
 
 ReactGA.initialize(process.env.GOOGLE_ANALYTICS_PROPERTY_ID, {
   debug: process.env.NODE_ENV === "development",
+  titleCase: false,
 })
 
 const history = createHistory()

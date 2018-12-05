@@ -50,6 +50,11 @@ header div.user a {
   text-decoration: none;
 }
 
+.login a {
+  color: white;
+  text-decoration: none;
+}
+
 /* Transcripts */
 
 hr {

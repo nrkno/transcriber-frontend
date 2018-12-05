@@ -1,12 +1,12 @@
 import * as React from "react"
-import { IWordInfo } from "../interfaces"
+import { IWord } from "../interfaces"
 
 interface IProps {
-  word: IWordInfo
+  word: IWord
   isCurrentWord: boolean
   resultIndex: number
   wordIndex: number
-  setCurrentWord(word: IWordInfo, resultIndex: number, wordIndex: number): void
+  setCurrentWord(word: IWord, resultIndex: number, wordIndex: number): void
 }
 
 class Word extends React.Component<IProps, {}> {

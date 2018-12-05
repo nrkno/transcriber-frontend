@@ -115,8 +115,23 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
 
     console.log("speechRecognitionResults", speechRecognitionResults)
 
-    const numberOfWords = speechRecognitionResults.reduce((accumulator, result) => accumulator + result.alternatives[0].transcript.split(" ").length, 0)
+    const numberOfWords = speechRecognitionResults.reduce((accumulator, result) => {
+      if (result.alternatives.length > 0) {
+        return accumulator + result.alternatives[0].transcript.split(" ").length
+      } else {
+        return accumulator
+      }
+    }, 0)
     console.log("Number of words", numberOfWords)
+
+    // If there are no transcribed words, we cancel the process here.
+    if (numberOfWords === 0) {
+      const error = new Error("Fant ingen ord i lydfilen")
+
+      await database.errorOccured(documentSnapshot.id, error)
+
+      return
+    }
 
     visitor.set("cm4", numberOfWords)
 
@@ -145,12 +160,12 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     visitor.event("transcription", "saved", transcriptId).send()
     visitor.timing("transcription", "saving", Math.round(savedDuration), transcriptId).send()
 
+    // Done
+
     const processDuration = savedDate - startDate
     visitor.set("cm8", Math.round(processDuration / 1000))
 
     visitor.event("transcription", "done", transcriptId, Math.round(audioDuration)).send()
-
-    // Done
 
     await database.setStep(transcriptId, Step.Done)
   } catch (error) {

@@ -1,7 +1,7 @@
 import createHistory from "history/createBrowserHistory"
 import * as React from "react"
 import ReactGA from "react-ga"
-import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom"
+import { BrowserRouter, Link, Redirect, Route, Switch } from "react-router-dom"
 import "../css/App.css"
 import { auth } from "../firebaseApp"
 import Index from "./Index"
@@ -59,7 +59,9 @@ class App extends React.Component<any, IState> {
                 <path fill="#FFFFFF" d="M15.5,3.5c-0.4-1.8-1.9-3.1-3.8-3.1l0,0H7.3L11.7,20h7.5L15.5,3.5z" />
               </g>
             </svg>
-            <h1 className="org-text-l">Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</h1>
+            <h1 className="org-text-l logo">
+              <Link to="/"> Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</Link>
+            </h1>
             <div className="user">
               {this.state.user !== undefined ? this.state.user.displayName : <a href="/login">Logg inn</a>}
               {process.env.NODE_ENV === "development" && this.state.user !== undefined ? ` (${this.state.user.uid})` : ""}

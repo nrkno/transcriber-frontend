@@ -71,3 +71,12 @@ typings/
 
 # Serverless directories
 .serverless
+
+
+
+
+##########
+# Custom #
+##########
+
+functions/dist

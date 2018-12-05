@@ -14,9 +14,10 @@ const Index = () => {
       </p>
       <p>Verktøyet støtter over 60 språk. Norsk språk fungerer opp mot 80%, mens engelsk opp mot 90%. Du kan laste opp alle type lydfiler, men husk at lydfilen bør være maks 200 MB, og maks lengde bør være under 1 time og 30 min.</p>
       <p>Lykke til !</p>
-      <button className="org-btn org-btn--primary login">
-        <a href="/login">Logg inn</a>
-      </button>
+
+      <a href="/login">
+        <button className="org-btn org-btn--primary login">Logg inn </button>
+      </a>
     </main>
   )
 }

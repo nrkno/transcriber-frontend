@@ -1,6 +1,7 @@
 import moment from "moment"
 import React, { Component } from "react"
 import { Link } from "react-router-dom"
+import "../css/TranscriptsList.css"
 import { Step } from "../enums"
 import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
@@ -8,6 +9,7 @@ import Progress from "./Progress"
 
 interface IProps {
   userId?: string
+  selectedTranscriptId?: string
 }
 
 interface IState {
@@ -36,54 +38,51 @@ class TranscriptsList extends Component<IProps, IState> {
 
   public render() {
     return (
-      <div className="transcripts">
-        <h2 className="org-text-xl">Transkripsjoner</h2>
-
-        {/* Render transcripts in progress */}
-        {this.state.transcripts &&
-          this.state.transcripts
-            .filter(transcript => transcript.process.step !== Step.Done)
-            .map((transcript, index) => {
-              return <Progress transcript={transcript} key={index} />
-            })}
+      <div className="trans-list org-color-shade org-shadow-l org-color-base">
+        <div className="org-bar">
+          <h2 className="org-text-l">Transkripsjoner</h2>
+        </div>
+        <hr />
         <table className="org-table">
           <thead>
             <tr>
               <th>Navn</th>
               <th>Dato</th>
-              <th>Lengde</th>
+              <th>Varighet</th>
             </tr>
           </thead>
           <tbody>
-            {/* Render finished transcripts */}
-            {this.state.transcripts !== undefined &&
-              this.state.transcriptIds !== undefined &&
-              this.state.transcripts
-                .filter(transcript => transcript.process.step === Step.Done)
-                .map((transcript, index) => {
-                  const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
-                  const formattedCreatedAt = moment(createdAt)
-                    .locale("nb")
-                    .calendar()
-                  const id = this.state.transcriptIds[index]
-                  const duration = moment.duration(transcript.metadata.audioDuration * 1000)
+            {this.state.transcripts &&
+              this.state.transcripts.map((transcript, index) => {
+                const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
+                const formattedCreatedAt = moment(createdAt)
+                  .locale("nb")
+                  .calendar()
+                const id = this.state.transcriptIds[index]
+                const duration = moment.duration(transcript.metadata.audioDuration * 1000)
 
-                  return (
-                    <tr key={id}>
-                      <td>
-                        <Link to={`transcripts/${id}`}>{transcript.name} </Link>
-                      </td>
-                      <td>{formattedCreatedAt}</td>
-                      <td>
-                        {duration.hours() > 0 ? `${duration.hours()} t ` : ""}
-                        {duration.minutes() > 0 ? `${duration.minutes()} m` : ""}
-                        {duration.hours() === 0 && duration.minutes() === 0 ? `${duration.seconds()} s` : ""}
-                      </td>
-                    </tr>
-                  )
-                })}
+                const selectedItemClassName = id === this.props.selectedTranscriptId ? "trans-item--selected" : ""
+                return (
+                  <tr key={id} className={`trans-item ${selectedItemClassName}`}>
+                    <td>
+                      <Link to={`transcripts/${id}`}>{transcript.name} </Link>
+                    </td>
+                    <td>{formattedCreatedAt}</td>
+                    <td>
+                      {duration.hours() > 0 ? `${duration.hours()} t ` : ""}
+                      {duration.minutes() > 0 ? `${duration.minutes()} m` : ""}
+                      {duration.hours() === 0 && duration.minutes() === 0 ? `${duration.seconds()} s` : ""}
+                    </td>
+                  </tr>
+                )
+              })}
           </tbody>
         </table>
+        <button id="new-trans" className="org-btn org-btn--primary org-btn--round">
+          <svg width="40" height="40" aria-hidden="true">
+            <use xlinkHref="#icon-pluss" />
+          </svg>
+        </button>
       </div>
     )
   }

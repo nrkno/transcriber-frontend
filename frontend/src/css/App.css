@@ -35,6 +35,14 @@ main#transcript {
   align-content: start;
 }
 
+main#create {
+  margin: 20px;
+  display: grid;
+  grid-template-columns: minmax(auto, 600px);
+  justify-content: center;
+  align-content: start;
+}
+
 /* Navigation */
 
 .logo a:visited,
@@ -65,10 +73,8 @@ hr {
 }
 
 main#transcripts {
-  margin: 40px;
   display: grid;
-  grid-template-columns: minmax(auto, 700px) 300px;
-  justify-content: center;
+  grid-template-columns: 300px 1fr;
   grid-gap: 40px;
 }
 

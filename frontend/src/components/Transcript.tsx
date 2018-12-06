@@ -1,6 +1,5 @@
 import * as React from "react"
 import ReactGA from "react-ga"
-import { RouteComponentProps } from "react-router"
 import { SweetProgressStatus } from "../enums"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
@@ -36,8 +35,6 @@ class Transcript extends React.Component<IProps, IState> {
     if (this.props.transcriptId !== prevProps.transcriptId) {
       this.fetchTranscript(this.props.transcriptId)
     }
-
-    console.log("componentDidUpdate")
   }
 
   public async componentDidMount() {
@@ -201,8 +198,8 @@ class Transcript extends React.Component<IProps, IState> {
                 )
               })}
             </div>
+            <Player ref={this.playerRef} fileUrl={transcript.playbackUrl} handleTimeUpdate={this.handleTimeUpdate} />
           </main>
-          <Player ref={this.playerRef} fileUrl={transcript.playbackUrl} handleTimeUpdate={this.handleTimeUpdate} />
         </>
       )
     }

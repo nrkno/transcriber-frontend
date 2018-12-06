@@ -5,10 +5,12 @@ import "../css/TranscriptsList.css"
 import { Step } from "../enums"
 import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
+import UploadButton from "./UploadButton"
 
 interface IProps {
   userId?: string
   selectedTranscriptId?: string
+  fileSelected: (file: File) => void
 }
 
 interface IState {
@@ -45,6 +47,7 @@ class TranscriptsList extends Component<IProps, IState> {
         <table className="org-table">
           <thead>
             <tr>
+              <th />
               <th>Navn</th>
               <th>Dato</th>
               <th>Varighet</th>
@@ -107,11 +110,8 @@ class TranscriptsList extends Component<IProps, IState> {
               })}
           </tbody>
         </table>
-        <button id="new-trans" className="org-btn org-btn--primary org-btn--round">
-          <svg width="40" height="40" aria-hidden="true">
-            <use xlinkHref="#icon-pluss" />
-          </svg>
-        </button>
+
+        <UploadButton fileSelected={this.props.fileSelected} />
       </div>
     )
   }

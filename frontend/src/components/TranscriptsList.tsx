@@ -5,7 +5,6 @@ import "../css/TranscriptsList.css"
 import { Step } from "../enums"
 import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
-import Progress from "./Progress"
 
 interface IProps {
   userId?: string
@@ -61,11 +60,41 @@ class TranscriptsList extends Component<IProps, IState> {
                 const id = this.state.transcriptIds[index]
                 const duration = moment.duration(transcript.metadata.audioDuration * 1000)
 
-                const selectedItemClassName = id === this.props.selectedTranscriptId ? "trans-item--selected" : ""
+                let className = "trans-item"
+                if (id === this.props.selectedTranscriptId) {
+                  className += " trans-item--selected"
+                }
+                if (transcript.process && transcript.process.error) {
+                  className += " org-color-error"
+                }
+
                 return (
-                  <tr key={id} className={`trans-item ${selectedItemClassName}`}>
+                  <tr key={id} className={className}>
                     <td>
-                      <Link to={`transcripts/${id}`}>{transcript.name} </Link>
+                      {(() => {
+                        if (transcript.process && transcript.process.error) {
+                          return (
+                            <svg width="20" height="20" focusable="false" aria-hidden="true">
+                              <use xlinkHref="#icon-x-c" />
+                            </svg>
+                          )
+                        } else if (transcript.process && transcript.process.step !== Step.Done) {
+                          return (
+                            <svg width="20" height="20" focusable="false" aria-hidden="true">
+                              <use xlinkHref="#icon-x-c" />
+                            </svg>
+                          )
+                        } else {
+                          return (
+                            <svg width="20" height="20" focusable="false" aria-hidden="true">
+                              <use xlinkHref="#icon-title" />
+                            </svg>
+                          )
+                        }
+                      })()}
+                    </td>
+                    <td>
+                      <Link to={`/transcripts/${id}`}>{transcript.name} </Link>
                     </td>
                     <td>{formattedCreatedAt}</td>
                     <td>
@@ -87,10 +116,10 @@ class TranscriptsList extends Component<IProps, IState> {
     )
   }
 
-  private fetchTranscripts(uid: string) {
+  private fetchTranscripts(userId: string) {
     database
       .collection("/transcripts")
-      .where("userId", "==", uid)
+      .where("userId", "==", userId)
       .orderBy("createdAt", "desc")
       .onSnapshot(querySnapshot => {
         const transcripts = Array<ITranscript>()
@@ -101,12 +130,7 @@ class TranscriptsList extends Component<IProps, IState> {
           const transcript = doc.data() as ITranscript
 
           transcripts.push(transcript)
-
-          // We only care about the ids of successful transcripts
-
-          if (transcript.process && transcript.process.step === Step.Done) {
-            transcriptIds.push(doc.id)
-          }
+          transcriptIds.push(doc.id)
         })
 
         this.setState({

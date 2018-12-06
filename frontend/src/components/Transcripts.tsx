@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import { RouteComponentProps } from "react-router"
+import Transcript from "./Transcript"
 import TranscriptsList from "./TranscriptsList"
 import Upload from "./Upload"
 
@@ -14,7 +15,8 @@ class Transcripts extends Component<RouteComponentProps<IProps>, any> {
         {this.props.user ? (
           <>
             <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} />
-            <Upload user={this.props.user} />
+            {/*<Upload user={this.props.user} />*/}
+            <Transcript transcriptId={this.props.match.params.id} />
           </>
         ) : (
           <div>Loading</div>

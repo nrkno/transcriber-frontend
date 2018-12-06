@@ -9,6 +9,10 @@ import Player from "./Player"
 import TranscriptionProgress from "./TranscriptionProgress"
 import Word from "./Word"
 
+interface IProps {
+  transcriptId: string
+}
+
 interface IState {
   currentResultIndex: number | undefined
   currentTime: number
@@ -16,7 +20,7 @@ interface IState {
   transcript: ITranscript | null
 }
 
-class Transcript extends React.Component<RouteComponentProps<any>, IState> {
+class Transcript extends React.Component<IProps, IState> {
   private playerRef = React.createRef<Player>()
   constructor(props: any) {
     super(props)
@@ -28,14 +32,16 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     }
   }
 
-  public async componentDidMount() {
-    database.doc(`transcripts/${this.props.match.params.id}`).onSnapshot(documentSnapshot => {
-      const transcript = documentSnapshot.data() as ITranscript
+  public componentDidUpdate(prevProps: IProps) {
+    if (this.props.transcriptId !== prevProps.transcriptId) {
+      this.fetchTranscript(this.props.transcriptId)
+    }
 
-      this.setState({
-        transcript,
-      })
-    })
+    console.log("componentDidUpdate")
+  }
+
+  public async componentDidMount() {
+    this.fetchTranscript(this.props.transcriptId)
   }
 
   public handleTimeUpdate = (currentTime: number) => {
@@ -127,7 +133,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
       ReactGA.event({
         action: "transcript not found",
         category: "transcript",
-        label: this.props.match.params.id,
+        label: this.props.transcriptId,
       })
       return (
         <main id="loading">
@@ -143,7 +149,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
         transcript.results = Array<IResult>()
 
         database
-          .collection(`transcripts/${this.props.match.params.id}/results`)
+          .collection(`transcripts/${this.props.transcriptId}/results`)
           .orderBy("startTime")
           .get()
           .then(querySnapshot => {
@@ -202,6 +208,16 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
     }
   }
 
+  private fetchTranscript(transcriptId: string) {
+    database.doc(`transcripts/${transcriptId}`).onSnapshot(documentSnapshot => {
+      const transcript = documentSnapshot.data() as ITranscript
+
+      this.setState({
+        transcript,
+      })
+    })
+  }
+
   private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {
     ReactGA.event({
       action: "export button pressed",
@@ -211,7 +227,7 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
 
     event.preventDefault()
 
-    const id = this.props.match.params.id
+    const id = this.props.transcriptId
 
     window.location.href = `${process.env.REACT_APP_FIREBASE_HTTP_CLOUD_FUNCTION_URL}/exportToDoc?id=${id}`
   }

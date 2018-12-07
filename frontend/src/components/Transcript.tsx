@@ -2,31 +2,19 @@ import * as React from "react"
 import ReactGA from "react-ga"
 import { SweetProgressStatus } from "../enums"
 import { database } from "../firebaseApp"
-import { IResult, ITranscript, IWord } from "../interfaces"
-import secondsToTime from "../secondsToTime"
-import Player from "./Player"
+import { ITranscript } from "../interfaces"
 import TranscriptionProgress from "./TranscriptionProgress"
-import Word from "./Word"
+import TranscriptResults from "./TranscriptResults"
 
 interface IProps {
+  transcript: ITranscript | null
   transcriptId: string
 }
-
-interface IState {
-  currentResultIndex: number | undefined
-  currentTime: number
-  currentWordIndex: number | undefined
-  transcript: ITranscript | null
-}
-
+ 
 class Transcript extends React.Component<IProps, IState> {
-  private playerRef = React.createRef<Player>()
   constructor(props: any) {
     super(props)
     this.state = {
-      currentResultIndex: undefined,
-      currentTime: 0,
-      currentWordIndex: undefined,
       transcript: null,
     }
   }
@@ -39,79 +27,6 @@ class Transcript extends React.Component<IProps, IState> {
 
   public async componentDidMount() {
     this.fetchTranscript(this.props.transcriptId)
-  }
-
-  public handleTimeUpdate = (currentTime: number) => {
-    // Find the next current result and word
-
-    const { currentResultIndex, currentWordIndex, transcript } = this.state
-
-    if (transcript === undefined || transcript.results === undefined) {
-      return
-    }
-
-    const { results } = transcript
-
-    // First, we check if the current word is still being said
-
-    if (currentResultIndex !== undefined && currentWordIndex !== undefined) {
-      const currentWord = results[currentResultIndex].words[currentWordIndex]
-
-      if (currentTime < currentWord.endTime * 1e-9) {
-        return
-      }
-    }
-    // The current word has been said, start scanning for the next word
-    // We assume that it will be the next word in the current result
-
-    let nextWordIndex = 0
-    let nextResultIndex = 0
-
-    if (currentResultIndex !== undefined && currentWordIndex !== undefined) {
-      nextWordIndex = currentWordIndex ? currentWordIndex + 1 : 0
-      nextResultIndex = currentResultIndex
-
-      if (nextWordIndex === results[currentResultIndex].words.length) {
-        // This was the last word, reset word index and move to next result
-
-        nextWordIndex = 0
-        nextResultIndex = nextResultIndex + 1
-      }
-    }
-
-    // Start scanning for next word
-    for (let i = nextResultIndex; i < results.length; i++) {
-      const words = results[i].words
-
-      for (let j = nextWordIndex; j < words.length; j++) {
-        const word = words[j]
-
-        const { startTime, endTime } = word
-
-        if (currentTime < startTime * 1e-9) {
-          // This word hasn't started yet, returning and waiting to be called again on new current time update
-          return
-        }
-
-        if (currentTime > endTime * 1e-9) {
-          // This word is no longer being said, go to next
-          continue
-        }
-
-        this.setState({ currentTime, currentResultIndex: i, currentWordIndex: j })
-
-        return
-      }
-    }
-  }
-
-  public setCurrentWord = (word: IWord, resultIndex: number, wordIndex: number) => {
-    this.playerRef.current!.setTime(word.startTime * 1e-9)
-
-    this.setState({
-      currentResultIndex: resultIndex,
-      currentWordIndex: wordIndex,
-    })
   }
 
   public render() {
@@ -138,29 +53,9 @@ class Transcript extends React.Component<IProps, IState> {
         </main>
       )
     } else {
-      const progress = transcript.process!
+      // Check current step
 
-      // Read results
-
-      if (transcript.results === undefined) {
-        transcript.results = Array<IResult>()
-
-        database
-          .collection(`transcripts/${this.props.transcriptId}/results`)
-          .orderBy("startTime")
-          .get()
-          .then(querySnapshot => {
-            querySnapshot.forEach(doc => {
-              const result = doc.data() as IResult
-
-              transcript.results.push(result)
-            })
-
-            this.setState({
-              transcript,
-            })
-          })
-      }
+ 
 
       return (
         <>
@@ -177,44 +72,23 @@ class Transcript extends React.Component<IProps, IState> {
                   </button>
                 </form>
               </div>
-              {transcript.results.map((result, i) => {
-                const startTime = result.startTime
 
-                const formattedStartTime = secondsToTime(startTime * 1e-9)
 
-                return (
-                  <React.Fragment key={i}>
-                    <div key={`startTime-${i}`} className="startTime">
-                      {i > 0 ? formattedStartTime : ""}
-                    </div>
 
-                    <div key={`result-${i}`} className="result">
-                      {result.words.map((word, j) => {
-                        const isCurrentWord = this.state.currentResultIndex === i && this.state.currentWordIndex === j
-                        return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
-                      })}
-                    </div>
-                  </React.Fragment>
-                )
-              })}
+            {{     this.state.tra   }}
+
+
+
+
+              <TranscriptResults transcript={this.state.transcript} transcriptId={this.props.transcriptId} />
             </div>
-            <Player ref={this.playerRef} fileUrl={transcript.playbackUrl} handleTimeUpdate={this.handleTimeUpdate} />
           </main>
         </>
       )
     }
   }
 
-  private fetchTranscript(transcriptId: string) {
-    database.doc(`transcripts/${transcriptId}`).onSnapshot(documentSnapshot => {
-      const transcript = documentSnapshot.data() as ITranscript
-
-      this.setState({
-        transcript,
-      })
-    })
-  }
-
+ 
   private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {
     ReactGA.event({
       action: "export button pressed",

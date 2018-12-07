@@ -94,13 +94,13 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
                         } else if (transcript.process && transcript.process.step !== Step.Done) {
                           return (
                             <svg width="20" height="20" focusable="false" aria-hidden="true">
-                              <use xlinkHref="#icon-x-c" />
+                              <use xlinkHref="#icon-title" />
                             </svg>
                           )
                         } else {
                           return (
                             <svg width="20" height="20" focusable="false" aria-hidden="true">
-                              <use xlinkHref="#icon-title" />
+                              <use xlinkHref="#icon-waveform" />
                             </svg>
                           )
                         }
@@ -121,7 +121,7 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
           </tbody>
         </table>
 
-        <UploadButton fileSelected={this.props.fileSelected} />
+        <UploadButton fileSelected={this.props.fileSelected} userId={this.props.userId} />
       </div>
     )
   }

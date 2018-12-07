@@ -25,7 +25,7 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
           <>
             <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} fileSelected={this.fileSelected} history={this.props.history} />
 
-            {this.state.file ? <CreateTranscript file={this.state.file} /> : <Transcript transcriptId={this.props.match.params.id} />}
+            {this.state.file ? <CreateTranscript file={this.state.file} userId={this.props.user.uid} /> : <Transcript transcriptId={this.props.match.params.id} />}
           </>
         ) : (
           <div>Loading</div>

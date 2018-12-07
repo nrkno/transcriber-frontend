@@ -6,14 +6,17 @@ import "react-sweet-progress/lib/style.css"
 import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Step, Timestamp } from "../enums"
 import { database, storage } from "../firebaseApp"
 import { IMetadata, ITranscript } from "../interfaces"
+import Transcript from "./Transcript"
 
 interface IState {
   transcript: ITranscript
+  isSubmitting: boolean
+  transcriptId?: string
 }
 
 interface IProps {
   file: File
-  user?: firebase.User
+  userId: string
 }
 
 class CreateTranscript extends React.Component<IProps, IState> {
@@ -21,6 +24,7 @@ class CreateTranscript extends React.Component<IProps, IState> {
     super(props)
 
     this.state = {
+      isSubmitting: false,
       transcript: {
         metadata: {
           audioTopic: "",
@@ -36,116 +40,233 @@ class CreateTranscript extends React.Component<IProps, IState> {
       },
     }
   }
+  public componentDidMount() {
+    this.uploadFile()
+  }
+
+  public componentDidUpdate() {
+    this.checkIfReadyToSubmit()
+  }
 
   public render() {
-    if (this.state.transcript.process === undefined) {
-      return (
-        <main id="transcript">
-          <div className="create">
-            <h2 className="org-text-xl">Ny transkripsjon</h2>
-            <form className="dropForm" onSubmit={this.handleSubmit}>
-              <label className="org-label">
-                Språk
-                <select value={this.state.transcript.metadata.languageCodes[0]} onChange={event => this.handleLanguageChange(0, event)}>
-                  {this.availableLanguages()}
-                </select>
-                <select data-testid="languages" value={this.state.transcript.metadata.languageCodes[1]} onChange={event => this.handleLanguageChange(1, event)}>
-                  {this.availableLanguages()}
-                </select>
-                <select data-testid="languages" value={this.state.transcript.metadata.languageCodes[2]} onChange={event => this.handleLanguageChange(2, event)}>
-                  {this.availableLanguages()}
-                </select>
-                <select data-testid="languages" value={this.state.transcript.metadata.languageCodes[3]} onChange={event => this.handleLanguageChange(3, event)}>
-                  {this.availableLanguages()}
-                </select>
-              </label>
-              <label className="org-label">
-                Type
-                <select value={this.state.transcript.metadata.interactionType} onChange={this.handleInteractionTypeChange}>
-                  <option value={InteractionType.Unspecified}>Ukjent eller annen type</option>
-                  <option value={InteractionType.Discussion}>Diskusjon - Flere personer i samtale eller diskusjon, for eksempel i møte med to eller flere aktive deltakere</option>
-                  <option value={InteractionType.Presentaton}>Presentasjon - En eller flere personer foreleser eller presenterer til andre, stort sett uten avbrudd</option>
-                  <option value={InteractionType.PhoneCall}>Telefon- eller videokonferansesamtale - To eller flere personer, som ikke er i samme rom, deltar aktivt i samtale.</option>
-                  <option value={InteractionType.Voicemail}>Talepostmelding/mobilsvar - Opptak som er ment for en annen person å lytte til.</option>
-                  <option value={InteractionType.ProfessionallyProduced}>Profesjonelt produsert - Eksempelvis TV-show, podkast</option>
-                  <option value={InteractionType.Dictation}>Diksjon - Opplesning av dokumenter som tekstmeldinger, e-post eller rapporter.</option>
-                </select>
-              </label>
+    return (
+      <main id="transcript">
+        <div className="create">
+          <h2 className="org-text-xl">Ny transkripsjon</h2>
+          <form className="dropForm" onSubmit={this.handleSubmit}>
+            <label className="org-label">
+              Språk
+              <select value={this.state.transcript.metadata.languageCodes[0]} onChange={event => this.handleLanguageChange(0, event)}>
+                {this.availableLanguages()}
+              </select>
+              <select data-testid="languages" value={this.state.transcript.metadata.languageCodes[1]} onChange={event => this.handleLanguageChange(1, event)}>
+                {this.availableLanguages()}
+              </select>
+              <select data-testid="languages" value={this.state.transcript.metadata.languageCodes[2]} onChange={event => this.handleLanguageChange(2, event)}>
+                {this.availableLanguages()}
+              </select>
+              <select data-testid="languages" value={this.state.transcript.metadata.languageCodes[3]} onChange={event => this.handleLanguageChange(3, event)}>
+                {this.availableLanguages()}
+              </select>
+            </label>
+            <label className="org-label">
+              Type
+              <select value={this.state.transcript.metadata.interactionType} onChange={this.handleInteractionTypeChange}>
+                <option value={InteractionType.Unspecified}>Ukjent eller annen type</option>
+                <option value={InteractionType.Discussion}>Diskusjon - Flere personer i samtale eller diskusjon, for eksempel i møte med to eller flere aktive deltakere</option>
+                <option value={InteractionType.Presentaton}>Presentasjon - En eller flere personer foreleser eller presenterer til andre, stort sett uten avbrudd</option>
+                <option value={InteractionType.PhoneCall}>Telefon- eller videokonferansesamtale - To eller flere personer, som ikke er i samme rom, deltar aktivt i samtale.</option>
+                <option value={InteractionType.Voicemail}>Talepostmelding/mobilsvar - Opptak som er ment for en annen person å lytte til.</option>
+                <option value={InteractionType.ProfessionallyProduced}>Profesjonelt produsert - Eksempelvis TV-show, podkast</option>
+                <option value={InteractionType.Dictation}>Diksjon - Opplesning av dokumenter som tekstmeldinger, e-post eller rapporter.</option>
+              </select>
+            </label>
 
-              <label className="org-label">
-                NAICS-kode
-                <small>
-                  Den 6-sifrede <a href="https://www.naics.com/search/">NAICS-koden</a> som ligger tettest opptil emnene det snakkes om i lydfilen.
-                </small>
-                <input value={this.state.transcript.metadata.industryNaicsCodeOfAudio} type="text" onChange={this.handleIndustryNaicsCodeOfAudioChange} />
-              </label>
+            <label className="org-label">
+              NAICS-kode
+              <small>
+                Den 6-sifrede <a href="https://www.naics.com/search/">NAICS-koden</a> som ligger tettest opptil emnene det snakkes om i lydfilen.
+              </small>
+              <input value={this.state.transcript.metadata.industryNaicsCodeOfAudio} type="text" onChange={this.handleIndustryNaicsCodeOfAudioChange} />
+            </label>
 
-              <label className="org-label">
-                Mikrofonavstand
-                <select value={this.state.transcript.metadata.microphoneDistance} onChange={this.handleMicrophoneDistanceChange}>
-                  <option value={MicrophoneDistance.Unspecified}>Ukjent</option>
-                  <option value={MicrophoneDistance.Nearfield}>Mindre enn 1 meter</option>
-                  <option value={MicrophoneDistance.Midfield}>Mindre enn 3 meter</option>
-                  <option value={MicrophoneDistance.Farfield}>Mer enn 3 meter</option>
-                </select>
-              </label>
-              <label className="org-label">
-                Opprinnelig mediatype
-                <select value={this.state.transcript.metadata.originalMediaType} onChange={this.handleOriginalMediaTypeChange}>
-                  <option value={OriginalMediaType.Unspecified}>Ukjent</option>
-                  <option value={OriginalMediaType.Audio}>Audio - Lydopptak</option>
-                  <option value={OriginalMediaType.Video}>Video - Lyden kommer opprinnelig fra et video-opptak </option>
-                </select>
-              </label>
-              <label className="org-label">
-                Hvor eller hvordan ble opptaket gjort?
-                <select value={this.state.transcript.metadata.recordingDeviceType} onChange={this.handleRecordingDeviceTypeChange}>
-                  <option value={RecordingDeviceType.Unspecified}>Ukjent</option>
-                  <option value={RecordingDeviceType.Smartphone}>Smarttelefon - Opptaket ble gjort på en smarttelefon</option>
-                  <option value={RecordingDeviceType.PC}>PC - Opptaket ble gjort med en PC eller tablet</option>
-                  <option value={RecordingDeviceType.PhoneLine}>Telefonlinje - Opptaket ble gjort over en telefonlinje</option>
-                  <option value={RecordingDeviceType.Vehicle}>Kjøretøy - Opptaket ble gjort i et kjøretøy</option>
-                  <option value={RecordingDeviceType.OtherOutdoorDevice}>Utendørs - Opptaket ble gjort utendørs</option>
-                  <option value={RecordingDeviceType.OtherIndoorDevice}>Innendørs - Opptaket ble gjort innendørs</option>
-                </select>
-              </label>
+            <label className="org-label">
+              Mikrofonavstand
+              <select value={this.state.transcript.metadata.microphoneDistance} onChange={this.handleMicrophoneDistanceChange}>
+                <option value={MicrophoneDistance.Unspecified}>Ukjent</option>
+                <option value={MicrophoneDistance.Nearfield}>Mindre enn 1 meter</option>
+                <option value={MicrophoneDistance.Midfield}>Mindre enn 3 meter</option>
+                <option value={MicrophoneDistance.Farfield}>Mer enn 3 meter</option>
+              </select>
+            </label>
+            <label className="org-label">
+              Opprinnelig mediatype
+              <select value={this.state.transcript.metadata.originalMediaType} onChange={this.handleOriginalMediaTypeChange}>
+                <option value={OriginalMediaType.Unspecified}>Ukjent</option>
+                <option value={OriginalMediaType.Audio}>Audio - Lydopptak</option>
+                <option value={OriginalMediaType.Video}>Video - Lyden kommer opprinnelig fra et video-opptak </option>
+              </select>
+            </label>
+            <label className="org-label">
+              Hvor eller hvordan ble opptaket gjort?
+              <select value={this.state.transcript.metadata.recordingDeviceType} onChange={this.handleRecordingDeviceTypeChange}>
+                <option value={RecordingDeviceType.Unspecified}>Ukjent</option>
+                <option value={RecordingDeviceType.Smartphone}>Smarttelefon - Opptaket ble gjort på en smarttelefon</option>
+                <option value={RecordingDeviceType.PC}>PC - Opptaket ble gjort med en PC eller tablet</option>
+                <option value={RecordingDeviceType.PhoneLine}>Telefonlinje - Opptaket ble gjort over en telefonlinje</option>
+                <option value={RecordingDeviceType.Vehicle}>Kjøretøy - Opptaket ble gjort i et kjøretøy</option>
+                <option value={RecordingDeviceType.OtherOutdoorDevice}>Utendørs - Opptaket ble gjort utendørs</option>
+                <option value={RecordingDeviceType.OtherIndoorDevice}>Innendørs - Opptaket ble gjort innendørs</option>
+              </select>
+            </label>
 
-              <label className="org-label">
-                Navn på opptaksutstyr
-                <small>Eksempel: iPhone X, Polycom SoundStation IP 6000, POTS, VOIP eller Cardioid Microphone</small>
-                <input value={this.state.transcript.metadata.recordingDeviceName} type="text" onChange={this.handleRecordingDeviceNameChange} />
-              </label>
+            <label className="org-label">
+              Navn på opptaksutstyr
+              <small>Eksempel: iPhone X, Polycom SoundStation IP 6000, POTS, VOIP eller Cardioid Microphone</small>
+              <input value={this.state.transcript.metadata.recordingDeviceName} type="text" onChange={this.handleRecordingDeviceNameChange} />
+            </label>
 
-              <label className="org-label">
-                Emne
-                <small>Hva handler lydfilen om?</small>
-                <textarea value={this.state.transcript.metadata.audioTopic} onChange={this.handleAudioTopicChange} />
-              </label>
+            <label className="org-label">
+              Emne
+              <small>Hva handler lydfilen om?</small>
+              <textarea value={this.state.transcript.metadata.audioTopic} onChange={this.handleAudioTopicChange} />
+            </label>
 
-              <label className="org-label">
-                Kontekst
-                <small>Gi "hint" til talegjenkjenningen for å favorisere bestemte ord og uttrykk i resultatene, i form av en kommaseparert liste.</small>
-                <textarea value={this.state.transcript.metadata.speechContexts[0].phrases} onChange={this.handleSpeechContextChange} />
-              </label>
+            <label className="org-label">
+              Kontekst
+              <small>Gi "hint" til talegjenkjenningen for å favorisere bestemte ord og uttrykk i resultatene, i form av en kommaseparert liste.</small>
+              <textarea value={this.state.transcript.metadata.speechContexts[0].phrases} onChange={this.handleSpeechContextChange} />
+            </label>
 
-              <button className="org-btn org-btn--primary" disabled={this.formIsDisabled()} type="submit">
-                Last opp
-              </button>
-            </form>
-          </div>
-        </main>
-      )
-    } else {
-      const status = this.state.transcript.process.percent < 100 ? "active" : "success"
-      return (
-        <main id="progress">
-          <div className="dropForm">
-            <p>Laster opp</p>
-            <Progress type="circle" percent={this.state.transcript.process.percent} status={status} />
-          </div>
-        </main>
-      )
+            <button className="org-btn org-btn--primary" disabled={this.formIsDisabled()} type="submit">
+              Last opp
+            </button>
+          </form>
+        </div>
+      </main>
+    )
+  }
+
+  private checkIfReadyToSubmit() {
+    if (this.state.isSubmitting === true && this.state.transcript.process) {
+      if (this.state.transcript.process.percent && this.state.transcript.process.percent < 100) {
+        console.log(this.state.transcript.process.percent)
+      } else {
+        const transcript = this.state.transcript
+
+        const file = this.props.file
+
+        transcript.name = file.name.substr(0, file.name.lastIndexOf(".")) || file.name
+        transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
+        transcript.userId = this.props.userId
+
+        // Metadata
+
+        const metadata: IMetadata = {
+          interactionType: transcript.metadata.interactionType,
+          languageCodes: this.selectedLanguageCodes(),
+          microphoneDistance: transcript.metadata.microphoneDistance,
+          originalMediaType: transcript.metadata.originalMediaType,
+          originalMimeType: file.type,
+          recordingDeviceType: transcript.metadata.recordingDeviceType,
+        }
+
+        // Add non empty fields
+
+        if (transcript.metadata.audioTopic !== "") {
+          metadata.audioTopic = transcript.metadata.audioTopic
+        }
+
+        const industryNaicsCodeOfAudio = parseInt(transcript.metadata.industryNaicsCodeOfAudio, 10)
+
+        if (!isNaN(industryNaicsCodeOfAudio)) {
+          transcript.metadata.industryNaicsCodeOfAudio = industryNaicsCodeOfAudio
+        }
+
+        if (transcript.metadata.recordingDeviceName !== "") {
+          metadata.recordingDeviceName = transcript.metadata.recordingDeviceName
+        }
+
+        // Clean up phrases
+
+        const phrases = transcript.metadata.speechContexts[0].phrases
+          .filter(phrase => {
+            return phrase.trim()
+          })
+          .map(phrase => phrase.trim())
+
+        if (phrases.length > 0) {
+          metadata.speechContexts = [{ phrases }]
+        }
+
+        transcript.metadata = metadata
+
+        database
+          .doc(`transcripts/${this.state.transcriptId}`)
+          .set(transcript)
+          .then(success => {
+            this.resetForm()
+          })
+          .catch((error: Error) => {
+            ReactGA.exception({
+              description: error.message,
+              fatal: false,
+            })
+          })
+      }
     }
+  }
+
+  private uploadFile() {
+    // Immediately start uploading the file
+
+    const transcriptId = database.collection("/transcripts").doc().id
+
+    this.setState({ transcriptId })
+
+    const uploadTask = storage
+      .ref(`/media/${this.props.userId}`)
+      .child(transcriptId)
+      .put(this.props.file)
+
+    uploadTask.on(
+      firebase.storage.TaskEvent.STATE_CHANGED,
+      (snapshot: firebase.storage.UploadTaskSnapshot) => {
+        const transcript = this.state.transcript
+
+        transcript.process = {
+          percent: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
+          step: Step.Uploading,
+        }
+
+        this.setState({ transcript })
+      },
+      error => {
+        ReactGA.exception({
+          description: error.message,
+          fatal: false,
+        })
+
+        /*FIXME https://firebase.google.com/docs/storage/web/handle-errors
+        
+        switch (error.code) {
+          case "storage/unauthorized":
+            // User doesn't have permission to access the object
+            break
+          case "storage/canceled":
+            // User canceled the upload
+            break
+          case "storage/unknown":
+            // Unknown error occurred, inspect error.serverResponse
+            console.error(error)
+            console.log("error during upload from error section")
+            break
+        }*/
+      },
+      () => {
+        console.log("Upload done", transcriptId)
+      },
+    )
   }
 
   private resetForm() {
@@ -248,117 +369,13 @@ class CreateTranscript extends React.Component<IProps, IState> {
   private handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const { file } = this.state
-
     const selectedLanguageCodes = this.selectedLanguageCodes()
 
-    if (file === undefined || this.props.user === undefined || this.props.user.uid === undefined || selectedLanguageCodes.length === 0) {
+    if (selectedLanguageCodes.length === 0) {
       return
     }
-    const userId = this.props.user.uid
 
-    const transcriptId = database.collection("/transcripts").doc().id
-
-    const uploadTask = storage
-      .ref(`/media/${userId}`)
-      .child(transcriptId)
-      .put(file)
-
-    uploadTask.on(
-      firebase.storage.TaskEvent.STATE_CHANGED,
-      (snapshot: firebase.storage.UploadTaskSnapshot) => {
-        const transcript = this.state.transcript
-
-        transcript.process = {
-          percent: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
-          step: Step.Uploading,
-        }
-
-        this.setState({ transcript })
-      },
-      error => {
-        ReactGA.exception({
-          description: error.message,
-          fatal: false,
-        })
-
-        /*FIXME https://firebase.google.com/docs/storage/web/handle-errors
-        
-        switch (error.code) {
-          case "storage/unauthorized":
-            // User doesn't have permission to access the object
-            break
-          case "storage/canceled":
-            // User canceled the upload
-            break
-          case "storage/unknown":
-            // Unknown error occurred, inspect error.serverResponse
-            console.error(error)
-            console.log("error during upload from error section")
-            break
-        }*/
-      },
-      () => {
-        const transcript = this.state.transcript
-        transcript.name = file.name.substr(0, file.name.lastIndexOf(".")) || file.name
-        transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
-        transcript.userId = userId
-
-        // Metadata
-
-        const metadata: IMetadata = {
-          interactionType: transcript.metadata.interactionType,
-          languageCodes: this.selectedLanguageCodes(),
-          microphoneDistance: transcript.metadata.microphoneDistance,
-          originalMediaType: transcript.metadata.originalMediaType,
-          originalMimeType: file.type,
-          recordingDeviceType: transcript.metadata.recordingDeviceType,
-        }
-
-        // Add non empty fields
-
-        if (transcript.metadata.audioTopic !== "") {
-          metadata.audioTopic = transcript.metadata.audioTopic
-        }
-
-        const industryNaicsCodeOfAudio = parseInt(transcript.metadata.industryNaicsCodeOfAudio, 10)
-
-        if (!isNaN(industryNaicsCodeOfAudio)) {
-          transcript.metadata.industryNaicsCodeOfAudio = industryNaicsCodeOfAudio
-        }
-
-        if (transcript.metadata.recordingDeviceName !== "") {
-          metadata.recordingDeviceName = transcript.metadata.recordingDeviceName
-        }
-
-        // Clean up phrases
-
-        const phrases = transcript.metadata.speechContexts[0].phrases
-          .filter(phrase => {
-            return phrase.trim()
-          })
-          .map(phrase => phrase.trim())
-
-        if (phrases.length > 0) {
-          metadata.speechContexts = [{ phrases }]
-        }
-
-        transcript.metadata = metadata
-
-        database
-          .doc(`transcripts/${transcriptId}`)
-          .set(transcript)
-          .then(success => {
-            this.resetForm()
-          })
-          .catch((error: Error) => {
-            ReactGA.exception({
-              description: error.message,
-              fatal: false,
-            })
-          })
-      },
-    )
+    this.setState({ isSubmitting: true })
   }
 
   private selectedLanguageCodes() {
@@ -372,7 +389,7 @@ class CreateTranscript extends React.Component<IProps, IState> {
   }
 
   private formIsDisabled() {
-    return this.selectedLanguageCodes().length === 0 || this.state.file === undefined || this.props.user === undefined
+    return this.selectedLanguageCodes().length === 0
   }
 
   private availableLanguages() {

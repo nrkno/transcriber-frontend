@@ -4,6 +4,7 @@ import ReactGA from "react-ga"
 
 interface IProps {
   fileSelected: (file: File) => void
+  userId: string
 }
 
 interface IState {

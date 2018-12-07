@@ -66,8 +66,7 @@ class App extends React.Component<any, IState> {
             <Switch>
               <Redirect from="/login" to="/" />
               <Route exact={true} path="/" render={() => (this.state.user ? <Redirect to="/transcripts" /> : <Index />)} />
-              <Route path="/transcripts/:id" render={props => <Transcripts {...props} user={this.state.user} />} />
-              <Route path="/xxxtranscripts/:id" component={Transcript} />
+              <Route path="/transcripts/:id?" render={props => <Transcripts {...props} user={this.state.user} />} />
             </Switch>
           </div>
         </GAListener>

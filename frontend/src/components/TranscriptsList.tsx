@@ -88,19 +88,19 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
                         if (transcript.process && transcript.process.error) {
                           return (
                             <svg width="20" height="20" focusable="false" aria-hidden="true">
-                              <use xlinkHref="#icon-x-c" />
+                              <use xlinkHref="#icon-warning" />
                             </svg>
                           )
                         } else if (transcript.process && transcript.process.step !== Step.Done) {
                           return (
                             <svg width="20" height="20" focusable="false" aria-hidden="true">
-                              <use xlinkHref="#icon-title" />
+                              <use xlinkHref="#icon-waveform" />
                             </svg>
                           )
                         } else {
                           return (
                             <svg width="20" height="20" focusable="false" aria-hidden="true">
-                              <use xlinkHref="#icon-waveform" />
+                              <use xlinkHref="#icon-title" />
                             </svg>
                           )
                         }

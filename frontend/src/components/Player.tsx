@@ -4,7 +4,7 @@ import secondsToTime from "../secondsToTime"
 
 interface IState {
   isPlaying: boolean
-  timer?: NodeJS.Timer
+  timer?: number
 }
 
 interface IProps {

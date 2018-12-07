@@ -54,19 +54,25 @@ class TranscriptResults extends Component<IProps, IState> {
       })
   }
 
+  public componentDidUpdate(prevProps: IProps) {
+    if (this.props.transcriptId !== prevProps.transcriptId) {
+      this.fetchResults()
+    }
+  }
+
   public componentDidMount() {
     this.fetchResults()
   }
   public handleTimeUpdate = (currentTime: number) => {
     // Find the next current result and word
 
-    const { currentResultIndex, currentWordIndex, transcript } = this.state
+    const { currentResultIndex, currentWordIndex } = this.state
 
-    if (transcript === undefined || transcript.results === undefined) {
+    if (this.props.transcript === undefined || this.state.results === undefined) {
       return
     }
 
-    const { results } = transcript
+    const { results } = this.state
 
     // First, we check if the current word is still being said
 

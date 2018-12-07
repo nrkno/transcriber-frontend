@@ -1,8 +1,9 @@
 import * as React from "react"
 import ReactGA from "react-ga"
-import { SweetProgressStatus } from "../enums"
+import { Step, SweetProgressStatus } from "../enums"
 import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
+import Process from "./Process"
 import TranscriptionProgress from "./TranscriptionProgress"
 import TranscriptResults from "./TranscriptResults"
 
@@ -10,7 +11,11 @@ interface IProps {
   transcript: ITranscript | null
   transcriptId: string
 }
- 
+
+interface IState {
+  transcript: ITranscript | null
+}
+
 class Transcript extends React.Component<IProps, IState> {
   constructor(props: any) {
     super(props)
@@ -20,6 +25,8 @@ class Transcript extends React.Component<IProps, IState> {
   }
 
   public componentDidUpdate(prevProps: IProps) {
+    console.log("hei", this.props.transcriptId, prevProps.transcriptId)
+
     if (this.props.transcriptId !== prevProps.transcriptId) {
       this.fetchTranscript(this.props.transcriptId)
     }
@@ -55,8 +62,6 @@ class Transcript extends React.Component<IProps, IState> {
     } else {
       // Check current step
 
- 
-
       return (
         <>
           <main id="transcript">
@@ -73,22 +78,29 @@ class Transcript extends React.Component<IProps, IState> {
                 </form>
               </div>
 
-
-
-            {{     this.state.tra   }}
-
-
-
-
-              <TranscriptResults transcript={this.state.transcript} transcriptId={this.props.transcriptId} />
+              {(() => {
+                if (this.state.transcript && this.state.transcript.process && this.state.transcript.process.step === Step.Done) {
+                  return <TranscriptResults transcript={this.state.transcript} transcriptId={this.props.transcriptId} />
+                } else {
+                  return <Process transcript={this.state.transcript} />
+                }
+              })()}
             </div>
           </main>
         </>
       )
     }
   }
+  private fetchTranscript(transcriptId: string) {
+    database.doc(`transcripts/${transcriptId}`).onSnapshot(documentSnapshot => {
+      const transcript = documentSnapshot.data() as ITranscript
 
- 
+      this.setState({
+        transcript,
+      })
+    })
+  }
+
   private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {
     ReactGA.event({
       action: "export button pressed",

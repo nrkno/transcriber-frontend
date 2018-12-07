@@ -4,18 +4,16 @@ import CreateTranscript from "./CreateTranscript"
 import Transcript from "./Transcript"
 import TranscriptsList from "./TranscriptsList"
 
-interface IMatchParams {
+interface IProps {
   user?: firebase.User
 }
-
-interface IProps extends RouteComponentProps<IMatchParams> {}
 
 interface IState {
   file?: File
 }
 
-class Transcripts extends Component<IProps, IState> {
-  constructor(props: IProps) {
+class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
+  constructor(props: RouteComponentProps<{}> & IProps) {
     super(props)
     this.state = {}
   }
@@ -25,7 +23,7 @@ class Transcripts extends Component<IProps, IState> {
       <main id="transcripts">
         {this.props.user ? (
           <>
-            <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} fileSelected={this.fileSelected} />
+            <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} fileSelected={this.fileSelected} history={this.props.history} />
 
             {this.state.file ? <CreateTranscript file={this.state.file} /> : <Transcript transcriptId={this.props.match.params.id} />}
           </>

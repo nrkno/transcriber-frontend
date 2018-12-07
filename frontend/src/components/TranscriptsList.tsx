@@ -1,5 +1,6 @@
 import moment from "moment"
 import React, { Component } from "react"
+import { RouteComponentProps } from "react-router"
 import { Link } from "react-router-dom"
 import "../css/TranscriptsList.css"
 import { Step } from "../enums"
@@ -8,9 +9,10 @@ import { ITranscript } from "../interfaces"
 import UploadButton from "./UploadButton"
 
 interface IProps {
-  userId?: string
-  selectedTranscriptId?: string
   fileSelected: (file: File) => void
+  history: History
+  selectedTranscriptId?: string
+  userId: string
 }
 
 interface IState {
@@ -18,22 +20,30 @@ interface IState {
   transcriptIds?: string[]
 }
 
-class TranscriptsList extends Component<IProps, IState> {
-  constructor(props: IProps) {
+class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState> {
+  constructor(props: RouteComponentProps<{}> & IProps) {
     super(props)
     this.state = {}
+    console.log("PROPS", props)
+    console.log("PROPS HIS", props.history)
   }
 
   public componentDidMount() {
-    // Check if have the user in props
-    if (this.props.userId !== undefined) {
-      this.fetchTranscripts(this.props.userId)
-    }
+    this.fetchTranscripts(this.props.userId)
   }
 
   public componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.userId !== undefined && this.state.transcripts === undefined) {
       this.fetchTranscripts(this.props.userId)
+    }
+
+    if (this.props.selectedTranscriptId === undefined && this.state.transcriptIds) {
+      // If selectedTranscriptId is undefined, it means that the user is accessing /transcripts
+      // We should thus select the newest transcript from the list
+
+      console.log(this.props)
+
+      this.props.history.push(`/transcripts/${this.state.transcriptIds[0]}`)
     }
   }
 

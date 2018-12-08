@@ -308,7 +308,7 @@ class Upload extends React.Component<IProps, IState> {
 
     const uploadTask = storage
       .ref(`/media/${userId}`)
-      .child(transcriptId)
+      .child(`${transcriptId}-original`)
       .put(file)
 
     uploadTask.on(

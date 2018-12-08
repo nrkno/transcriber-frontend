@@ -9,7 +9,7 @@ import { ILongRunningRegonize, ISpeechRecognitionResult, ITranscript } from "../
 
 const client = new speech.v1p1beta1.SpeechClient()
 
-async function trans(operation, id: string): Promise<ISpeechRecognitionResult[]> {
+async function trans(operation, transcriptId: string): Promise<ISpeechRecognitionResult[]> {
   return new Promise<ISpeechRecognitionResult[]>((resolve, reject) => {
     operation
       .on("complete", (longRunningRecognizeResponse /*, longRunningRecognizeMetadata, finalApiResponse*/) => {
@@ -26,13 +26,13 @@ async function trans(operation, id: string): Promise<ISpeechRecognitionResult[]>
         const percent = longRunningRecognizeMetadata.progressPercent
         if (percent !== undefined) {
           try {
-            await database.setPercent(id, percent)
+            await database.setPercent(transcriptId, percent)
           } catch (error) {
-            console.log("Error in on.('progress')")
-            console.error(error)
+            console.log(transcriptId, "Error in on.('progress')")
+            console.error(transcriptId, error)
           }
         }
-        console.log("progress", longRunningRecognizeMetadata /*, apiResponse*/)
+        console.log(transcriptId, "progressPercent", longRunningRecognizeMetadata.progressPercent /*, apiResponse*/)
       })
       .on("error", (error: Error) => {
         // Adding a listener for the "error" event handles any errors found during polling.
@@ -41,7 +41,7 @@ async function trans(operation, id: string): Promise<ISpeechRecognitionResult[]>
   })
 }
 
-export async function transcribe(id: string, transcript: ITranscript, uri: string): Promise<ISpeechRecognitionResult[]> {
+export async function transcribe(transcriptId: string, transcript: ITranscript, uri: string): Promise<ISpeechRecognitionResult[]> {
   if (!transcript.metadata || !transcript.metadata.languageCodes || transcript.metadata.languageCodes.length === 0) {
     throw new Error("Language codes missing")
   }
@@ -64,7 +64,7 @@ export async function transcribe(id: string, transcript: ITranscript, uri: strin
     recognitionRequest.config.alternativeLanguageCodes = transcript.metadata.languageCodes
   }
 
-  console.log("Start transcribing", id, recognitionRequest)
+  console.log(transcriptId, "Start transcribing", recognitionRequest)
 
   // Detects speech in the audio file. This creates a recognition job that you
   // can wait for now, or get its result later.
@@ -73,9 +73,9 @@ export async function transcribe(id: string, transcript: ITranscript, uri: strin
 
   const operation = responses[0]
 
-  console.log("operation", operation)
+  console.log(transcriptId, "operation", operation)
 
-  const speechRecognitionResults = await trans(operation, id)
+  const speechRecognitionResults = await trans(operation, transcriptId)
 
   return speechRecognitionResults
 }

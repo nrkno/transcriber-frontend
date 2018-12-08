@@ -35,7 +35,7 @@ it.only("Transcode", async done => {
   const transcodedBucket = storage.bucket(functions.config().bucket.transcoded)
   const tempFilePath = path.join(os.tmpdir(), fileId)
 
-  await transcodedBucket.file(`${fileId}.flac`).download({ destination: tempFilePath })
+  await transcodedBucket.file(`${fileId}-transcribed`).download({ destination: tempFilePath })
 
   ffmpeg.ffprobe(tempFilePath, (error: any, probeData: ffmpeg.FfprobeData) => {
     expect(error).toBeNull()

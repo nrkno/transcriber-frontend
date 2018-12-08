@@ -30,8 +30,6 @@ class Player extends React.Component<IProps, IState> {
       .refFromURL(this.props.playbackGsUrl)
       .getDownloadURL()
       .then(url => {
-        console.log(url)
-
         this.setState({ playbackUrl: url })
       })
       .catch(error => {
@@ -92,10 +90,6 @@ class Player extends React.Component<IProps, IState> {
     if (this.state.playbackUrl === undefined) {
       return <div />
     }
-
-    // <audio ref={this.audioRef} src={this.state.playbackUrl} />
-
-    console.log("SETTER URL", this.state.playbackUrl)
 
     return (
       <div>

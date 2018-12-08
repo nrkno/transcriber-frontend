@@ -13,7 +13,7 @@ interface IState {
   currentResultIndex: number | undefined
   currentTime: number
   currentWordIndex: number | undefined
-  transcript: ITranscript | null
+  transcript?: ITranscript | null
 }
 
 class Transcript extends React.Component<RouteComponentProps<any>, IState> {
@@ -29,13 +29,24 @@ class Transcript extends React.Component<RouteComponentProps<any>, IState> {
   }
 
   public async componentDidMount() {
-    database.doc(`transcripts/${this.props.match.params.id}`).onSnapshot(documentSnapshot => {
-      const transcript = documentSnapshot.data() as ITranscript
+    database.doc(`transcripts/${this.props.match.params.id}`).onSnapshot(
+      documentSnapshot => {
+        const transcript = documentSnapshot.data() as ITranscript
 
-      this.setState({
-        transcript,
-      })
-    })
+        this.setState({
+          transcript,
+        })
+      },
+      error => {
+        if (error.name === "FirebaseError" && error.message === "Missing or insufficient permissions.") {
+          this.setState({
+            transcript: undefined,
+          })
+        } else {
+          console.error(error)
+        }
+      },
+    )
   }
 
   public handleTimeUpdate = (currentTime: number) => {

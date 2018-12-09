@@ -9,7 +9,6 @@ import ffmpeg from "fluent-ffmpeg"
 import fs from "fs"
 import os from "os"
 import path from "path"
-import url from "url"
 import database from "../database"
 import { hoursMinutesSecondsToSeconds } from "./helpers"
 import { storage } from "./storage"
@@ -24,7 +23,7 @@ interface IDurationAndGsUrl {
 /**
  * Utility method to convert audio to mono channel using FFMPEG.
  */
-async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: string, id: string) {
+async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: string, transcriptId: string) {
   return new Promise((resolve, reject) => {
     ffmpeg(tempFilePath)
       .setFfmpegPath(ffmpeg_static.path)
@@ -41,10 +40,10 @@ async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: stri
         // Saving duration to database
         audioDuration = hoursMinutesSecondsToSeconds(data.duration)
         try {
-          await database.setDuration(id, audioDuration)
+          await database.setDuration(transcriptId, audioDuration)
         } catch (error) {
-          console.log("Error in transcoding on('codecData')")
-          console.error(error)
+          console.log(transcriptId, "Error in transcoding on('codecData')")
+          console.error(transcriptId, error)
         }
       })
       .save(targetTempFilePath)
@@ -89,7 +88,7 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
 
   const mediaPath = path.join("media", userId)
 
-  const file = bucket.file(path.join(mediaPath, transcriptId))
+  const file = bucket.file(path.join(mediaPath, `${transcriptId}-original`))
 
   const [fileMetadata] = await file.getMetadata()
 
@@ -108,11 +107,11 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
 
   await file.download({ destination: tempFilePath })
 
-  console.log("Audio downloaded locally to", tempFilePath)
+  console.log(transcriptId, "Audio downloaded locally to", tempFilePath)
 
   // Transcode to m4a
 
-  const playbackFileName = `${transcriptId}.m4a`
+  const playbackFileName = `${transcriptId}-playback.m4a`
   const playbackTempFilePath = path.join(os.tmpdir(), playbackFileName)
 
   await reencodeToM4a(tempFilePath, playbackTempFilePath)
@@ -123,18 +122,16 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
     destination: playbackStorageFilePath,
     resumable: false,
   })
-  console.log("Uploaded m4a to ", playbackStorageFilePath)
+  console.log(transcriptId, "Uploaded m4a to ", playbackStorageFilePath)
 
-  await playbackFile.makePublic()
-  const playbackFilePath = path.join(bucketName, mediaPath, playbackFileName)
-  const playbackUrl = url.resolve("https://storage.googleapis.com", playbackFilePath)
+  const playbackGsUrl = "gs://" + path.join(bucketName, mediaPath, playbackFileName)
 
-  console.log("Playback url ", playbackUrl)
-  await database.setPlaybackUrl(transcriptId, playbackUrl)
+  console.log(transcriptId, "Playback GS URL ", playbackGsUrl)
+  await database.setPlaybackGsUrl(transcriptId, playbackGsUrl)
 
   // Transcode to FLAC mono
 
-  const transcribeFileName = `${transcriptId}.flac`
+  const transcribeFileName = `${transcriptId}-transcribed.flac`
   const transcribeTempFilePath = path.join(os.tmpdir(), transcribeFileName)
 
   await reencodeToFlacMono(tempFilePath, transcribeTempFilePath, transcriptId)
@@ -146,7 +143,7 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
     resumable: false,
   })
 
-  console.log("Output flac to", targetStorageFilePath)
+  console.log(transcriptId, "Output flac to", targetStorageFilePath)
 
   // Once the audio has been uploaded delete the local file to free up disk space.
   fs.unlinkSync(tempFilePath)
@@ -155,6 +152,6 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
 
   return {
     audioDuration,
-    gsUri: `gs://${bucket.name}/${targetStorageFilePath}`,
+    gsUri: `gs://${bucketName}/${targetStorageFilePath}`,
   }
 }

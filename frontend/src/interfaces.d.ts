@@ -3,7 +3,7 @@ import { Step, InteractionType, MicrophoneDistance, OriginalMediaType, Recording
 interface ITranscript {
   createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   name?: string
-  playbackUrl?: string
+  playbackGsUrl?: string
   process?: {
     error?: any
     percent?: number

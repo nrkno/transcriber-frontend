@@ -8,7 +8,7 @@ import { Step, InteractionType, MicrophoneDistance, OriginalMediaType, Recording
 interface ITranscript {
   createdAt?: admin.firestore.FieldValue | admin.firestore.Timestamp
   name?: string
-  playbackUrl?: string
+  playbackGsUrl?: string
   process?: IProcess
   metadata?: IMetadata
   results?: Array<IResult>

@@ -1,14 +1,16 @@
 import * as React from "react"
 import ReactGA from "react-ga"
+import { storage } from "../firebaseApp"
 import secondsToTime from "../secondsToTime"
 
 interface IState {
   isPlaying: boolean
   timer?: number
+  playbackUrl?: string
 }
 
 interface IProps {
-  fileUrl: string
+  playbackGsUrl: string
   handleTimeUpdate(currentTime: number): void
 }
 
@@ -20,6 +22,23 @@ class Player extends React.Component<IProps, IState> {
     this.state = {
       isPlaying: false,
     }
+  }
+
+  public componentDidMount() {
+    console.log(this.props.playbackGsUrl)
+
+    storage
+
+      .refFromURL(this.props.playbackGsUrl)
+      .getDownloadURL()
+      .then(url => {
+        this.setState({ playbackUrl: url })
+      })
+      .catch(error => {
+        // Handle any errors
+
+        console.error(error)
+      })
   }
 
   public componentWillUnmount() {
@@ -70,9 +89,13 @@ class Player extends React.Component<IProps, IState> {
     // Avoid division by zero
     const progress = duration !== 0 ? currentTime / duration : 0
 
+    if (this.state.playbackUrl === undefined) {
+      return <div />
+    }
+
     return (
       <div>
-        <audio ref={this.audioRef} src={this.props.fileUrl} />
+        <audio ref={this.audioRef} src={this.state.playbackUrl} />
         <div id="player">
           {!this.state.isPlaying ? (
             <button onClick={this.handlePlay}>

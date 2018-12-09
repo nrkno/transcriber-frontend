@@ -46,10 +46,10 @@ const database = (() => {
     return db.collection(`transcripts/${transcriptId}/results`).add(result)
   }
 
-  const setDuration = async (id: string, seconds: number): Promise<FirebaseFirestore.WriteResult> => {
+  const setDuration = async (transcriptId: string, seconds: number): Promise<FirebaseFirestore.WriteResult> => {
     const transcript: ITranscript = { metadata: { audioDuration: seconds } }
 
-    return updateTranscript(id, transcript)
+    return updateTranscript(transcriptId, transcript)
   }
 
   const errorOccured = async (transcriptId: string, error: Error): Promise<FirebaseFirestore.WriteResult> => {
@@ -86,8 +86,8 @@ const database = (() => {
     return transcript.process.step
   }
 
-  const setPlaybackUrl = async (id: string, url: string) => {
-    const transcript: ITranscript = { playbackUrl: url }
+  const setPlaybackGsUrl = async (id: string, url: string) => {
+    const transcript: ITranscript = { playbackGsUrl: url }
 
     return updateTranscript(id, transcript)
   }
@@ -128,7 +128,7 @@ const database = (() => {
     return batch.commit()
   }
 
-  return { addResult, errorOccured, setDuration, setStep, setPercent, getStep, getResults, setPlaybackUrl, getTranscript, addTranscriptSummary }
+  return { addResult, errorOccured, setDuration, setStep, setPercent, getStep, getResults, setPlaybackGsUrl, getTranscript, addTranscriptSummary }
 })()
 
 export default database

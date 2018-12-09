@@ -6,10 +6,6 @@ import Player from "./Player"
 import Word from "./Word"
 
 interface IProps {
-  transcriptId: string
-}
-
-interface IProps {
   transcript: ITranscript
   transcriptId: string
 }
@@ -61,6 +57,8 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public componentDidMount() {
+    console.log(this.props.transcript)
+
     this.fetchResults()
   }
   public handleTimeUpdate = (currentTime: number) => {
@@ -137,6 +135,9 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public render() {
+    console.log("this.props.transcript.playbackGsUrl")
+    console.log(this.props.transcript.playbackGsUrl)
+
     return (
       <>
         {this.state.results &&
@@ -161,7 +162,7 @@ class TranscriptResults extends Component<IProps, IState> {
             )
           })}
 
-        <Player ref={this.playerRef} fileUrl={this.props.transcript.playbackUrl} handleTimeUpdate={this.handleTimeUpdate} />
+        <Player ref={this.playerRef} playbackGsUrl={this.props.transcript.playbackGsUrl} handleTimeUpdate={this.handleTimeUpdate} />
       </>
     )
   }

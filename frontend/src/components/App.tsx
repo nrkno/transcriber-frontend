@@ -5,6 +5,7 @@ import "../css/App.css"
 import { auth } from "../firebaseApp"
 import GAListener from "./GAListener"
 import Index from "./Index"
+import Login from "./Login"
 import Transcript from "./Transcript"
 import Transcripts from "./Transcripts"
 
@@ -24,13 +25,21 @@ class App extends React.Component<any, IState> {
   }
 
   public async componentDidMount() {
+    try {
+      const userCredential = await auth.signInWithEmailAndPassword("andreas@schjonhaug.com", "andreas")
+      await userCredential.user!.updateProfile({ displayName: "Andreas Schjønhaug", photoURL: null })
+    } catch (error) {
+      const errorCode = error.code
+      const errorMessage = error.message
+
+      console.error(errorCode, errorMessage)
+    }
+
     auth.onAuthStateChanged(user => {
       if (user) {
-        this.setState({ user })
         // Set Google Analytics ID
+        this.setState({ user })
         ReactGA.set({ userId: user.uid })
-      } else {
-        // history.push("login")
       }
     })
   }
@@ -58,10 +67,8 @@ class App extends React.Component<any, IState> {
               <h1 className="org-text-l logo">
                 <Link to="/"> Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</Link>
               </h1>
-              <div className="user">
-                {this.state.user !== undefined ? this.state.user.displayName : <a href="/login">Logg inn</a>}
-                {process.env.NODE_ENV === "development" && this.state.user !== undefined ? ` (${this.state.user.uid})` : ""}
-              </div>
+
+              <Login user={this.state.user} logout={this.logout} />
             </header>
             <Switch>
               <Redirect from="/login" to="/" />
@@ -73,6 +80,16 @@ class App extends React.Component<any, IState> {
         </GAListener>
       </BrowserRouter>
     )
+  }
+
+  private logout = async () => {
+    this.setState({ user: undefined })
+    ReactGA.set({ userId: null })
+    try {
+      await auth.signOut()
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
 

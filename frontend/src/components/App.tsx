@@ -5,6 +5,7 @@ import "../css/App.css"
 import { auth } from "../firebaseApp"
 import GAListener from "./GAListener"
 import Index from "./Index"
+import Login from "./Login"
 import Transcripts from "./Transcripts"
 
 ReactGA.initialize(process.env.GOOGLE_ANALYTICS_PROPERTY_ID, {

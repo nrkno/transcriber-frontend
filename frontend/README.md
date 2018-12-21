@@ -15,6 +15,11 @@ npm run dev
 
 To track events to [Google Analytics](https://analytics.google.com/analytics/web), enter your `GOOGLE_ANALYTICS_PROPERTY_ID` in the `.env` file. The following events are tracked:
 
+## All pages
+
+- Authentication
+  - log out button pressed
+
 ## Upload page
 
 - Upload

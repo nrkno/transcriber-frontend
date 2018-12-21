@@ -13,6 +13,11 @@ const Index = () => {
         eksportere ut teksten til et Word-dokument og redigere i teksten som du ønsker der.
       </p>
       <p>Verktøyet støtter over 60 språk. Norsk språk fungerer opp mot 80%, mens engelsk opp mot 90%. Du kan laste opp alle type lydfiler, men husk at lydfilen bør være maks 200 MB, og maks lengde bør være under 1 time og 30 min.</p>
+
+      <p>
+        Til slutt noen ord om tilgang og kildevern. Bruk av verktøyet krever innlogging med NRK-kontoen din. Det er ikke mulig å dele en transkripsjons-lenke med andre, så hvis du vil sende teksten til noen, så må den først eksporteres til
+        Word.
+      </p>
       <p>Lykke til !</p>
 
       <a href="/login">

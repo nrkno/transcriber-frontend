@@ -25,11 +25,9 @@ class App extends React.Component<any, IState> {
   public async componentDidMount() {
     auth.onAuthStateChanged(user => {
       if (user) {
-        this.setState({ user })
         // Set Google Analytics ID
+        this.setState({ user })
         ReactGA.set({ userId: user.uid })
-      } else {
-        // history.push("login")
       }
     })
   }
@@ -57,10 +55,8 @@ class App extends React.Component<any, IState> {
               <h1 className="org-text-l logo">
                 <Link to="/"> Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</Link>
               </h1>
-              <div className="user">
-                {this.state.user !== undefined ? this.state.user.displayName : <a href="/login">Logg inn</a>}
-                {process.env.NODE_ENV === "development" && this.state.user !== undefined ? ` (${this.state.user.uid})` : ""}
-              </div>
+
+              <Login user={this.state.user} logout={this.logout} />
             </header>
             <Switch>
               <Redirect from="/login" to="/" />
@@ -71,6 +67,16 @@ class App extends React.Component<any, IState> {
         </GAListener>
       </BrowserRouter>
     )
+  }
+
+  private logout = async () => {
+    this.setState({ user: undefined })
+    ReactGA.set({ userId: null })
+    try {
+      await auth.signOut()
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
 

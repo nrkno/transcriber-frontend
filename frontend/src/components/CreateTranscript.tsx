@@ -52,7 +52,7 @@ class CreateTranscript extends React.Component<IProps, IState> {
     return (
       <main id="transcript">
         <div className="create">
-          <h2 className="org-text-xl">Ny transkripsjon</h2>
+          <h2 className="org-text-xl">{this.props.file.name}</h2>
           <form className="dropForm" onSubmit={this.handleSubmit}>
             <label className="org-label">
               Språk

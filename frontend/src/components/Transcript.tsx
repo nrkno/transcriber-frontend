@@ -25,8 +25,6 @@ class Transcript extends React.Component<IProps, IState> {
   }
 
   public componentDidUpdate(prevProps: IProps) {
-    console.log("hei", this.props.transcriptId, prevProps.transcriptId)
-
     if (this.props.transcriptId !== prevProps.transcriptId) {
       this.fetchTranscript(this.props.transcriptId)
     }
@@ -62,32 +60,42 @@ class Transcript extends React.Component<IProps, IState> {
     } else {
       // Check current step
 
-      return (
-        <>
-          <main id="transcript">
-            <div className="results">
-              <div className="meta">
-                <h1 className="org-text-xl">{transcript.name}</h1>
-                <form onSubmit={this.handleExportToWord}>
-                  <button className="org-btn" type="submit">
-                    <svg width="20" height="20" focusable="false" aria-hidden="true">
-                      <use xlinkHref="#icon-download" />
-                    </svg>{" "}
-                    Last ned som Word
-                  </button>
-                </form>
-              </div>
+      const isDone = transcript && transcript.process && transcript.process.step === Step.Done ? true : false
 
-              {(() => {
-                if (this.state.transcript && this.state.transcript.process && this.state.transcript.process.step === Step.Done) {
-                  return <TranscriptResults transcript={this.state.transcript} transcriptId={this.props.transcriptId} />
-                } else {
-                  return <Process transcript={this.state.transcript} />
-                }
-              })()}
-            </div>
-          </main>
-        </>
+      return (
+        <main id="transcript">
+          <div className="meta">
+            <h1 className="org-text-xl">{transcript.name}</h1>
+
+            {(() => {
+              if (isDone) {
+                return (
+                  <form onSubmit={this.handleExportToWord}>
+                    <button className="org-btn org-btn--primary" type="submit">
+                      <svg width="20" height="20" focusable="false" aria-hidden="true">
+                        <use xlinkHref="#icon-download" />
+                      </svg>{" "}
+                      Last ned som Word
+                    </button>
+                  </form>
+                )
+              } else {
+                return
+              }
+            })()}
+          </div>
+          {(() => {
+            if (isDone) {
+              return (
+                <div className="results">
+                  <TranscriptResults transcript={transcript} transcriptId={this.props.transcriptId} />
+                </div>
+              )
+            } else {
+              return <Process transcript={transcript} />
+            }
+          })()}
+        </main>
       )
     }
   }

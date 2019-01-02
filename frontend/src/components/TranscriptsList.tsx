@@ -93,8 +93,18 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
                           )
                         } else if (transcript.process && transcript.process.step !== Step.Done) {
                           return (
-                            <svg width="20" height="20" focusable="false" aria-hidden="true">
-                              <use xlinkHref="#icon-waveform" />
+                            <svg width="20" height="20">
+                              <defs>
+                                <pattern id="pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                                  <use href="#icon-waveform" x="0" y="0" width="20" height="20" stroke-width="0" stroke="none" />
+                                </pattern>
+                                <mask id="mask">
+                                  <rect x="0" y="0" width="20" height="20" fill="url(#pattern)">
+                                    <animate attributeName="x" from="-20" to="20" dur="1.5s" repeatCount="indefinite" />
+                                  </rect>
+                                </mask>
+                              </defs>
+                              <rect x="0" y="0" width="20" fill="black" height="20" mask="url(#mask)" />
                             </svg>
                           )
                         } else {

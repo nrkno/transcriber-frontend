@@ -48,6 +48,8 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
   }
 
   public render() {
+    console.log("RENDER!!!")
+
     return (
       <div className="trans-list org-color-shade org-shadow-l org-color-base">
         <div className="org-bar">
@@ -66,10 +68,18 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
           <tbody>
             {this.state.transcripts &&
               this.state.transcripts.map((transcript, index) => {
-                const createdAt = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
-                const formattedCreatedAt = moment(createdAt)
-                  .locale("nb")
-                  .calendar()
+                let createdAt: string
+
+                if (transcript.createdAt !== null) {
+                  const date = (transcript.createdAt as firebase.firestore.Timestamp).toDate()
+
+                  createdAt = moment(date)
+                    .locale("nb")
+                    .calendar()
+                } else {
+                  createdAt = ""
+                }
+
                 const id = this.state.transcriptIds[index]
                 const duration = moment.duration(transcript.metadata.audioDuration * 1000)
 
@@ -96,7 +106,7 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
                             <svg width="20" height="20">
                               <defs>
                                 <pattern id="pattern" width="20" height="20" patternUnits="userSpaceOnUse">
-                                  <use xlinkHref="#icon-waveform" x="0" y="0" width="20" height="20" stroke-width="0" stroke="none" />
+                                  <use xlinkHref="#icon-waveform" x="0" y="0" width="20" height="20" strokeWidth="0" stroke="none" />
                                 </pattern>
                                 <mask id="mask">
                                   <rect x="0" y="0" width="20" height="20" fill="url(#pattern)">
@@ -119,7 +129,7 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
                     <td className="name">
                       <Link to={`/transcripts/${id}`}>{transcript.name} </Link>
                     </td>
-                    <td>{formattedCreatedAt}</td>
+                    <td>{createdAt}</td>
                     <td>
                       {duration.hours() > 0 ? `${duration.hours()} t ` : ""}
                       {duration.minutes() > 0 ? `${duration.minutes()} m` : ""}

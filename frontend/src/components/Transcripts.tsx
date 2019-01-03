@@ -25,7 +25,7 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
           <>
             <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} fileSelected={this.fileSelected} history={this.props.history} />
 
-            {this.state.file ? <CreateTranscript file={this.state.file} userId={this.props.user.uid} /> : <Transcript transcriptId={this.props.match.params.id} />}
+            {this.state.file ? <CreateTranscript file={this.state.file} userId={this.props.user.uid} transcriptCreated={this.transcriptCreated} /> : <Transcript transcriptId={this.props.match.params.id} />}
           </>
         ) : (
           <div>Loading</div>
@@ -35,6 +35,13 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
   }
   public fileSelected = (file: File) => {
     this.setState({ file })
+  }
+
+  private transcriptCreated = (transcriptId: string) => {
+    // Remove file so that Transcript is shown, and not CreateTranscript
+    this.setState({ file: undefined })
+    // Push the newly created transcript id
+    this.props.history.push(`/transcripts/${transcriptId}`)
   }
 }
 

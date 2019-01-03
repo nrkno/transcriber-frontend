@@ -1,12 +1,10 @@
 import firebase from "firebase/app"
 import * as React from "react"
 import ReactGA from "react-ga"
-import { Progress } from "react-sweet-progress"
 import "react-sweet-progress/lib/style.css"
-import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Step, Timestamp } from "../enums"
+import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Step } from "../enums"
 import { database, storage } from "../firebaseApp"
 import { IMetadata, ITranscript } from "../interfaces"
-import Transcript from "./Transcript"
 
 interface IState {
   transcript: ITranscript
@@ -16,6 +14,7 @@ interface IState {
 
 interface IProps {
   file: File
+  transcriptCreated: (transcriptId: string) => void
   userId: string
 }
 
@@ -205,7 +204,7 @@ class CreateTranscript extends React.Component<IProps, IState> {
           .doc(`transcripts/${this.state.transcriptId}`)
           .set(transcript)
           .then(success => {
-            this.resetForm()
+            this.props.transcriptCreated(this.state.transcriptId)
           })
           .catch((error: Error) => {
             ReactGA.exception({
@@ -267,24 +266,6 @@ class CreateTranscript extends React.Component<IProps, IState> {
         console.log("Upload done", transcriptId)
       },
     )
-  }
-
-  private resetForm() {
-    this.setState({
-      transcript: {
-        metadata: {
-          audioTopic: "",
-          industryNaicsCodeOfAudio: "",
-          interactionType: InteractionType.Unspecified,
-          languageCodes: ["nb-NO", "", "", ""],
-          microphoneDistance: MicrophoneDistance.Unspecified,
-          originalMediaType: OriginalMediaType.Unspecified,
-          recordingDeviceName: "",
-          recordingDeviceType: RecordingDeviceType.Unspecified,
-          speechContexts: [{ phrases: [""] }],
-        },
-      },
-    })
   }
 
   private handleLanguageChange = (index: number, event: React.ChangeEvent<HTMLSelectElement>) => {

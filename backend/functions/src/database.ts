@@ -53,9 +53,14 @@ const database = (() => {
   }
 
   const errorOccured = async (transcriptId: string, error: Error): Promise<FirebaseFirestore.WriteResult> => {
+    const serializedError = serializeError(error)
+
+    // Firestore does not support undefined values, remove them if present.
+    Object.keys(serializedError).forEach(key => serializedError[key] === undefined && delete serializedError[key])
+
     const transcript: ITranscript = {
       process: {
-        error: serializeError(error),
+        error: serializedError,
       },
     }
     return updateTranscript(transcriptId, transcript)

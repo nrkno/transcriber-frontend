@@ -20,7 +20,7 @@ html {
 
 header {
   display: grid;
-  padding: 16px;
+  padding: 1em;
   grid-template-columns: auto 1fr;
   grid-gap: 8px;
   grid-auto-flow: column;
@@ -74,8 +74,7 @@ hr {
 
 main#transcripts {
   display: grid;
-  grid-template-columns: 300px 1fr;
-  grid-gap: 40px;
+  grid-template-columns: 460px 1fr;
 }
 
 /* Progress */

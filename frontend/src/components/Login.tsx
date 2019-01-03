@@ -17,14 +17,14 @@ class Login extends Component<RouteComponentProps<{}> & IProps, any> {
             if (process.env.NODE_ENV === "development") {
               displayName += ` (${this.props.user.uid})`
             }
-            return (
-              <>
-                {displayName}
-                <button className="org-btn" onClick={() => this.logout()}>
-                  Logg ut
-                </button>
-              </>
-            )
+            return <>{displayName}</>
+            /*
+            
+            <button className="org-btn" onClick={() => this.logout()}>
+              Logg ut
+            </button>
+
+            */
           } else {
             return <a href="/login">Logg inn</a>
           }

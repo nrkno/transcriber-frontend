@@ -57,9 +57,9 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
         <table className="org-table">
           <thead>
             <tr>
-              <th />
-              <th>Navn</th>
-              <th>Dato</th>
+              <th className="icon" />
+              <th className="name">Navn</th>
+              <th className="date">Dato</th>
               <th>Varighet</th>
             </tr>
           </thead>
@@ -96,7 +96,7 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
                             <svg width="20" height="20">
                               <defs>
                                 <pattern id="pattern" width="20" height="20" patternUnits="userSpaceOnUse">
-                                  <use href="#icon-waveform" x="0" y="0" width="20" height="20" stroke-width="0" stroke="none" />
+                                  <use xlinkHref="#icon-waveform" x="0" y="0" width="20" height="20" stroke-width="0" stroke="none" />
                                 </pattern>
                                 <mask id="mask">
                                   <rect x="0" y="0" width="20" height="20" fill="url(#pattern)">
@@ -116,7 +116,7 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
                         }
                       })()}
                     </td>
-                    <td>
+                    <td className="name">
                       <Link to={`/transcripts/${id}`}>{transcript.name} </Link>
                     </td>
                     <td>{formattedCreatedAt}</td>

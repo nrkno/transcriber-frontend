@@ -100,13 +100,17 @@ class Player extends React.Component<IProps, IState> {
           {!this.state.isPlaying ? (
             <button onClick={this.handlePlay}>
               <span role="img" aria-label="Spill av">
-                ▶️
+                <svg width="40" height="40" focusable="false" aria-hidden="true">
+                  <use xlinkHref="#icon-play-c" />
+                </svg>
               </span>
             </button>
           ) : (
             <button onClick={this.handlePause}>
               <span role="img" aria-label="Pause">
-                ⏸
+                <svg width="40" height="40" focusable="false" aria-hidden="true">
+                  <use xlinkHref="#icon-pause-c" />
+                </svg>
               </span>
             </button>
           )}

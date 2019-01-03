@@ -15,10 +15,13 @@ interface IProps {
 }
 
 class Player extends React.Component<IProps, IState> {
-  private audioRef = React.createRef<HTMLAudioElement>()
+  private audioRef: React.RefObject<HTMLAudioElement>
 
   constructor(props: IProps) {
     super(props)
+
+    this.audioRef = React.createRef<HTMLAudioElement>()
+
     this.state = {
       isPlaying: false,
     }
@@ -43,7 +46,6 @@ class Player extends React.Component<IProps, IState> {
 
   public componentWillUnmount() {
     clearInterval(this.state.timer)
-    this.setState({ isPlaying: false, timer: undefined })
   }
 
   public handlePlay = (event: React.FormEvent<HTMLButtonElement>) => {

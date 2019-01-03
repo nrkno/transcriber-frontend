@@ -43,6 +43,10 @@ main#create {
   align-content: start;
 }
 
+fieldset {
+  border: none;
+}
+
 /* Navigation */
 
 .logo a:visited,

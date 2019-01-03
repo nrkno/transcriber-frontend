@@ -24,8 +24,6 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
   constructor(props: RouteComponentProps<{}> & IProps) {
     super(props)
     this.state = {}
-    console.log("PROPS", props)
-    console.log("PROPS HIS", props.history)
   }
 
   public componentDidMount() {
@@ -48,8 +46,6 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
   }
 
   public render() {
-    console.log("RENDER!!!")
-
     return (
       <div className="trans-list org-color-shade org-shadow-l org-color-base">
         <div className="org-bar">

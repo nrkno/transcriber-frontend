@@ -225,8 +225,8 @@ class CreateTranscript extends React.Component<IProps, IState> {
     this.setState({ transcriptId })
 
     const uploadTask = storage
-      .ref(`/media/${this.props.userId}-original`)
-      .child(transcriptId)
+      .ref(`/media/${this.props.userId}`)
+      .child(`${transcriptId}-original`)
       .put(this.props.file)
 
     uploadTask.on(

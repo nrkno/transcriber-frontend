@@ -163,14 +163,14 @@ main#loading {
 /* Player */
 
 #player {
-  width: 100%;
+  width: calc(100% - 460px);
   height: 64px;
   background: black;
   display: flex;
   color: white;
   padding: 0 8px;
   bottom: 0;
-  left: 0;
+  left: 460px;
   position: fixed;
 }
 

@@ -152,6 +152,14 @@ main#loading {
   line-height: 1.8;
 }
 
+.result {
+  cursor: pointer;
+}
+
+.result .word:hover {
+  color: var(--org-color-primary);
+}
+
 /* Player */
 
 #player {

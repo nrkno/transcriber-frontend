@@ -5,7 +5,6 @@ import secondsToTime from "../secondsToTime"
 
 interface IState {
   isPlaying: boolean
-  timer?: number
   playbackUrl?: string
 }
 
@@ -16,6 +15,7 @@ interface IProps {
 
 class Player extends React.Component<IProps, IState> {
   private audioRef: React.RefObject<HTMLAudioElement>
+  private timer: number
 
   constructor(props: IProps) {
     super(props)
@@ -39,13 +39,14 @@ class Player extends React.Component<IProps, IState> {
 
       // Reset state
 
-      clearInterval(this.state.timer)
       this.setState({ isPlaying: false })
+      this.audioRef.current!.currentTime = 0
+      clearInterval(this.timer)
     }
   }
 
   public componentWillUnmount() {
-    clearInterval(this.state.timer)
+    clearInterval(this.timer)
   }
 
   public handlePlay = (event: React.FormEvent<HTMLButtonElement>) => {
@@ -59,9 +60,9 @@ class Player extends React.Component<IProps, IState> {
   public handlePause = (event: React.FormEvent<HTMLButtonElement>) => {
     this.audioRef.current!.pause()
 
-    clearInterval(this.state.timer)
+    clearInterval(this.timer)
 
-    this.setState({ isPlaying: false, timer: undefined })
+    this.setState({ isPlaying: false })
     ReactGA.event({
       action: "pause button pressed",
       category: "player",
@@ -155,11 +156,11 @@ class Player extends React.Component<IProps, IState> {
   private play = () => {
     this.audioRef.current!.play()
 
-    const timer = setInterval(() => {
+    this.timer = setInterval(() => {
       this.handleTimeUpdate()
     }, 100)
 
-    this.setState({ isPlaying: true, timer })
+    this.setState({ isPlaying: true })
   }
   private handleTimeUpdate = () => {
     const currentTime = this.audioRef.current!.currentTime

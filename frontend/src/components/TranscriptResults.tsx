@@ -53,6 +53,15 @@ class TranscriptResults extends Component<IProps, IState> {
   public componentDidUpdate(prevProps: IProps) {
     if (this.props.transcriptId !== prevProps.transcriptId) {
       this.fetchResults()
+
+      // Reset state
+
+      this.setState({
+        currentResultIndex: undefined,
+        currentTime: 0,
+        currentWordIndex: undefined,
+        results: undefined,
+      })
     }
   }
 
@@ -135,8 +144,6 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public render() {
-    console.log("transcripts result GS URL: ", this.props.transcript.playbackGsUrl)
-
     return (
       <>
         {this.state.results &&

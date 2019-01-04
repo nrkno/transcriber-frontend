@@ -1,7 +1,6 @@
 import * as React from "react"
-import { Step, SweetProgressStatus } from "../enums"
+import { Step } from "../enums"
 import { ITranscript } from "../interfaces"
-import TranscriptionProgress from "./TranscriptionProgress"
 
 interface IProps {
   transcript: ITranscript
@@ -15,38 +14,96 @@ class Process extends React.Component<IProps, any> {
       return null
     }
 
+    const step = transcript.process.step
+
     return (
-      <div className="progress org-shadow-s org-color-shade">
+      <div>
         {(() => {
-          const progress = transcript.process
-
-          // Check for errors first
-
-          const error = transcript.process.error
-          if (error) {
-            return <TranscriptionProgress message={error!.message} title={transcript.name} status={SweetProgressStatus.Error} />
-          }
-
-          // Else, show which step we are on
-
-          switch (progress.step) {
-            case Step.Uploading:
-              // The file has been uploaded, and we're waiting for the Cloud function to start
-              return <TranscriptionProgress message="Laster opp" title={transcript.name} status={SweetProgressStatus.Active} symbol={"⬆️"} />
-
-            case Step.Transcoding:
-              return <TranscriptionProgress message="Transkoder" title={transcript.name} status={SweetProgressStatus.Active} symbol={"🤖"} />
-
-            case Step.Transcribing:
-              return <TranscriptionProgress message="Transkriberer" title={transcript.name} status={SweetProgressStatus.Active} percent={progress.percent} />
-
-            case Step.Saving:
-              return <TranscriptionProgress message="Lagrer" title={transcript.name} status={SweetProgressStatus.Active} percent={progress.percent} />
-
-            default:
-              return <TranscriptionProgress message={"Noe gikk galt!"} title={transcript.name} status={SweetProgressStatus.Error} />
+          if (transcript.process.error) {
+            return (
+              <div>
+                <svg width="40" height="40" focusable="false" aria-hidden="true">
+                  <use xlinkHref="#icon-x-c" color="red" />
+                </svg>{" "}
+                <span className="org-text-l">Noe gikk galt!</span>
+              </div>
+            )
+          } else {
+            return (
+              <div>
+                <svg width="40" height="40">
+                  <defs>
+                    <pattern id="pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <use xlinkHref="#icon-waveform" x="0" y="0" width="40" height="40" strokeWidth="0" stroke="none" />
+                    </pattern>
+                    <mask id="mask">
+                      <rect x="0" y="0" width="40" height="40" fill="url(#pattern)">
+                        <animate attributeName="x" from="-40" to="40" dur="1.5s" repeatCount="indefinite" />
+                      </rect>
+                    </mask>
+                  </defs>
+                  <rect x="0" y="0" width="40" fill="black" height="40" mask="url(#mask)" />
+                </svg>{" "}
+                <span className="org-text-l">Noe gikk galt!</span>
+              </div>
+            )
           }
         })()}
+
+        <label className="org-label">
+          Transkoding:
+          {(() => {
+            if (step === Step.Transcoding) {
+              if (transcript.process.error) {
+                return (
+                  <div>
+                    <progress data-status="error" className="org-progress" value="1" max="100" /> <div className="org-color-error"> {transcript.process.error.message}</div>
+                  </div>
+                )
+              } else {
+                return <progress className="org-progress" />
+              }
+            } else if (step === Step.Uploading) {
+              return <progress className="org-progress" value="0" max="100" />
+            } else {
+              return <progress data-status="completed" className="org-progress" value="100" max="100" />
+            }
+          })()}
+        </label>
+
+        <label className="org-label">
+          Transkribering:
+          {(() => {
+            if (step === Step.Transcribing) {
+              if (transcript.process.error) {
+                return <progress data-status="error" className="org-progress" value={transcript.process.percent} max="100" />
+              } else {
+                return <progress className="org-progress" value={transcript.process.percent} max="100" />
+              }
+            } else if (step === Step.Uploading || step === Step.Transcoding) {
+              return <progress className="org-progress" value="0" max="100" />
+            } else {
+              return <progress data-status="completed" className="org-progress" value="100" max="100" />
+            }
+          })()}
+        </label>
+
+        <label className="org-label">
+          Lagring:
+          {(() => {
+            if (step === Step.Saving) {
+              if (transcript.process.error) {
+                return <progress data-status="error" className="org-progress" value={transcript.process.percent} max="100" />
+              } else {
+                return <progress className="org-progress" value={transcript.process.percent} max="100" />
+              }
+            } else if (step === Step.Uploading || step === Step.Transcoding || step === Step.Transcribing) {
+              return <progress className="org-progress" value="0" max="100" />
+            } else {
+              return <progress data-status="completed" className="org-progress" value="100" max="100" />
+            }
+          })()}
+        </label>
       </div>
     )
   }

@@ -44,7 +44,7 @@ class Process extends React.Component<IProps, any> {
                   </defs>
                   <rect x="0" y="0" width="40" fill="black" height="40" mask="url(#mask)" />
                 </svg>{" "}
-                <span className="org-text-l">Noe gikk galt!</span>
+                <span className="org-text-l">Jobber</span>
               </div>
             )
           }

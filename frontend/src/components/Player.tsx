@@ -28,20 +28,20 @@ class Player extends React.Component<IProps, IState> {
   }
 
   public componentDidMount() {
-    console.log(this.props.playbackGsUrl)
+    console.log("PLAYER DID MOUNT", this.props.playbackGsUrl)
 
-    storage
+    this.fetchPlaybackUrl()
+  }
 
-      .refFromURL(this.props.playbackGsUrl)
-      .getDownloadURL()
-      .then(url => {
-        this.setState({ playbackUrl: url })
-      })
-      .catch(error => {
-        // Handle any errors
+  public componentDidUpdate(prevProps: IProps) {
+    if (this.props.playbackGsUrl !== prevProps.playbackGsUrl) {
+      this.fetchPlaybackUrl()
 
-        console.error(error)
-      })
+      // Reset state
+
+      clearInterval(this.state.timer)
+      this.setState({ isPlaying: false })
+    }
   }
 
   public componentWillUnmount() {
@@ -135,6 +135,21 @@ class Player extends React.Component<IProps, IState> {
         </div>
       </div>
     )
+  }
+
+  private fetchPlaybackUrl() {
+    storage
+
+      .refFromURL(this.props.playbackGsUrl)
+      .getDownloadURL()
+      .then(url => {
+        this.setState({ playbackUrl: url })
+      })
+      .catch(error => {
+        // Handle any errors
+
+        console.error(error)
+      })
   }
 
   private play = () => {

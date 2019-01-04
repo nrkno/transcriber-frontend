@@ -57,7 +57,7 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public componentDidMount() {
-    console.log(this.props.transcript)
+    console.log("TRANSCRIPT RESULTS DID MOUNT", this.props.transcript)
 
     this.fetchResults()
   }
@@ -135,8 +135,7 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public render() {
-    console.log("this.props.transcript.playbackGsUrl")
-    console.log(this.props.transcript.playbackGsUrl)
+    console.log("transcripts result GS URL: ", this.props.transcript.playbackGsUrl)
 
     return (
       <>

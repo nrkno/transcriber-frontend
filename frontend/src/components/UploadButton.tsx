@@ -13,28 +13,22 @@ interface IState {
 
 class UploadButton extends Component<IProps, IState> {
   public render() {
+    const style = { alignContent: "center", borderColor: "rgb(102, 102, 102)", borderRadius: "5px", borderStyle: "dashed", borderWidth: "2px", display: "grid", height: "100px", justifyContent: "center", position: "relative", width: "100%" }
+
     return (
-      <Dropzone
-        accept="audio/*"
-        style={{
-          alignContent: "center",
-          borderColor: "rgb(102, 102, 102)",
-          borderRadius: "5px",
-          borderStyle: "dashed",
-          borderWidth: "2px",
-          display: "grid",
-          height: "100px",
-          justifyContent: "center",
-          position: "relative",
-          width: "100%",
+      <Dropzone accept="audio/*" onDrop={this.handleFileDrop}>
+        {({ getRootProps, getInputProps, isDragActive }) => {
+          return (
+            <div {...getRootProps()} style={style}>
+              <input {...getInputProps()} />
+              <button id="new-trans" className="org-btn org-btn--primary org-btn--round">
+                <svg width="40" height="40" aria-hidden="true">
+                  <use xlinkHref="#icon-pluss" />
+                </svg>
+              </button>
+            </div>
+          )
         }}
-        onDrop={this.handleFileDrop}
-      >
-        <button id="new-trans" className="org-btn org-btn--primary org-btn--round">
-          <svg width="40" height="40" aria-hidden="true">
-            <use xlinkHref="#icon-pluss" />
-          </svg>
-        </button>
       </Dropzone>
     )
   }

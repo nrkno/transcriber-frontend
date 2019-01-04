@@ -9,7 +9,7 @@ import { ITranscript } from "../interfaces"
 import UploadButton from "./UploadButton"
 
 interface IProps {
-  fileSelected: (file: File) => void
+  handleFileSelected: (file: File) => void
   history: History
   selectedTranscriptId?: string
   userId: string
@@ -38,8 +38,6 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
     if (this.props.selectedTranscriptId === undefined && this.state.transcriptIds) {
       // If selectedTranscriptId is undefined, it means that the user is accessing /transcripts
       // We should thus select the newest transcript from the list
-
-      console.log(this.props)
 
       this.props.history.push(`/transcripts/${this.state.transcriptIds[0]}`)
     }
@@ -137,7 +135,7 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
           </tbody>
         </table>
 
-        <UploadButton fileSelected={this.props.fileSelected} userId={this.props.userId} />
+        <UploadButton fileSelected={this.props.handleFileSelected} userId={this.props.userId} />
       </div>
     )
   }

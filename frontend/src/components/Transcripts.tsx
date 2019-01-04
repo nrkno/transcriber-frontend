@@ -23,7 +23,7 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
       <main id="transcripts">
         {this.props.user ? (
           <>
-            <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} fileSelected={this.fileSelected} history={this.props.history} />
+            <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} handleFileSelected={this.handleFileSelected} history={this.props.history} />
 
             {this.state.file ? <CreateTranscript file={this.state.file} userId={this.props.user.uid} transcriptCreated={this.transcriptCreated} /> : <Transcript transcriptId={this.props.match.params.id} />}
           </>
@@ -33,7 +33,7 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
       </main>
     )
   }
-  public fileSelected = (file: File) => {
+  public handleFileSelected = (file: File) => {
     this.setState({ file })
   }
 

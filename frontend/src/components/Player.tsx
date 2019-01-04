@@ -5,7 +5,6 @@ import secondsToTime from "../secondsToTime"
 
 interface IState {
   isPlaying: boolean
-  timer?: number
   playbackUrl?: string
 }
 
@@ -15,33 +14,39 @@ interface IProps {
 }
 
 class Player extends React.Component<IProps, IState> {
-  private audioRef = React.createRef<HTMLAudioElement>()
+  private audioRef: React.RefObject<HTMLAudioElement>
+  private timer: number
 
   constructor(props: IProps) {
     super(props)
+
+    this.audioRef = React.createRef<HTMLAudioElement>()
+
     this.state = {
       isPlaying: false,
     }
   }
 
   public componentDidMount() {
-    storage
+    console.log("PLAYER DID MOUNT", this.props.playbackGsUrl)
 
-      .refFromURL(this.props.playbackGsUrl)
-      .getDownloadURL()
-      .then(url => {
-        this.setState({ playbackUrl: url })
-      })
-      .catch(error => {
-        // Handle any errors
+    this.fetchPlaybackUrl()
+  }
 
-        console.error(error)
-      })
+  public componentDidUpdate(prevProps: IProps) {
+    if (this.props.playbackGsUrl !== prevProps.playbackGsUrl) {
+      this.fetchPlaybackUrl()
+
+      // Reset state
+
+      this.setState({ isPlaying: false })
+      this.audioRef.current!.currentTime = 0
+      clearInterval(this.timer)
+    }
   }
 
   public componentWillUnmount() {
-    clearInterval(this.state.timer)
-    this.setState({ isPlaying: false, timer: undefined })
+    clearInterval(this.timer)
   }
 
   public handlePlay = (event: React.FormEvent<HTMLButtonElement>) => {
@@ -55,9 +60,9 @@ class Player extends React.Component<IProps, IState> {
   public handlePause = (event: React.FormEvent<HTMLButtonElement>) => {
     this.audioRef.current!.pause()
 
-    clearInterval(this.state.timer)
+    clearInterval(this.timer)
 
-    this.setState({ isPlaying: false, timer: undefined })
+    this.setState({ isPlaying: false })
     ReactGA.event({
       action: "pause button pressed",
       category: "player",
@@ -98,13 +103,17 @@ class Player extends React.Component<IProps, IState> {
           {!this.state.isPlaying ? (
             <button onClick={this.handlePlay}>
               <span role="img" aria-label="Spill av">
-                ▶️
+                <svg width="40" height="40" focusable="false" aria-hidden="true">
+                  <use xlinkHref="#icon-play-c" />
+                </svg>
               </span>
             </button>
           ) : (
             <button onClick={this.handlePause}>
               <span role="img" aria-label="Pause">
-                ⏸
+                <svg width="40" height="40" focusable="false" aria-hidden="true">
+                  <use xlinkHref="#icon-pause-c" />
+                </svg>
               </span>
             </button>
           )}
@@ -129,14 +138,29 @@ class Player extends React.Component<IProps, IState> {
     )
   }
 
+  private fetchPlaybackUrl() {
+    storage
+
+      .refFromURL(this.props.playbackGsUrl)
+      .getDownloadURL()
+      .then(url => {
+        this.setState({ playbackUrl: url })
+      })
+      .catch(error => {
+        // Handle any errors
+
+        console.error(error)
+      })
+  }
+
   private play = () => {
     this.audioRef.current!.play()
 
-    const timer = setInterval(() => {
+    this.timer = setInterval(() => {
       this.handleTimeUpdate()
     }, 100)
 
-    this.setState({ isPlaying: true, timer })
+    this.setState({ isPlaying: true })
   }
   private handleTimeUpdate = () => {
     const currentTime = this.audioRef.current!.currentTime

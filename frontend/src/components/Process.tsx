@@ -7,7 +7,7 @@ interface IProps {
   transcript: ITranscript
 }
 
-class Progress extends React.Component<IProps, any> {
+class Process extends React.Component<IProps, any> {
   public render() {
     const transcript = this.props.transcript
 
@@ -52,4 +52,4 @@ class Progress extends React.Component<IProps, any> {
   }
 }
 
-export default Progress
+export default Process

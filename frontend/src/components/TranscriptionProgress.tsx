@@ -8,7 +8,6 @@ interface IProps {
   percent?: number
   status?: SweetProgressStatus
   symbol?: string
-  title: string
 }
 
 interface IProgressProps {
@@ -24,7 +23,7 @@ interface IProgressProps {
   }
 }
 
-const TranscriptionProgress = ({ message, percent = 100, status, symbol, title }: IProps) => {
+const TranscriptionProgress = ({ message, percent = 100, status, symbol }: IProps) => {
   const props: IProgressProps = {
     percent,
     status,
@@ -40,7 +39,6 @@ const TranscriptionProgress = ({ message, percent = 100, status, symbol, title }
 
   return (
     <>
-      <div>{title}</div>
       <div className={className}>{message} </div>
       <Progress {...props} />
     </>

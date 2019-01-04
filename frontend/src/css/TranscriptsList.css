@@ -1,0 +1,74 @@
+.trans-list .org-bar {
+  padding-bottom: 6px;
+}
+
+.trans-list table {
+  table-layout: fixed;
+}
+
+/*
+@media (max-width: 930px) {
+  .trans-list {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 2;
+  }
+
+  / move content view to the right of list view []->[] /
+  .trans-content {
+    position: absolute;
+    left: 100%;
+  }
+}
+*/
+
+.trans-list table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.trans-list table th {
+  font-weight: normal;
+}
+
+.trans-item {
+  cursor: pointer;
+}
+
+.trans-item--selected {
+  background: rgba(0, 0, 0, 0.1);
+  border-left: 0.5em solid var(--org-color-primary);
+}
+
+.trans-item:active,
+.trans-item:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transition: 0.2s;
+}
+.trans-list table th:first-of-type,
+.trans-list table td:first-of-type {
+  padding: 10px;
+}
+
+.trans-list td.name,
+.trans-list th.name {
+  width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trans-list td.icon,
+.trans-list th.icon {
+  width: 40px;
+}
+
+.trans-list td.date,
+.trans-list th.date {
+  width: 160px;
+}

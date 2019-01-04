@@ -20,7 +20,7 @@ html {
 
 header {
   display: grid;
-  padding: 16px;
+  padding: 1em;
   grid-template-columns: auto 1fr;
   grid-gap: 8px;
   grid-auto-flow: column;
@@ -30,9 +30,21 @@ header {
 main#transcript {
   margin: 20px;
   display: grid;
+  grid-template-columns: minmax(auto, 650px);
+  justify-content: center;
+  align-content: start;
+}
+
+main#create {
+  margin: 20px;
+  display: grid;
   grid-template-columns: minmax(auto, 600px);
   justify-content: center;
   align-content: start;
+}
+
+fieldset {
+  border: none;
 }
 
 /* Navigation */
@@ -65,11 +77,8 @@ hr {
 }
 
 main#transcripts {
-  margin: 40px;
   display: grid;
-  grid-template-columns: minmax(auto, 700px) 300px;
-  justify-content: center;
-  grid-gap: 40px;
+  grid-template-columns: 460px 1fr;
 }
 
 /* Progress */
@@ -133,6 +142,7 @@ main#loading {
   grid-gap: 10px;
   padding: 16px;
   padding-bottom: 100px;
+  font-family: "Roboto Mono", monospace;
 }
 
 .results .startTime {
@@ -147,17 +157,25 @@ main#loading {
   line-height: 1.8;
 }
 
+.result {
+  cursor: pointer;
+}
+
+.result .word:hover {
+  color: var(--org-color-primary);
+}
+
 /* Player */
 
 #player {
-  width: 100%;
+  width: calc(100% - 460px);
   height: 64px;
   background: black;
   display: flex;
   color: white;
   padding: 0 8px;
   bottom: 0;
-  left: 0;
+  left: 460px;
   position: fixed;
 }
 

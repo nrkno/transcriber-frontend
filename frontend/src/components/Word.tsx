@@ -13,7 +13,7 @@ class Word extends React.Component<IProps, {}> {
   public render() {
     return (
       <span onClick={() => this.props.setCurrentWord(this.props.word, this.props.resultIndex, this.props.wordIndex)}>
-        <span className={`${this.props.isCurrentWord ? "active" : ""}`}>{this.props.word.word}</span>{" "}
+        <span className={"word " + `${this.props.isCurrentWord ? "active" : ""}`}>{this.props.word.word}</span>{" "}
       </span>
     )
   }

@@ -30,7 +30,7 @@ header {
 main#transcript {
   margin: 20px;
   display: grid;
-  grid-template-columns: minmax(auto, 600px);
+  grid-template-columns: minmax(auto, 650px);
   justify-content: center;
   align-content: start;
 }
@@ -142,6 +142,7 @@ main#loading {
   grid-gap: 10px;
   padding: 16px;
   padding-bottom: 100px;
+  font-family: "Roboto Mono", monospace;
 }
 
 .results .startTime {

@@ -117,15 +117,6 @@ main#transcripts {
   animation: dots 1s steps(5, end) infinite;
 }
 
-/* Loading */
-
-main#loading {
-  display: grid;
-  justify-content: center;
-  justify-items: center;
-  align-content: center;
-}
-
 /* Transcript */
 
 .results .meta {

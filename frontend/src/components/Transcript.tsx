@@ -13,7 +13,7 @@ interface IProps {
 }
 
 interface IState {
-  transcript: ITranscript | null
+  transcript?: ITranscript | null
 }
 
 class Transcript extends React.Component<IProps, IState> {
@@ -39,11 +39,7 @@ class Transcript extends React.Component<IProps, IState> {
 
     // Loading from Firebase
     if (transcript === null) {
-      return (
-        <main id="loading">
-          <TranscriptionProgress message={"Laster"} status={SweetProgressStatus.Active} symbol={"⏳"} />
-        </main>
-      )
+      return null
     }
     // Transcription not found
     else if (transcript === undefined) {
@@ -100,13 +96,22 @@ class Transcript extends React.Component<IProps, IState> {
     }
   }
   private fetchTranscript(transcriptId: string) {
-    database.doc(`transcripts/${transcriptId}`).onSnapshot(documentSnapshot => {
-      const transcript = documentSnapshot.data() as ITranscript
+    database.doc(`transcripts/${transcriptId}`).onSnapshot(
+      documentSnapshot => {
+        const transcript = documentSnapshot.data() as ITranscript
 
-      this.setState({
-        transcript,
-      })
-    })
+        this.setState({
+          transcript,
+        })
+      },
+      error => {
+        console.log("error", error)
+
+        this.setState({
+          transcript: undefined,
+        })
+      },
+    )
   }
 
   private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {

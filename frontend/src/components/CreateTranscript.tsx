@@ -371,8 +371,9 @@ class CreateTranscript extends React.Component<IProps, IState> {
   private selectedLanguageCodes() {
     const languageCodes = this.state.transcript.metadata.languageCodes
 
-    const selectedLanguageCodes = languageCodes.filter(language => {
-      return language !== ""
+    // This will remove unselected languages (no value) and remove duplicates
+    const selectedLanguageCodes = languageCodes.filter((language, index, array) => {
+      return language !== "" && array.indexOf(language) === index
     })
 
     return selectedLanguageCodes

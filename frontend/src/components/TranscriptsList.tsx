@@ -1,7 +1,6 @@
 import moment from "moment"
 import React, { Component } from "react"
 import { RouteComponentProps } from "react-router"
-import { Link } from "react-router-dom"
 import "../css/TranscriptsList.css"
 import { Step } from "../enums"
 import { database } from "../firebaseApp"
@@ -67,11 +66,11 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
                   createdAt = ""
                 }
 
-                const id = this.state.transcriptIds[index]
+                const transcriptId = this.state.transcriptIds[index]
                 const duration = moment.duration(transcript.metadata.audioDuration * 1000)
 
                 let className = "trans-item"
-                if (id === this.props.selectedTranscriptId) {
+                if (transcriptId === this.props.selectedTranscriptId) {
                   className += " trans-item--selected"
                 }
                 if (transcript.process && transcript.process.error) {
@@ -79,7 +78,7 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
                 }
 
                 return (
-                  <tr key={id} className={className}>
+                  <tr key={transcriptId} data-transcript-id={transcriptId} className={className} onClick={this.handleRowClick}>
                     <td>
                       {(() => {
                         if (transcript.process && transcript.process.error) {
@@ -113,9 +112,7 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
                         }
                       })()}
                     </td>
-                    <td className="name">
-                      <Link to={`/transcripts/${id}`}>{transcript.name} </Link>
-                    </td>
+                    <td className="name">{transcript.name}</td>
                     <td>{createdAt}</td>
                     <td>
                       {duration.hours() > 0 ? `${duration.hours()} t ` : ""}
@@ -131,6 +128,11 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
         <UploadButton fileSelected={this.props.handleFileSelected} userId={this.props.userId} />
       </div>
     )
+  }
+
+  private handleRowClick = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+    const transcriptId = event.currentTarget.dataset.transcriptId
+    this.props.history.push(`/transcripts/${transcriptId}`)
   }
 
   private fetchTranscripts(userId: string) {

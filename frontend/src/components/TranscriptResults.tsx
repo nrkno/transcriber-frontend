@@ -66,8 +66,6 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public componentDidMount() {
-    console.log("TRANSCRIPT RESULTS DID MOUNT", this.props.transcript)
-
     this.fetchResults()
   }
   public handleTimeUpdate = (currentTime: number) => {

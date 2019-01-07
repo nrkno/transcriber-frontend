@@ -28,8 +28,6 @@ class Player extends React.Component<IProps, IState> {
   }
 
   public componentDidMount() {
-    console.log("PLAYER DID MOUNT", this.props.playbackGsUrl)
-
     this.fetchPlaybackUrl()
   }
 

@@ -272,7 +272,6 @@ class CreateTranscript extends React.Component<IProps, IState> {
       },
       () => {
         this.setState({ fileUploaded: true })
-        console.log("Upload done", transcriptId)
       },
     )
   }

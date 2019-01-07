@@ -8,7 +8,7 @@ Transcriber is a web app using Google speech-to-text API for transcribing audio 
 * [Google Cloud Storage](https://cloud.google.com/storage/)
 * [Cloud Functions for Firebase](https://firebase.google.com/docs/functions/)
 * [Cloud Speech-to-text](https://cloud.google.com/speech-to-text/)
-* [Cloud Realtime Database](https://firebase.google.com/docs/database/)
+* [Cloud Firestore](https://firebase.google.com/docs/firestore/)
 
 # Backend
 

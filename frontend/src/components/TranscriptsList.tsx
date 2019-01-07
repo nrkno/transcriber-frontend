@@ -34,13 +34,6 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
     if (this.props.userId !== undefined && this.state.transcripts === undefined) {
       this.fetchTranscripts(this.props.userId)
     }
-
-    if (this.props.selectedTranscriptId === undefined && this.state.transcriptIds) {
-      // If selectedTranscriptId is undefined, it means that the user is accessing /transcripts
-      // We should thus select the newest transcript from the list
-
-      this.props.history.push(`/transcripts/${this.state.transcriptIds[0]}`)
-    }
   }
 
   public render() {

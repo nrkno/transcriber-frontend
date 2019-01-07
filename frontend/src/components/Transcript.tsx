@@ -9,11 +9,11 @@ import TranscriptResults from "./TranscriptResults"
 
 interface IProps {
   transcript: ITranscript | null
-  transcriptId: string
+  transcriptId?: string
 }
 
 interface IState {
-  transcript: ITranscript | null
+  transcript?: ITranscript | null
 }
 
 class Transcript extends React.Component<IProps, IState> {
@@ -25,13 +25,15 @@ class Transcript extends React.Component<IProps, IState> {
   }
 
   public componentDidUpdate(prevProps: IProps) {
-    if (this.props.transcriptId !== prevProps.transcriptId) {
+    if (this.props.transcriptId && this.props.transcriptId !== prevProps.transcriptId) {
       this.fetchTranscript(this.props.transcriptId)
     }
   }
 
   public async componentDidMount() {
-    this.fetchTranscript(this.props.transcriptId)
+    if (this.props.transcriptId) {
+      this.fetchTranscript(this.props.transcriptId)
+    }
   }
 
   public render() {
@@ -39,11 +41,7 @@ class Transcript extends React.Component<IProps, IState> {
 
     // Loading from Firebase
     if (transcript === null) {
-      return (
-        <main id="loading">
-          <TranscriptionProgress message={"Laster"} status={SweetProgressStatus.Active} symbol={"⏳"} />
-        </main>
-      )
+      return null
     }
     // Transcription not found
     else if (transcript === undefined) {
@@ -100,13 +98,22 @@ class Transcript extends React.Component<IProps, IState> {
     }
   }
   private fetchTranscript(transcriptId: string) {
-    database.doc(`transcripts/${transcriptId}`).onSnapshot(documentSnapshot => {
-      const transcript = documentSnapshot.data() as ITranscript
+    database.doc(`transcripts/${transcriptId}`).onSnapshot(
+      documentSnapshot => {
+        const transcript = documentSnapshot.data() as ITranscript
 
-      this.setState({
-        transcript,
-      })
-    })
+        this.setState({
+          transcript,
+        })
+      },
+      error => {
+        console.log("error", error)
+
+        this.setState({
+          transcript: undefined,
+        })
+      },
+    )
   }
 
   private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {

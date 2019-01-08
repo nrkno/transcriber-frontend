@@ -60,13 +60,9 @@ async function deleteTranscript(data: any, context: functions.https.CallableCont
 
     await bucket.deleteFiles({ prefix })
 
-    /* const baseFileMediaPath = path.join(path.join("media", userId), transcriptId)
-    const fileSuffices = ["original", "playback.m4a", "transcribed.flac"]
-
-    fileSuffices.forEach(async fileSuffix => {
-      const file = bucket.file(`${baseFileMediaPath}}-${fileSuffix}`)
-      await file.delete()
-    })*/
+    if (transcript.process && transcript.process.step) {
+      visitor.event("transcription", "deleted", transcript.process.step).send()
+    }
 
     return { success: true }
   } catch (error) {

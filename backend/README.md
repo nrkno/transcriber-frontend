@@ -70,3 +70,4 @@ Exceptions are logged.
 #### Events
 
 transcript -> export generated -> docx
+transcript -> deleted -> step

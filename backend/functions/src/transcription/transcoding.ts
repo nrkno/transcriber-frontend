@@ -4,7 +4,6 @@
  */
 
 import ffmpeg_static from "ffmpeg-static"
-import * as functions from "firebase-functions"
 import ffmpeg from "fluent-ffmpeg"
 import fs from "fs"
 import os from "os"

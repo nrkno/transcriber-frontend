@@ -5,8 +5,6 @@ import database from "../database"
 import { bucket } from "../transcription/storage"
 
 async function deleteTranscript(data: any, context: functions.https.CallableContext) {
-  console.log("STARTER DELETE TRANSCRIPT")
-
   // ----------------
   // Google analytics
   // ----------------

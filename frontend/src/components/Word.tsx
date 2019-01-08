@@ -12,10 +12,16 @@ interface IProps {
 class Word extends React.Component<IProps, {}> {
   public render() {
     return (
-      <span onClick={() => this.props.setCurrentWord(this.props.word, this.props.resultIndex, this.props.wordIndex)}>
-        <span className={"word " + `${this.props.isCurrentWord ? "active" : ""}`}>{this.props.word.word}</span>{" "}
-      </span>
+      <>
+        <span onClick={this.handleWordClick} className={"word " + `${this.props.isCurrentWord ? "active" : ""}`}>
+          {this.props.word.word}
+        </span>{" "}
+      </>
     )
+  }
+
+  private handleWordClick = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+    this.props.setCurrentWord(this.props.word, this.props.resultIndex, this.props.wordIndex)
   }
 }
 

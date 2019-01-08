@@ -11,7 +11,7 @@ import os from "os"
 import path from "path"
 import database from "../database"
 import { hoursMinutesSecondsToSeconds } from "./helpers"
-import { storage } from "./storage"
+import { bucket, bucketName } from "./storage"
 
 let audioDuration: number
 
@@ -73,15 +73,6 @@ async function reencodeToM4a(input: string, output: string) {
  * node-fluent-ffmpeg.
  */
 export async function transcode(transcriptId: string, userId: string): Promise<IDurationAndGsUrl> {
-  // Getting the bucket reference from Google Cloud Runtime Configuration API
-
-  const bucketName = functions.config().bucket.name
-
-  if (bucketName === undefined) {
-    throw Error("Environment variable 'bucket.name' not set up")
-  }
-  const bucket = storage.bucket(bucketName)
-
   // -----------------------------------
   // 1. Check that we have an audio file
   // -----------------------------------

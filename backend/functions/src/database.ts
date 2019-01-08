@@ -3,6 +3,7 @@
  * @author Andreas Schjønhaug
  */
 
+import { WriteResult } from "@google-cloud/firestore"
 import admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import serializeError from "serialize-error"
@@ -103,6 +104,10 @@ const database = (() => {
     return doc.data() as ITranscript
   }
 
+  const deleteTranscript = async (transcriptId: string): Promise<WriteResult> => {
+    return db.doc(`transcripts/${transcriptId}`).delete()
+  }
+
   const addTranscriptSummary = async (transcriptSummary: ITranscriptSummary): Promise<FirebaseFirestore.WriteResult[]> => {
     const transcriptsRef = db.doc("statistics/transcripts")
 
@@ -133,7 +138,7 @@ const database = (() => {
     return batch.commit()
   }
 
-  return { addResult, errorOccured, setDuration, setStep, setPercent, getStep, getResults, setPlaybackGsUrl, getTranscript, addTranscriptSummary }
+  return { addResult, deleteTranscript, errorOccured, setDuration, setStep, setPercent, getStep, getResults, setPlaybackGsUrl, getTranscript, addTranscriptSummary }
 })()
 
 export default database

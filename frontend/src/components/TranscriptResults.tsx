@@ -30,8 +30,6 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public fetchResults() {
-    // Read results from
-
     const results = Array<IResult>()
 
     database
@@ -180,17 +178,6 @@ class TranscriptResults extends Component<IProps, IState> {
       </>
     )
   }
-}
-
-const Result = (result: IResult, i: number) => {
-  return (
-    <div key={`result-${i}`} className="result">
-      {result.words.map((word, j) => {
-        const isCurrentWord = this.state.currentResultIndex === i && this.state.currentWordIndex === j
-        return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
-      })}
-    </div>
-  )
 }
 
 export default TranscriptResults

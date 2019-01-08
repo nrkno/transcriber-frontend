@@ -1,13 +1,15 @@
 import * as React from "react"
 import ReactGA from "react-ga"
+import { RouteComponentProps } from "react-router"
 import { Step, SweetProgressStatus } from "../enums"
-import { database } from "../firebaseApp"
+import { database, functions } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 import Process from "./Process"
 import TranscriptionProgress from "./TranscriptionProgress"
 import TranscriptResults from "./TranscriptResults"
 
 interface IProps {
+  history: History
   transcript: ITranscript | null
   transcriptId?: string
 }
@@ -16,7 +18,9 @@ interface IState {
   transcript?: ITranscript | null
 }
 
-class Transcript extends React.Component<IProps, IState> {
+class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IState> {
+  private unsubscribe: () => void
+
   constructor(props: any) {
     super(props)
     this.state = {
@@ -30,7 +34,11 @@ class Transcript extends React.Component<IProps, IState> {
     }
   }
 
-  public async componentDidMount() {
+  public componentWillUnmount() {
+    this.unsubscribe()
+  }
+
+  public componentDidMount() {
     if (this.props.transcriptId) {
       this.fetchTranscript(this.props.transcriptId)
     }
@@ -62,26 +70,33 @@ class Transcript extends React.Component<IProps, IState> {
 
       return (
         <main id="transcript">
-          <div className="meta">
-            <h1 className="org-text-xl">{transcript.name}</h1>
+          <section className="org-bar">
+            <span className="org-text-l">{transcript.name}</span>
 
             {(() => {
               if (isDone) {
                 return (
-                  <form onSubmit={this.handleExportToWord}>
-                    <button className="org-btn org-btn--primary" type="submit">
+                  <>
+                    <button className="org-btn" onClick={this.handleExportToWordButtonClicked}>
                       <svg width="20" height="20" focusable="false" aria-hidden="true">
                         <use xlinkHref="#icon-download" />
                       </svg>{" "}
-                      Last ned som Word
+                      Word-dokument
                     </button>
-                  </form>
+                    <button className="org-btn" onClick={this.handleDeleteButtonClicked}>
+                      <svg width="20" height="20" focusable="false" aria-hidden="true">
+                        <use xlinkHref="#icon-garbage" />
+                      </svg>{" "}
+                      Slett
+                    </button>
+                  </>
                 )
               } else {
                 return
               }
             })()}
-          </div>
+          </section>
+
           {(() => {
             if (isDone) {
               return (
@@ -98,7 +113,7 @@ class Transcript extends React.Component<IProps, IState> {
     }
   }
   private fetchTranscript(transcriptId: string) {
-    database.doc(`transcripts/${transcriptId}`).onSnapshot(
+    this.unsubscribe = database.doc(`transcripts/${transcriptId}`).onSnapshot(
       documentSnapshot => {
         const transcript = documentSnapshot.data() as ITranscript
 
@@ -107,7 +122,7 @@ class Transcript extends React.Component<IProps, IState> {
         })
       },
       error => {
-        console.log("error", error)
+        console.error(error)
 
         this.setState({
           transcript: undefined,
@@ -116,18 +131,37 @@ class Transcript extends React.Component<IProps, IState> {
     )
   }
 
-  private handleExportToWord = async (event: React.FormEvent<HTMLFormElement>) => {
+  private handleExportToWordButtonClicked = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     ReactGA.event({
       action: "export button pressed",
       category: "transcript",
       label: "docx",
     })
 
-    event.preventDefault()
-
     const id = this.props.transcriptId
 
     window.location.href = `${process.env.REACT_APP_FIREBASE_HTTP_CLOUD_FUNCTION_URL}/exportToDoc?id=${id}`
+  }
+
+  private handleDeleteButtonClicked = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    ReactGA.event({
+      action: "delete button pressed",
+      category: "transcript",
+    })
+
+    const transcriptId = this.props.transcriptId
+    const deleteTranscript = functions.httpsCallable("deleteTranscript")
+
+    try {
+      this.props.history.push("/transcripts/")
+      await deleteTranscript({ transcriptId })
+    } catch (error) {
+      console.error(error)
+      ReactGA.exception({
+        description: error.message,
+        fatal: false,
+      })
+    }
   }
 }
 

@@ -13,4 +13,12 @@ if (!admin.apps.length) {
   admin.app()
 }
 
-export const storage = admin.storage()
+const storage = admin.storage()
+
+// Getting the bucket reference from Google Cloud Runtime Configuration API
+export const bucketName = functions.config().bucket.name
+
+if (bucketName === undefined) {
+  throw Error("Environment variable 'bucket.name' not set up")
+}
+export const bucket = storage.bucket(bucketName)

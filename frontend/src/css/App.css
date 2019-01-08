@@ -118,10 +118,10 @@ main#transcripts {
 }
 
 /* Transcript */
-
-.results .meta {
+/*
+#transcript section {
   grid-column-start: 2;
-}
+}*/
 
 .active {
   background: #ffc600;

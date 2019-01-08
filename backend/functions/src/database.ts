@@ -105,7 +105,55 @@ const database = (() => {
   }
 
   const deleteTranscript = async (transcriptId: string): Promise<WriteResult> => {
+    // Delete the results collection
+    const resultsPath = `/transcripts/${transcriptId}/results`
+    await deleteCollection(resultsPath, 10)
+
+    // Delete the documet
     return db.doc(`transcripts/${transcriptId}`).delete()
+  }
+
+  const deleteCollection = async (collectionPath: string, batchSize: number): Promise<{}> => {
+    const collectionRef = db.collection(collectionPath)
+    const query = collectionRef.orderBy("__name__").limit(batchSize)
+
+    return new Promise((resolve, reject) => {
+      deleteQueryBatch(query, batchSize, resolve, reject)
+    })
+  }
+
+  const deleteQueryBatch = (query: FirebaseFirestore.Query, batchSize: number, resolve, reject) => {
+    query
+      .get()
+      .then(snapshot => {
+        // When there are no documents left, we are done
+        if (snapshot.size === 0) {
+          return 0
+        }
+
+        // Delete documents in a batch
+        const batch = db.batch()
+        snapshot.docs.forEach(doc => {
+          batch.delete(doc.ref)
+        })
+
+        return batch.commit().then(() => {
+          return snapshot.size
+        })
+      })
+      .then((numDeleted: number) => {
+        if (numDeleted === 0) {
+          resolve()
+          return
+        }
+
+        // Recurse on the next process tick, to avoid
+        // exploding the stack.
+        process.nextTick(() => {
+          deleteQueryBatch(query, batchSize, resolve, reject)
+        })
+      })
+      .catch(reject)
   }
 
   const addTranscriptSummary = async (transcriptSummary: ITranscriptSummary): Promise<FirebaseFirestore.WriteResult[]> => {

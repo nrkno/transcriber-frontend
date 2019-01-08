@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import TrackVisibility from "react-on-screen"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
 import secondsToTime from "../secondsToTime"
@@ -155,12 +156,21 @@ class TranscriptResults extends Component<IProps, IState> {
                 <div key={`startTime-${i}`} className="startTime">
                   {i > 0 ? formattedStartTime : ""}
                 </div>
-
                 <div key={`result-${i}`} className="result">
-                  {result.words.map((word, j) => {
-                    const isCurrentWord = this.state.currentResultIndex === i && this.state.currentWordIndex === j
-                    return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
-                  })}
+                  <TrackVisibility partialVisibility={true}>
+                    {({ isVisible }) => {
+                      if (isVisible) {
+                        return result.words.map((word, j) => {
+                          const isCurrentWord = this.state.currentResultIndex === i && this.state.currentWordIndex === j
+                          return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
+                        })
+                      } else {
+                        return result.words.map(word => {
+                          return word.word + " "
+                        })
+                      }
+                    }}
+                  </TrackVisibility>
                 </div>
               </React.Fragment>
             )
@@ -170,6 +180,17 @@ class TranscriptResults extends Component<IProps, IState> {
       </>
     )
   }
+}
+
+const Result = (result: IResult, i: number) => {
+  return (
+    <div key={`result-${i}`} className="result">
+      {result.words.map((word, j) => {
+        const isCurrentWord = this.state.currentResultIndex === i && this.state.currentWordIndex === j
+        return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
+      })}
+    </div>
+  )
 }
 
 export default TranscriptResults

@@ -1,5 +1,6 @@
 import moment from "moment"
 import React, { Component } from "react"
+import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"
 import "../css/TranscriptsList.css"
 import { Step } from "../enums"
@@ -20,6 +21,8 @@ interface IState {
 }
 
 class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState> {
+  private unsubscribe: () => void
+
   constructor(props: RouteComponentProps<{}> & IProps) {
     super(props)
     this.state = {}
@@ -130,33 +133,47 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
     )
   }
 
+  public componentWillUnmount() {
+    this.unsubscribe()
+  }
+
   private handleRowClick = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
     const transcriptId = event.currentTarget.dataset.transcriptId
     this.props.history.push(`/transcripts/${transcriptId}`)
   }
 
   private fetchTranscripts(userId: string) {
-    database
+    this.unsubscribe = database
       .collection("/transcripts")
       .where("userId", "==", userId)
       .orderBy("createdAt", "desc")
-      .onSnapshot(querySnapshot => {
-        const transcripts = Array<ITranscript>()
-        const transcriptIds = Array<string>()
+      .onSnapshot(
+        querySnapshot => {
+          const transcripts = Array<ITranscript>()
+          const transcriptIds = Array<string>()
 
-        querySnapshot.forEach(doc => {
-          // doc.data() is never undefined for query doc snapshots
-          const transcript = doc.data() as ITranscript
+          querySnapshot.forEach(doc => {
+            // doc.data() is never undefined for query doc snapshots
+            const transcript = doc.data() as ITranscript
 
-          transcripts.push(transcript)
-          transcriptIds.push(doc.id)
-        })
+            transcripts.push(transcript)
+            transcriptIds.push(doc.id)
+          })
 
-        this.setState({
-          transcriptIds,
-          transcripts,
-        })
-      })
+          this.setState({
+            transcriptIds,
+            transcripts,
+          })
+        },
+        error => {
+          console.error(error)
+
+          ReactGA.exception({
+            description: error.message,
+            fatal: false,
+          })
+        },
+      )
   }
 }
 

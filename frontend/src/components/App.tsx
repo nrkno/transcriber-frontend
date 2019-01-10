@@ -24,16 +24,6 @@ class App extends React.Component<any, IState> {
   }
 
   public async componentDidMount() {
-    try {
-      const userCredential = await auth.signInWithEmailAndPassword("andreas2@schjonhaug.com", "andreas")
-      await userCredential.user!.updateProfile({ displayName: "Andreas Schjønhaug", photoURL: null })
-    } catch (error) {
-      const errorCode = error.code
-      const errorMessage = error.message
-
-      console.error(errorCode, errorMessage)
-    }
-
     auth.onAuthStateChanged(user => {
       if (user) {
         // Set Google Analytics ID

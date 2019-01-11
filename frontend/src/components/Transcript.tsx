@@ -77,11 +77,18 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IStat
               if (isDone) {
                 return (
                   <>
-                    <button className="org-btn" onClick={this.handleExportToWordButtonClicked}>
+                    <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
                       <svg width="20" height="20" focusable="false" aria-hidden="true">
                         <use xlinkHref="#icon-download" />
                       </svg>{" "}
-                      Word-dokument
+                      docx
+                    </button>
+
+                    <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("xmp")}>
+                      <svg width="20" height="20" focusable="false" aria-hidden="true">
+                        <use xlinkHref="#icon-download" />
+                      </svg>{" "}
+                      xmp
                     </button>
                     <button className="org-btn" onClick={this.handleDeleteButtonClicked}>
                       <svg width="20" height="20" focusable="false" aria-hidden="true">
@@ -131,16 +138,16 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IStat
     )
   }
 
-  private handleExportToWordButtonClicked = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  private handleExportTranscriptButtonClicked = (type: string) => {
     ReactGA.event({
       action: "export button pressed",
       category: "transcript",
-      label: "docx",
+      label: type,
     })
 
     const id = this.props.transcriptId
 
-    window.location.href = `${process.env.REACT_APP_FIREBASE_HTTP_CLOUD_FUNCTION_URL}/exportTranscript?id=${id}&type=docx`
+    window.location.href = `${process.env.REACT_APP_FIREBASE_HTTP_CLOUD_FUNCTION_URL}/exportTranscript?id=${id}&type=${type}`
   }
 
   private handleDeleteButtonClicked = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

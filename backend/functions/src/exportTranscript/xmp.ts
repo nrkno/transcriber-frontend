@@ -6,7 +6,7 @@ function xmp(results: IResult[], response: functions.Response) {
   const markers = results.map(result => {
     const words = result.words.map(word => word.word).join(" ")
     const startTime = (result.startTime || 0) / 10000000
-    const duration = 100
+    const duration = result.endTime / 10000000 - startTime
     const marker = {
       "@rdf:parseType": "Resource",
       "xmpDM:comment": words,
@@ -29,7 +29,11 @@ function xmp(results: IResult[], response: functions.Response) {
               "rdf:li": {
                 "@rdf:parseType": "Resource",
                 "xmpDM:frameRate": "f100",
-                "xmpDM:markers": markers,
+                "xmpDM:markers": {
+                  "rdf:Seq": {
+                    "rdf:li": markers,
+                  },
+                },
                 "xmpDM:trackName": "Comment",
                 "xmpDM:trackType": "Comment",
               },

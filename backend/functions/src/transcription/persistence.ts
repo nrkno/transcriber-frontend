@@ -42,6 +42,7 @@ export async function saveResult(speechRecognitionResults: any, transcriptId: st
     // Transform startTime and endTime's seconds and nanos
     const result: IResult = {
       confidence: recognitionResult.confidence,
+      endTime: words[words.length - 1].endTime,
       startTime: words[0].startTime,
       transcript: recognitionResult.transcript,
       words,

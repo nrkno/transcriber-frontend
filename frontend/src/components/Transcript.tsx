@@ -140,7 +140,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IStat
 
     const id = this.props.transcriptId
 
-    window.location.href = `${process.env.REACT_APP_FIREBASE_HTTP_CLOUD_FUNCTION_URL}/exportToDoc?id=${id}`
+    window.location.href = `${process.env.REACT_APP_FIREBASE_HTTP_CLOUD_FUNCTION_URL}/exportTranscript?id=${id}&type=docx`
   }
 
   private handleDeleteButtonClicked = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

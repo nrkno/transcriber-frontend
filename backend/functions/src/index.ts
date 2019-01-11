@@ -5,21 +5,21 @@
 
 import * as functions from "firebase-functions"
 import deleteTranscript from "./deleteTranscript"
-import exportToDoc from "./exportToDoc"
+import exportTranscript from "./exportTranscript"
 import transcription from "./transcription"
 
-// -------------
+// --------------------
 // Create transcription
-// -------------
+// --------------------
 
 exports.transcription = functions
   .region("europe-west1")
   .firestore.document("transcripts/{transcriptId}")
   .onCreate(transcription)
 
-// -------------
+// --------------------
 // Delete transcription
-// -------------
+// --------------------
 
 exports.deleteTranscript = functions
   .runWith({
@@ -29,11 +29,11 @@ exports.deleteTranscript = functions
   .region("europe-west1")
   .https.onCall(deleteTranscript)
 
-// -------------
-// Export to doc
-// -------------
+// ------
+// Export
+// ------
 
-exports.exportToDoc = functions.region("europe-west1").https.onRequest(exportToDoc)
+exports.exportTranscript = functions.region("europe-west1").https.onRequest(exportTranscript)
 
 // Catch unhandled rejections
 process.on("unhandledRejection", (reason: any, promise: Promise<any>) => {

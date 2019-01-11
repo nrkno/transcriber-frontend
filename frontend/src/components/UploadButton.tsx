@@ -34,7 +34,9 @@ class UploadButton extends Component<IProps, IState> {
   }
   private handleFileDrop: DropFilesEventHandler = (acceptedFiles: [File], rejectedFiles: [File]) => {
     if (rejectedFiles.length > 0) {
-      this.setState({ dropzoneMessage: "Filen har feil format", file: undefined })
+      console.error(rejectedFiles)
+
+      this.setState({ file: undefined })
 
       ReactGA.event({
         action: "wrong file format",
@@ -47,7 +49,7 @@ class UploadButton extends Component<IProps, IState> {
 
       this.props.fileSelected(file)
 
-      this.setState({ file, dropzoneMessage: file.name })
+      this.setState({ file })
     }
   }
 }

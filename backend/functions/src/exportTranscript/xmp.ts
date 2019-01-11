@@ -8,7 +8,7 @@ function xmp(results: IResult[], response: functions.Response) {
   const markers = results.map(result => {
     const words = result.words.map(word => word.word).join(" ")
     const startTime = (result.startTime || 0) * 1e-9
-    const duration = result.endTime * 1e-9 - startTime
+    const duration = result.words[result.words.length - 1].endTime * 1e-9 - startTime
     const marker = {
       "@rdf:parseType": "Resource",
       "xmpDM:comment": words,

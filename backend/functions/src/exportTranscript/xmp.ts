@@ -3,15 +3,17 @@ import xmlbuilder from "xmlbuilder"
 import { IResult } from "../interfaces"
 
 function xmp(results: IResult[], response: functions.Response) {
+  const fps = 25
+
   const markers = results.map(result => {
     const words = result.words.map(word => word.word).join(" ")
-    const startTime = (result.startTime || 0) / 10000000
-    const duration = result.endTime / 10000000 - startTime
+    const startTime = (result.startTime || 0) * 1e-9
+    const duration = result.endTime * 1e-9 - startTime
     const marker = {
       "@rdf:parseType": "Resource",
       "xmpDM:comment": words,
-      "xmpDM:duration": duration,
-      "xmpDM:startTime": startTime,
+      "xmpDM:duration": duration * fps,
+      "xmpDM:startTime": startTime * fps,
     }
 
     return marker
@@ -28,7 +30,7 @@ function xmp(results: IResult[], response: functions.Response) {
             "rdf:Bag": {
               "rdf:li": {
                 "@rdf:parseType": "Resource",
-                "xmpDM:frameRate": "f100",
+                "xmpDM:frameRate": `f${fps}`,
                 "xmpDM:markers": {
                   "rdf:Seq": {
                     "rdf:li": markers,

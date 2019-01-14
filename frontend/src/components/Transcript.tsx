@@ -88,7 +88,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IStat
                       <svg width="20" height="20" focusable="false" aria-hidden="true">
                         <use xlinkHref="#icon-download" />
                       </svg>{" "}
-                      xmp 25fps
+                      xmp
                     </button>
                     <button className="org-btn" onClick={this.handleDeleteButtonClicked}>
                       <svg width="20" height="20" focusable="false" aria-hidden="true">

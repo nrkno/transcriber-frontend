@@ -1,8 +1,11 @@
+import { MailData } from "@sendgrid/helpers/classes/mail"
+import admin from "firebase-admin"
 import * as functions from "firebase-functions"
 import ua from "universal-analytics"
 import database from "../database"
 import { Step } from "../enums"
 import { ITranscript } from "../interfaces"
+import sendEmail from "../sendEmail"
 import { saveResult } from "./persistence"
 import { transcode } from "./transcoding"
 import { transcribe } from "./transcribe"
@@ -166,6 +169,43 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     visitor.event("transcription", "done", transcriptId, Math.round(audioDuration)).send()
 
     await database.setStep(transcriptId, Step.Done)
+
+    // -------------------
+    // Step 4: Send e-mail
+    // -------------------
+
+    const domainname: string = functions.config().webserver.domainname
+
+    if (domainname === undefined) {
+      throw new Error("Domain name missing from config")
+    }
+
+    // Get user
+
+    const userRecord = await admin.auth().getUser(transcript.userId)
+
+    const { email, displayName } = userRecord
+
+    if (email === undefined) {
+      throw new Error("E-mail missing from user")
+    }
+
+    const mailData: MailData = {
+      from: {
+        email: "transkribering@nrk.no",
+        name: "NRK transkribering",
+      },
+      subject: `${transcript.name} er ferdig transkribert`,
+      text: `Filen ${transcript.name} er ferdig transkribert. Du finner den på ${domainname}/transcripts/${transcriptId} `,
+      to: {
+        email,
+        name: displayName,
+      },
+    }
+
+    await sendEmail(mailData)
+
+    visitor.event("email", "sent", "transcription done").send()
   } catch (error) {
     // Log error to console
 

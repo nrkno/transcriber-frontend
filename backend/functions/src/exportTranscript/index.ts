@@ -25,18 +25,19 @@ async function exportTranscript(request: functions.Request, response: functions.
       throw new Error("Transcript id missing")
     }
 
+    const transcript = await database.getTranscript(id)
     const results = await database.getResults(id)
 
     const type = request.query.type
 
     if (type === "docx") {
-      await docx(results, response)
+      await docx(transcript, results, response)
       visitor.event("transcript", "export", type).send()
     } else if (type === "xmp") {
-      xmp(results, response)
+      xmp(transcript, results, response)
       visitor.event("transcript", "export", type).send()
     } else {
-      throw new Error("Unknown type")
+      throw new Error(`Unknown type: ${type}`)
     }
   } catch (error) {
     // Log error to console

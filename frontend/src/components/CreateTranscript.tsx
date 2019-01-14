@@ -162,13 +162,19 @@ class CreateTranscript extends React.Component<IProps, IState> {
 
       const file = this.props.file
 
-      transcript.name = file.name.substr(0, file.name.lastIndexOf(".")) || file.name
+      const fileNameAndExtension = [file.name.substr(0, file.name.lastIndexOf(".")), file.name.substr(file.name.lastIndexOf(".") + 1, file.name.length)]
+
+      if (fileNameAndExtension.length === 2) {
+        transcript.name = fileNameAndExtension[0]
+        transcript.metadata.fileExtension = fileNameAndExtension[1]
+      }
       transcript.createdAt = firebase.firestore.FieldValue.serverTimestamp()
       transcript.userId = this.props.userId
 
       // Metadata
 
       const metadata: IMetadata = {
+        fileExtension: transcript.metadata.fileExtension,
         interactionType: transcript.metadata.interactionType,
         languageCodes: this.selectedLanguageCodes(),
         microphoneDistance: transcript.metadata.microphoneDistance,

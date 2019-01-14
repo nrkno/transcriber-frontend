@@ -1,8 +1,8 @@
 import * as functions from "firebase-functions"
 import xmlbuilder from "xmlbuilder"
-import { IResult } from "../interfaces"
+import { IResult, ITranscript } from "../interfaces"
 
-function xmp(results: IResult[], response: functions.Response) {
+function xmp(transcript: ITranscript, results: IResult[], response: functions.Response) {
   const fps = 25
 
   const markers = results.map(result => {
@@ -48,7 +48,7 @@ function xmp(results: IResult[], response: functions.Response) {
 
   const xml = xmlbuilder.create(data, { encoding: "utf-8" }).end({ pretty: true })
 
-  response.setHeader("Content-Disposition", "attachment; filename=Transcript.xmp")
+  response.setHeader("Content-Disposition", `attachment; filename=${transcript.name}.${transcript.metadata ? transcript.metadata.fileExtension : ""}.xmp`)
   response.send(Buffer.from(xml))
 }
 

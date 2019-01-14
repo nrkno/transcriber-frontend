@@ -17,6 +17,7 @@ interface ITranscript {
 interface IMetadata {
   audioDuration?: number
   audioTopic?: string
+  fileExtension?: string
   industryNaicsCodeOfAudio?: number | string
   interactionType: InteractionType
   languageCodes: Array<string>

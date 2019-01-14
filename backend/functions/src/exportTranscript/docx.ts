@@ -1,8 +1,8 @@
 import { Document, Packer, Paragraph } from "docx"
 import * as functions from "firebase-functions"
-import { IResult } from "../interfaces"
+import { IResult, ITranscript } from "../interfaces"
 
-async function docx(results: IResult[], response: functions.Response) {
+async function docx(transcript: ITranscript, results: IResult[], response: functions.Response) {
   const doc = new Document()
 
   Object.values(results).map((result, i) => {
@@ -22,7 +22,7 @@ async function docx(results: IResult[], response: functions.Response) {
   const packer = new Packer()
 
   const b64string = await packer.toBase64String(doc)
-  response.setHeader("Content-Disposition", "attachment; filename=Transcript.docx")
+  response.setHeader("Content-Disposition", `attachment; filename=${transcript.name}.docx`)
   response.send(Buffer.from(b64string, "base64"))
 }
 

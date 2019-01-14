@@ -14,6 +14,7 @@
   "main": "dist/app.bundle.js",
   "dependencies": {
     "@google-cloud/speech": "^2.1.2",
+    "@types/xmlbuilder": "0.0.34",
     "babel-plugin-transform-es2017-object-entries": "0.0.5",
     "docx": "^4.6.0",
     "ffmpeg-static": "^2.4.0",
@@ -21,7 +22,8 @@
     "firebase-functions": "^2.1.0",
     "fluent-ffmpeg": "^2.1.2",
     "serialize-error": "^3.0.0",
-    "universal-analytics": "^0.4.20"
+    "universal-analytics": "^0.4.20",
+    "xmlbuilder": "^10.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",

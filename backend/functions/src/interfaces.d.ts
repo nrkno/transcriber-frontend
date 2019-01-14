@@ -24,6 +24,7 @@ interface IProcess {
 interface IMetadata {
   audioDuration?: number
   audioTopic?: string
+  fileExtension?: string
   industryNaicsCodeOfAudio?: number
   interactionType?: InteractionType
   languageCodes?: Array<string>

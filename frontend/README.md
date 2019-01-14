@@ -17,24 +17,19 @@ To track events to [Google Analytics](https://analytics.google.com/analytics/web
 
 ## All pages
 
-- Authentication
-  - log out button pressed
+authentication → log out button pressed
 
 ## Upload page
 
-- Upload
-  - Wrong file format
+upload → wrong file format
 
 ## Transcript page
 
-- Transcription
+transcription → not found
 
-  - Not found
-
-- Player
-  - Play button pressed
-  - Pause button pressed
-  - Volume changed
+player → play button pressed
+player → pause button pressed
+player → volume changed
 
 # Browsers targeted
 

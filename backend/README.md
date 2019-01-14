@@ -54,22 +54,22 @@ Exceptions are logged.
 
 #### Events
 
-- transcription -> transcoded -> transcriptId
-- transcription -> transcribed -> transcriptId
-- transcription -> saved -> transcriptId
-- transcription -> done -> transcriptId (audioDuration)
+- transcription → transcoded → transcriptId
+- transcription → transcribed → transcriptId
+- transcription → saved → transcriptId
+- transcription → done → transcriptId (audioDuration)
 
 #### User timings
 
-- transcription -> transcoding
-- transcription -> transcribing
-- transcription -> saving
+- transcription → transcoding
+- transcription → transcribing
+- transcription → saving
 
 ### Export to Doc
 
 #### Events
 
-transcript -> export -> docx
-transcript -> export -> xmp
-transcript -> deleted -> step
-email -> sent -> transcript done
+transcript → export → docx
+transcript → export → xmp
+transcript → deleted → step
+email → sent → transcript done

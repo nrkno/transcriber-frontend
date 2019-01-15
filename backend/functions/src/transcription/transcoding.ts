@@ -21,13 +21,14 @@ interface IDurationAndGsUrl {
 
 /**
  * Utility method to convert audio to mono channel using FFMPEG.
+ * Command line equivalent:
+ * ffmpeg -i input.xxx -ac 1 output.flac
  */
 async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: string, transcriptId: string) {
   return new Promise((resolve, reject) => {
     ffmpeg(tempFilePath)
       .setFfmpegPath(ffmpeg_static.path)
       .audioChannels(1)
-      .audioFrequency(16000)
       .format("flac")
       .on("error", err => {
         reject(err)
@@ -36,6 +37,7 @@ async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: stri
         resolve()
       })
       .on("codecData", async data => {
+        console.log(data)
         // Saving duration to database
         audioDuration = hoursMinutesSecondsToSeconds(data.duration)
         try {
@@ -51,6 +53,8 @@ async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: stri
 
 /**
  * Utility method to convert audio to MP4.
+ * Command line equivalent:
+ * ffmpeg ffmpeg -i input.xxx -ac 2 output.m4a
  */
 async function reencodeToM4a(input: string, output: string) {
   return new Promise((resolve, reject) => {

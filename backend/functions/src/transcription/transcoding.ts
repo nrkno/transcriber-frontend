@@ -56,6 +56,7 @@ async function reencodeToM4a(input: string, output: string) {
   return new Promise((resolve, reject) => {
     ffmpeg(input)
       .setFfmpegPath(ffmpeg_static.path)
+      .audioChannels(2)
       .format("mp4")
       .on("error", err => {
         reject(err)

@@ -4,7 +4,7 @@
 - Turn on the Firestore database and Storage.
 - Edit `.firebaserc` with the name of your Firebase project.
 - Install the Firebase CLI: `npm install -g firebase-tools`
-- Use the default bucket in Firebase Storage, or create a new one, and set up environment variables with the name of the bucket you just created, along with your Google Analytics account ID: `firebase functions:config:set bucket.name="name-of-bucket" analytics.account_id="UA-XXXXXX-XX" sendgrid.apikey="api key" webserver.domainname="https://www.example.com`
+- Use the default bucket in Firebase Storage, or create a new one, and set up environment variables with the name of the bucket you just created, along with your Google Analytics account ID: `firebase functions:config:set bucket.name="name-of-bucket" analytics.account_id="UA-XXXXXX-XX" sendgrid.apikey="api key" webserver.domainname="https://www.example.com"`
 - Enable the [Google Speech API](https://console.developers.google.com/apis/api/speech.googleapis.com/overview).
 - After deploying the cloud function for the first time, you might want to increase the memory allocation to 2 GB and the timeout to 540 seconds.
 
@@ -69,7 +69,7 @@ Exceptions are logged.
 
 #### Events
 
-transcript → export → docx
-transcript → export → xmp
-transcript → deleted → step
-email → sent → transcript done
+- transcript → export → docx
+- transcript → export → xmp
+- transcript → deleted → step
+- email → sent → transcript done

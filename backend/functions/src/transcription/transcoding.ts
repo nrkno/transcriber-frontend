@@ -23,7 +23,7 @@ interface IDurationAndGsUrl {
  * Utility method to convert audio to mono channel using FFMPEG.
  *
  * Command line equivalent:
- * ffmpeg -i input -y -ac 1 -f flac output
+ * ffmpeg -i input -y -ac 1 -vn -f flac output
  *
  */
 async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: string, transcriptId: string) {
@@ -31,6 +31,7 @@ async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: stri
     ffmpeg(tempFilePath)
       .setFfmpegPath(ffmpeg_static.path)
       .audioChannels(1)
+      .noVideo()
       .format("flac")
       /*DEBUG
       .on("start", commandLine => {

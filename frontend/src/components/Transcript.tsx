@@ -131,6 +131,11 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IStat
       error => {
         console.error(error)
 
+        ReactGA.exception({
+          description: error.message,
+          fatal: false,
+        })
+
         this.setState({
           transcript: undefined,
         })

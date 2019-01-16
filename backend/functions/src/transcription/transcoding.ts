@@ -21,15 +21,22 @@ interface IDurationAndGsUrl {
 
 /**
  * Utility method to convert audio to mono channel using FFMPEG.
+ *
  * Command line equivalent:
- * ffmpeg -i input.xxx -ac 1 output.flac
+ * ffmpeg -i input -y -ac 1 -vn -f flac output
+ *
  */
 async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: string, transcriptId: string) {
   return new Promise((resolve, reject) => {
     ffmpeg(tempFilePath)
       .setFfmpegPath(ffmpeg_static.path)
       .audioChannels(1)
+      .noVideo()
       .format("flac")
+      /*DEBUG
+      .on("start", commandLine => {
+        console.log("flac: Spawned Ffmpeg with command: " + commandLine)
+      })*/
       .on("error", err => {
         reject(err)
       })
@@ -53,15 +60,22 @@ async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: stri
 
 /**
  * Utility method to convert audio to MP4.
+ *
  * Command line equivalent:
- * ffmpeg ffmpeg -i input.xxx -ac 2 output.m4a
+ * ffmpeg -i input -y -ac 2 -vn -f mp4 output.m4a
+ *
  */
 async function reencodeToM4a(input: string, output: string) {
   return new Promise((resolve, reject) => {
     ffmpeg(input)
       .setFfmpegPath(ffmpeg_static.path)
       .audioChannels(2)
+      .noVideo()
       .format("mp4")
+      /* DEBUG
+      .on("start", commandLine => {
+        console.log("mp4: Spawned Ffmpeg with command: " + commandLine)
+      })*/
       .on("error", err => {
         reject(err)
       })
@@ -89,8 +103,10 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
 
   const contentType = fileMetadata.contentType
 
-  // Exit if this is triggered on a file that is not an audio.
-  if (contentType === undefined || !contentType.startsWith("audio/")) {
+  console.log(contentType)
+
+  // Exit if this is triggered on a file that is not audio.
+  if (contentType === undefined || (!contentType.startsWith("audio/") && contentType !== "video/mp4")) {
     throw Error("Uploaded file is not an audio file")
   }
 

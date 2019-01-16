@@ -26,7 +26,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.1.0",
     "@types/jest": "^23.3.12",
-    "@types/react": "^16.7.18",
+    "@types/react": "^16.7.19",
     "@types/react-dom": "^16.0.11",
     "@types/react-router": "^4.4.3",
     "@types/react-router-dom": "^4.3.1",

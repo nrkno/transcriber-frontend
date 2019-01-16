@@ -192,8 +192,8 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
 
     const mailData: MailData = {
       from: {
-        email: "transkribering@nrk.no",
-        name: "NRK transkribering",
+        email: "Will be populated in sendEmail(..)",
+        name: "Will be populated in sendEmail(..)",
       },
       subject: `${transcript.name} er ferdig transkribert`,
       text: `Filen ${transcript.name} er ferdig transkribert. Du finner den på ${domainname}/transcripts/${transcriptId} `,

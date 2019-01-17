@@ -18,7 +18,6 @@ webserver.domainname="https://www.example.com"
 ```
 
 - Enable the [Google Speech API](https://console.developers.google.com/apis/api/speech.googleapis.com/overview).
-- After deploying the cloud function for the first time, you might want to increase the memory allocation to 2 GB and the timeout to 540 seconds.
 
 ## Testing
 

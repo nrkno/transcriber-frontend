@@ -13,6 +13,10 @@ import transcription from "./transcription"
 // --------------------
 
 exports.transcription = functions
+  .runWith({
+    memory: "2GB",
+    timeoutSeconds: 540,
+  })
   .region("europe-west1")
   .firestore.document("transcripts/{transcriptId}")
   .onCreate(transcription)

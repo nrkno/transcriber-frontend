@@ -44,14 +44,12 @@ async function reencodeToFlacMono(tempFilePath: string, targetTempFilePath: stri
         resolve()
       })
       .on("codecData", async data => {
-        console.log(data)
         // Saving duration to database
         audioDuration = hoursMinutesSecondsToSeconds(data.duration)
         try {
           await database.setDuration(transcriptId, audioDuration)
         } catch (error) {
-          console.log(transcriptId, "Error in transcoding on('codecData')")
-          console.error(transcriptId, error)
+          console.log(transcriptId, "Error in transcoding on('codecData')", error)
         }
       })
       .save(targetTempFilePath)
@@ -103,8 +101,6 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
 
   const contentType = fileMetadata.contentType
 
-  console.log(contentType)
-
   // Exit if this is triggered on a file that is not audio.
   if (contentType === undefined || (!contentType.startsWith("audio/") && contentType !== "video/mp4")) {
     throw Error("Uploaded file is not an audio file")
@@ -117,8 +113,6 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
   const tempFilePath = path.join(os.tmpdir(), transcriptId)
 
   await file.download({ destination: tempFilePath })
-
-  console.log(transcriptId, "Audio downloaded locally to", tempFilePath)
 
   // Transcode to m4a
 
@@ -133,11 +127,9 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
     destination: playbackStorageFilePath,
     resumable: false,
   })
-  console.log(transcriptId, "Uploaded m4a to ", playbackStorageFilePath)
 
   const playbackGsUrl = "gs://" + path.join(bucketName, mediaPath, playbackFileName)
 
-  console.log(transcriptId, "Playback GS URL ", playbackGsUrl)
   await database.setPlaybackGsUrl(transcriptId, playbackGsUrl)
 
   // Transcode to FLAC mono
@@ -153,8 +145,6 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
     destination: targetStorageFilePath,
     resumable: false,
   })
-
-  console.log(transcriptId, "Output flac to", targetStorageFilePath)
 
   // Once the audio has been uploaded delete the local file to free up disk space.
   fs.unlinkSync(tempFilePath)

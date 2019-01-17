@@ -205,7 +205,7 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
 
     await sendEmail(mailData)
 
-    visitor.event("email", "sent", "transcription done").send()
+    visitor.event("email", "transcription done", transcriptId).send()
   } catch (error) {
     // Log error to console
 

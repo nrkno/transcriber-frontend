@@ -109,13 +109,13 @@ interface IRecognitionConfig {
 }
 
 interface IRecognitionMetadata {
-  audioTopic?: string
-  industryNaicsCodeOfAudio?: number
-  interactionType?: InteractionType
-  microphoneDistance?: MicrophoneDistance
-  originalMediaType?: OriginalMediaType
-  originalMimeType?: string
-  recordingDeviceName?: string
-  recordingDeviceType?: RecordingDeviceType
-  speechContexts?: Array<ISpeechContext>
+  audioTopic?: string // An arbitrary description of the subject matter discussed in the audio file. Examples include "Guided tour of New York City," "court trial hearing," or "live interview between 2 people."
+  industryNaicsCodeOfAudio?: number // The industry vertical of the audio file, as a 6-digit NAICS code.
+  interactionType?: InteractionType // The use case of the audio.
+  microphoneDistance?: MicrophoneDistance // The distance of the microphone from the speaker.
+  //NOT IN USE obfuscatedId?: string //	The privacy-protected ID of the user, to identify number of unique users using the service.
+  originalMediaType?: OriginalMediaType // The original media of the audio, either audio or video.
+  originalMimeType?: string // The MIME type of the original audio file. Examples include audio/m4a, audio/x-alaw-basic, audio/mp3, audio/3gpp, or other audio file MIME type.
+  recordingDeviceName?: string // The device used to make the recording. This arbitrary string can include names like 'Pixel XL', 'VoIP', 'Cardioid Microphone', or other value.
+  recordingDeviceType?: RecordingDeviceType // The kind of device used to capture the audio, including smartphones, PC microphones, vehicles, etc.
 }

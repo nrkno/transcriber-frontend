@@ -5,7 +5,7 @@
 
 import speech from "@google-cloud/speech"
 import database from "../database"
-import { ILongRunningRegonize, ISpeechRecognitionResult, ITranscript } from "../interfaces"
+import { ILongRunningRegonize, IRecognitionMetadata, ISpeechRecognitionResult, ITranscript } from "../interfaces"
 
 const client = new speech.v1p1beta1.SpeechClient()
 
@@ -49,13 +49,25 @@ export async function transcribe(transcriptId: string, transcript: ITranscript, 
   const languageCode = transcript.metadata.languageCodes.shift()!
   const enableAutomaticPunctuation = languageCode === "en-US" // Only working for en-US at the moment
 
+  const recognitionMetadata: IRecognitionMetadata = {
+    audioTopic: transcript.metadata.audioTopic, // An arbitrary description of the subject matter discussed in the audio file. Examples include "Guided tour of New York City," "court trial hearing," or "live interview between 2 people."
+    industryNaicsCodeOfAudio: transcript.metadata.industryNaicsCodeOfAudio, // The industry vertical of the audio file, as a 6-digit NAICS code.
+    interactionType: transcript.metadata.interactionType, // The use case of the audio.
+    microphoneDistance: transcript.metadata.microphoneDistance, // The distance of the microphone from the speaker.
+    originalMediaType: transcript.metadata.originalMediaType, // The original media of the audio, either audio or video.
+    originalMimeType: transcript.metadata.originalMimeType, // The MIME type of the original audio file. Examples include audio/m4a, audio/x-alaw-basic, audio/mp3, audio/3gpp, or other audio file MIME type.
+    recordingDeviceName: transcript.metadata.recordingDeviceName, // The device used to make the recording. This arbitrary string can include names like 'Pixel XL', 'VoIP', 'Cardioid Microphone', or other value.
+    recordingDeviceType: transcript.metadata.recordingDeviceType, // The kind of device used to capture the audio, including smartphones, PC microphones, vehicles, etc.
+  }
+
   const recognitionRequest: ILongRunningRegonize = {
     audio: { uri },
     config: {
       enableAutomaticPunctuation,
       enableWordTimeOffsets: true,
       languageCode,
-      metadata: transcript.metadata,
+      metadata: recognitionMetadata,
+      speechContexts: transcript.metadata.speechContexts,
       useEnhanced: true,
     },
   }

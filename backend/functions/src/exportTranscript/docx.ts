@@ -7,10 +7,14 @@ async function docx(transcript: ITranscript, results: IResult[], response: funct
 
   Object.values(results).map((result, i) => {
     if (i > 0) {
-      const seconds = result.startTime || 0
-      const startTime = new Date(seconds * 1000).toISOString().substr(11, 8)
       doc.addParagraph(new Paragraph())
-      doc.addParagraph(new Paragraph(startTime))
+
+      const startTimeInSeconds = (result.startTime || 0) * 1e-9 // Nano to seconds
+      const startTimeMatchArray = new Date(startTimeInSeconds * 1000).toUTCString().match(/(\d\d:\d\d:\d\d)/)
+
+      if (startTimeMatchArray !== null) {
+        doc.addParagraph(new Paragraph(startTimeMatchArray[0]))
+      }
       doc.addParagraph(new Paragraph())
     }
 

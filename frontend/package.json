@@ -15,6 +15,7 @@
     "react-dom": "^16.7.0",
     "react-dropzone": "^8.0.3",
     "react-ga": "^2.5.6",
+    "react-keyboard-event-handler": "^1.4.1",
     "react-on-screen": "^2.1.1",
     "react-router-dom": "^4.3.1",
     "react-sweet-progress": "^1.1.2"

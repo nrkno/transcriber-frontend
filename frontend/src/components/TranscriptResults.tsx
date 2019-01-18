@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import KeyboardEventHandler from "react-keyboard-event-handler"
 import TrackVisibility from "react-on-screen"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
@@ -16,6 +17,7 @@ interface IState {
   currentTime: number
   currentWordIndex: number | undefined
   results?: IResult[]
+  resultIds?: string[]
 }
 
 class TranscriptResults extends Component<IProps, IState> {
@@ -31,6 +33,7 @@ class TranscriptResults extends Component<IProps, IState> {
 
   public fetchResults() {
     const results = Array<IResult>()
+    const resultIds = Array<string>()
 
     database
       .collection(`transcripts/${this.props.transcriptId}/results`)
@@ -41,9 +44,12 @@ class TranscriptResults extends Component<IProps, IState> {
           const result = doc.data() as IResult
 
           results.push(result)
+
+          resultIds.push(doc.id)
         })
 
         this.setState({
+          resultIds,
           results,
         })
       })
@@ -143,6 +149,7 @@ class TranscriptResults extends Component<IProps, IState> {
   public render() {
     return (
       <>
+        <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={(key, e) => this.handleKeyPressed(key)} />
         {this.state.results &&
           this.state.results.map((result, i) => {
             const startTime = result.startTime
@@ -177,6 +184,89 @@ class TranscriptResults extends Component<IProps, IState> {
         <Player ref={this.playerRef} playbackGsUrl={this.props.transcript.playbackGsUrl} handleTimeUpdate={this.handleTimeUpdate} />
       </>
     )
+  }
+
+  private handleKeyPressed(key: string, event) {
+    console.log(this.state.currentResultIndex)
+    console.log(this.state.currentWordIndex)
+
+    console.log(key)
+
+    if (this.state.currentResultIndex !== undefined && this.state.currentWordIndex !== undefined) {
+      switch (key) {
+        case "space":
+        // this.playerRef.current!.handlePlay()
+        case "left":
+          if (this.state.currentWordIndex - 1 >= 0) {
+            this.setState({ currentWordIndex: this.state.currentWordIndex - 1 })
+          } else if (this.state.currentResultIndex - 1 >= 0) {
+            this.setState({ currentResultIndex: this.state.currentResultIndex - 1, currentWordIndex: this.state.results![this.state.currentResultIndex - 1].words.length - 1 })
+          }
+          break
+
+        case "right":
+          if (this.state.currentWordIndex + 1 < this.state.results![this.state.currentResultIndex].words.length) {
+            this.setState({ currentWordIndex: this.state.currentWordIndex + 1 })
+          } else if (this.state.currentResultIndex + 1 < this.state.results!.length) {
+            this.setState({ currentResultIndex: this.state.currentResultIndex + 1, currentWordIndex: 0 })
+          }
+          break
+
+        case ".":
+          // Add period to the word we're at
+
+          const resultIndex = this.state.currentResultIndex
+          const wordIndex = this.state.currentWordIndex
+
+          const word = this.state.results![resultIndex].words[wordIndex].word
+
+          if (word.endsWith(".")) {
+            // Remove period
+            this.setWord(resultIndex, wordIndex, word.slice(0, -1))
+            // Decapitalize next word if it exist
+
+            const nextWord = this.state.results![resultIndex].words[wordIndex + 1]
+
+            if (nextWord !== undefined) {
+              this.setWord(resultIndex, wordIndex + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1))
+            }
+          } else {
+            this.setWord(resultIndex, wordIndex, word + ".")
+
+            const nextWord = this.state.results![resultIndex].words[wordIndex + 1]
+
+            if (nextWord !== undefined) {
+              this.setWord(resultIndex, wordIndex + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1))
+            }
+          }
+
+          console.log("word", word)
+
+          break
+      }
+    }
+
+    console.log(`do something upon keydown event of ${key}`)
+  }
+
+  private setWord(resultIndex: number, wordIndex: number, text: string) {
+    const results = this.state.results
+
+    const resultId = this.state.resultIds[resultIndex]
+
+    console.log(resultIndex)
+
+    console.log(resultId)
+    console.log(results)
+    console.log(results[resultId])
+
+    results[resultIndex].words[wordIndex].word = text
+
+    this.setState({
+      results,
+    })
+
+    // database.collection(`transcripts/${this.props.transcriptId}/results/${resultId}`)
   }
 }
 

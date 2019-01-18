@@ -107,9 +107,10 @@ const database = (() => {
   const deleteTranscript = async (transcriptId: string): Promise<WriteResult> => {
     // Delete the results collection
     const resultsPath = `/transcripts/${transcriptId}/results`
+
     await deleteCollection(resultsPath, 10)
 
-    // Delete the documet
+    // Delete the document
     return db.doc(`transcripts/${transcriptId}`).delete()
   }
 

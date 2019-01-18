@@ -17,19 +17,28 @@ To track events to [Google Analytics](https://analytics.google.com/analytics/web
 
 ## All pages
 
-authentication → log out button pressed
+| category       | action                 | label |
+| -------------- | ---------------------- | ----- |
+| authentication | log out button pressed |       |
 
-## Upload page
+## Create transcript
 
-upload → wrong file format
+| category   | action        | label         |
+| ---------- | ------------- | ------------- |
+| transcript | upload failed | [file format] |
+| transcript | aborted       |               |
+|            |               |               |
 
 ## Transcript page
 
-transcription → not found
-
-player → play button pressed
-player → pause button pressed
-player → volume changed
+| category   | action                | label  |
+| ---------- | --------------------- | ------ |
+| transcript | not found             |        |
+| transcript | export button pressed | [type] |
+| transcript | delete button pressed |        |
+| player     | play button pressed   |        |
+| player     | pause button pressed  |        |
+| player     | volume changed        |        |
 
 # Browsers targeted
 

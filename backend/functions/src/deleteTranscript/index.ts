@@ -23,7 +23,7 @@ async function deleteTranscript(data: any, context: functions.https.CallableCont
     const transcriptId = data.transcriptId
 
     if (!transcriptId) {
-      throw new Error("Transcript transcriptId missing")
+      throw new Error("Transcript id missing")
     }
 
     const transcript = await database.getTranscript(transcriptId)

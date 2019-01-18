@@ -26,7 +26,6 @@ async function sendEmail(mailData: MailData) {
   mailData.from = from
 
   await sendgridMail.send(mailData)
-  console.log("Sendte", mailData)
 }
 
 export default sendEmail

@@ -32,10 +32,10 @@ async function exportTranscript(request: functions.Request, response: functions.
 
     if (type === "docx") {
       await docx(transcript, results, response)
-      visitor.event("transcript", "export", type).send()
+      visitor.event("transcript", "exported", type).send()
     } else if (type === "xmp") {
       xmp(transcript, results, response)
-      visitor.event("transcript", "export", type).send()
+      visitor.event("transcript", "exported", type).send()
     } else {
       throw new Error(`Unknown type: ${type}`)
     }

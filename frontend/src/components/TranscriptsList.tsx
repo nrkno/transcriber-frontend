@@ -1,7 +1,6 @@
 import moment from "moment"
 import React, { Component } from "react"
 import ReactGA from "react-ga"
-import { RouteComponentProps } from "react-router"
 import "../css/TranscriptsList.css"
 import { Step } from "../enums"
 import { database } from "../firebaseApp"
@@ -10,7 +9,7 @@ import UploadButton from "./UploadButton"
 
 interface IProps {
   handleFileSelected: (file: File) => void
-  history: History
+  handleTranscriptIdSelected: (transcriptId: string) => void
   selectedTranscriptId?: string
   userId: string
 }
@@ -20,10 +19,10 @@ interface IState {
   transcriptIds?: string[]
 }
 
-class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState> {
+class TranscriptsList extends Component<IProps, IState> {
   private unsubscribe: () => void
 
-  constructor(props: RouteComponentProps<{}> & IProps) {
+  constructor(props: IProps) {
     super(props)
     this.state = {}
   }
@@ -139,7 +138,8 @@ class TranscriptsList extends Component<RouteComponentProps<{}> & IProps, IState
 
   private handleRowClick = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
     const transcriptId = event.currentTarget.dataset.transcriptId
-    this.props.history.push(`/transcripts/${transcriptId}`)
+
+    this.props.handleTranscriptIdSelected(transcriptId)
   }
 
   private fetchTranscripts(userId: string) {

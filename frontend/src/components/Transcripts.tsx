@@ -1,5 +1,7 @@
 import React, { Component } from "react"
+import ReactGA from "react-ga"
 import { RouteComponentProps } from "react-router"
+import { functions } from "../firebaseApp"
 import CreateTranscript from "./CreateTranscript"
 import Transcript from "./Transcript"
 import TranscriptsList from "./TranscriptsList"
@@ -23,7 +25,7 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
       <main id="transcripts">
         {this.props.user ? (
           <>
-            <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} handleFileSelected={this.handleFileSelected} history={this.props.history} />
+            <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} handleFileSelected={this.handleFileSelected} handleTranscriptIdSelected={this.handleTranscriptIdSelected} />
 
             {(() => {
               if (this.state.file) {
@@ -43,6 +45,10 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
   }
   public handleFileSelected = (file: File) => {
     this.setState({ file })
+  }
+
+  public handleTranscriptIdSelected = async (transcriptId: string) => {
+    this.props.history.push(`/transcripts/${transcriptId}`)
   }
 
   private transcriptCreated = (transcriptId: string) => {

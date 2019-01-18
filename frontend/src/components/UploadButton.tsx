@@ -39,8 +39,8 @@ class UploadButton extends Component<IProps, IState> {
       this.setState({ file: undefined })
 
       ReactGA.event({
-        action: "wrong file format",
-        category: "upload",
+        action: "upload failed",
+        category: "transcript",
         label: rejectedFiles[0].type,
       })
     } else {

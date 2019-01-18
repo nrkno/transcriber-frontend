@@ -54,7 +54,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IStat
     // Transcription not found
     else if (transcript === undefined) {
       ReactGA.event({
-        action: "transcript not found",
+        action: "not found",
         category: "transcript",
         label: this.props.transcriptId,
       })

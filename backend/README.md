@@ -8,11 +8,11 @@
 
 ```
 firebase functions:config:set \
-bucket.name="name-of-bucket" \
 analytics.account_id="UA-XXXXXX-XX" \
+bucket.name="name-of-bucket" \
 sendgrid.apikey="api key" \
-sendgrid.name="Your name" \
 sendgrid.email="you@email.com" \
+sendgrid.name="Your name" \
 webserver.domainname="https://www.example.com"
 
 ```
@@ -65,10 +65,12 @@ Exceptions are logged.
 
 #### Events
 
-- transcription → transcoded → transcriptId
-- transcription → transcribed → transcriptId
-- transcription → saved → transcriptId
-- transcription → done → transcriptId (audioDuration)
+| Category      | Action      | Label         | Value          |
+| ------------- | ----------- | ------------- | -------------- |
+| transcription | transcoded  | transcript id |                |
+| transcription | transcribed | transcript id |                |
+| transcription | saved       | transcript id |                |
+| transcription | done        | transcript id | audio duration |
 
 #### User timings
 
@@ -76,11 +78,12 @@ Exceptions are logged.
 - transcription → transcribing
 - transcription → saving
 
-### Export to Doc
+### Export
 
 #### Events
 
-- transcript → export → docx
-- transcript → export → xmp
-- transcript → deleted → step
-- email → sent → transcript done
+| Category   | Action             | Label         |
+| ---------- | ------------------ | ------------- |
+| transcript | exported           | [type]        |
+| transcript | deleted            | step          |
+| email      | transcription done | transcript id |

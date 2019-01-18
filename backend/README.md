@@ -44,8 +44,8 @@ Exceptions are logged.
 #### Custom dimensions
 
 - cd1: Language codes
-- cd2: Original mime type
-- cd3: Industry naics code of audio
+- cd2: Original MIME type
+- cd3: Industry NAICS code of audio
 - cd4: Interaction type
 - cd5: Microphone distance
 - cd6: Original media type

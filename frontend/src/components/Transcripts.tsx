@@ -48,7 +48,33 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
   }
 
   public handleTranscriptIdSelected = async (transcriptId: string) => {
-    this.props.history.push(`/transcripts/${transcriptId}`)
+    // Check if a file has been selected,
+    // meaning that we need to warn the user that
+    // the upload will be lost
+
+    if (this.state.file !== undefined && window.confirm("Ønsker du å avbryte transkripsjonsjobben?")) {
+      this.setState({ file: undefined })
+
+      /*const deleteTranscript = functions.httpsCallable("deleteTranscript")
+      try {
+        await deleteTranscript({ transcriptId })
+      } catch (error) {
+        console.error(error)
+        ReactGA.exception({
+          description: error.message,
+          fatal: false,
+        })
+      }*/
+
+      ReactGA.event({
+        action: "aborted",
+        category: "transcript",
+      })
+    }
+
+    if (this.state.file === undefined) {
+      this.props.history.push(`/transcripts/${transcriptId}`)
+    }
   }
 
   private transcriptCreated = (transcriptId: string) => {

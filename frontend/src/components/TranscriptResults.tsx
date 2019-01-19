@@ -149,7 +149,7 @@ class TranscriptResults extends Component<IProps, IState> {
   public render() {
     return (
       <>
-        <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={(key, e) => this.handleKeyPressed(key)} />
+        <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={(key, event) => this.handleKeyPressed(key, event)} />
         {this.state.results &&
           this.state.results.map((result, i) => {
             const startTime = result.startTime
@@ -186,11 +186,9 @@ class TranscriptResults extends Component<IProps, IState> {
     )
   }
 
-  private handleKeyPressed(key: string, event) {
-    console.log(this.state.currentResultIndex)
-    console.log(this.state.currentWordIndex)
-
-    console.log(key)
+  private handleKeyPressed(key: string, event: KeyboardEvent) {
+    console.log("key:      ", key)
+    console.log("event.key:", event.key)
 
     if (this.state.currentResultIndex !== undefined && this.state.currentWordIndex !== undefined) {
       switch (key) {
@@ -213,29 +211,29 @@ class TranscriptResults extends Component<IProps, IState> {
           break
 
         case ".":
-          // Add period to the word we're at
-
+        case ",":
+        case "!":
           const resultIndex = this.state.currentResultIndex
           const wordIndex = this.state.currentWordIndex
 
           const word = this.state.results![resultIndex].words[wordIndex].word
 
-          if (word.endsWith(".")) {
-            // Remove period
+          if (word.endsWith(key)) {
             this.setWord(resultIndex, wordIndex, word.slice(0, -1))
+
             // Decapitalize next word if it exist
 
             const nextWord = this.state.results![resultIndex].words[wordIndex + 1]
 
-            if (nextWord !== undefined) {
+            if (nextWord !== undefined && (key === "." || key === "!")) {
               this.setWord(resultIndex, wordIndex + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1))
             }
           } else {
-            this.setWord(resultIndex, wordIndex, word + ".")
+            this.setWord(resultIndex, wordIndex, word + key)
 
             const nextWord = this.state.results![resultIndex].words[wordIndex + 1]
 
-            if (nextWord !== undefined) {
+            if (nextWord !== undefined && (key === "." || key === "!")) {
               this.setWord(resultIndex, wordIndex + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1))
             }
           }
@@ -245,20 +243,10 @@ class TranscriptResults extends Component<IProps, IState> {
           break
       }
     }
-
-    console.log(`do something upon keydown event of ${key}`)
   }
 
   private setWord(resultIndex: number, wordIndex: number, text: string) {
-    const results = this.state.results
-
-    const resultId = this.state.resultIds[resultIndex]
-
-    console.log(resultIndex)
-
-    console.log(resultId)
-    console.log(results)
-    console.log(results[resultId])
+    const results = this.state.results!
 
     results[resultIndex].words[wordIndex].word = text
 

@@ -18,6 +18,8 @@ interface IState {
   currentWordIndex: number | undefined
   results?: IResult[]
   resultIds?: string[]
+  resultIdsWithChanges: Set<string>
+  isEditing: boolean
 }
 
 class TranscriptResults extends Component<IProps, IState> {
@@ -28,6 +30,8 @@ class TranscriptResults extends Component<IProps, IState> {
       currentResultIndex: undefined,
       currentTime: 0,
       currentWordIndex: undefined,
+      isEditing: false,
+      resultIdsWithChanges: new Set<string>(),
     }
   }
 
@@ -44,7 +48,6 @@ class TranscriptResults extends Component<IProps, IState> {
           const result = doc.data() as IResult
 
           results.push(result)
-
           resultIds.push(doc.id)
         })
 
@@ -150,6 +153,7 @@ class TranscriptResults extends Component<IProps, IState> {
     return (
       <>
         <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={(key, event) => this.handleKeyPressed(key, event)} />
+        <KeyboardEventHandler handleKeys={["meta+s", "ctrl+s"]} onKeyEvent={(key, event) => this.handleKeyPressedSave(key, event)} />
         {this.state.results &&
           this.state.results.map((result, i) => {
             const startTime = result.startTime
@@ -186,62 +190,171 @@ class TranscriptResults extends Component<IProps, IState> {
     )
   }
 
-  private handleKeyPressed(key: string, event: KeyboardEvent) {
-    console.log("key:      ", key)
+  private async handleKeyPressedSave(key: string, event: KeyboardEvent) {
+    event.preventDefault() // So that the browser save dialog doesn't appear
+
+    // Check result changes for which results have changes
+
+    console.log("SAVESENNN")
+
+    for (const resultId of this.state.resultIdsWithChanges) {
+      console.log(resultId)
+
+      const index = this.state.resultIds!.indexOf(resultId)
+
+      const result = this.state.results![index]
+
+      await database.doc(`transcripts/${this.props.transcriptId}/results/${resultId}`).update({ words: result.words })
+    }
+  }
+  private handleKeyPressed(keyX: string, event: KeyboardEvent) {
+    if (event.defaultPrevented) {
+      return // Do nothing if the event was already processed
+    }
+
+    console.log("handleKeyPressed")
+
+    console.log(event.getModifierState("Shift"))
+
+    const key = event.key
+
     console.log("event.key:", event.key)
 
+    // If left or right is pressed, we reset the indeces to 0,0 and return,
+    // so that the first word is highlighted
+    if ((key === "ArrowLeft" || key === "ArrowRight") && this.state.currentResultIndex === undefined && this.state.currentWordIndex === undefined) {
+      this.setState({ currentResultIndex: 0, currentWordIndex: 0 })
+      return
+    }
+
+    const currentWordIndex = this.state.currentWordIndex!
+    const currentResultIndex = this.state.currentResultIndex!
+    const results = this.state.results!
+
     if (this.state.currentResultIndex !== undefined && this.state.currentWordIndex !== undefined) {
-      switch (key) {
-        case "space":
-        // this.playerRef.current!.handlePlay()
-        case "left":
-          if (this.state.currentWordIndex - 1 >= 0) {
-            this.setState({ currentWordIndex: this.state.currentWordIndex - 1 })
-          } else if (this.state.currentResultIndex - 1 >= 0) {
-            this.setState({ currentResultIndex: this.state.currentResultIndex - 1, currentWordIndex: this.state.results![this.state.currentResultIndex - 1].words.length - 1 })
+      switch (event.key) {
+        case " ":
+          this.playerRef.current!.togglePlay()
+        case "ArrowLeft":
+        case "Left":
+          if (currentWordIndex - 1 >= 0) {
+            this.setState({ currentWordIndex: currentWordIndex - 1 })
+          } else if (currentResultIndex - 1 >= 0) {
+            this.setState({ currentResultIndex: currentResultIndex - 1, currentWordIndex: results![currentResultIndex - 1].words.length - 1 })
           }
           break
 
-        case "right":
-          if (this.state.currentWordIndex + 1 < this.state.results![this.state.currentResultIndex].words.length) {
-            this.setState({ currentWordIndex: this.state.currentWordIndex + 1 })
-          } else if (this.state.currentResultIndex + 1 < this.state.results!.length) {
-            this.setState({ currentResultIndex: this.state.currentResultIndex + 1, currentWordIndex: 0 })
+        case "ArrowRight":
+        case "Right":
+          if (currentWordIndex + 1 < results![currentResultIndex].words.length) {
+            this.setState({ currentWordIndex: currentWordIndex + 1 })
+          } else if (currentResultIndex + 1 < results!.length) {
+            this.setState({ currentResultIndex: currentResultIndex + 1, currentWordIndex: 0 })
           }
           break
 
         case ".":
         case ",":
         case "!":
-          const resultIndex = this.state.currentResultIndex
-          const wordIndex = this.state.currentWordIndex
+        case "?":
+          const currentWord = this.state.results![currentResultIndex].words[currentWordIndex].word
 
-          const word = this.state.results![resultIndex].words[wordIndex].word
-
-          if (word.endsWith(key)) {
-            this.setWord(resultIndex, wordIndex, word.slice(0, -1))
+          if (currentWord.endsWith(key)) {
+            this.setWord(currentResultIndex, currentWordIndex, currentWord.slice(0, -1))
 
             // Decapitalize next word if it exist
 
-            const nextWord = this.state.results![resultIndex].words[wordIndex + 1]
+            const nextWord = this.state.results![currentResultIndex].words[currentWordIndex + 1]
 
-            if (nextWord !== undefined && (key === "." || key === "!")) {
-              this.setWord(resultIndex, wordIndex + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1))
+            if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
+              this.setWord(currentResultIndex, currentWordIndex + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1))
             }
           } else {
-            this.setWord(resultIndex, wordIndex, word + key)
+            this.setWord(currentResultIndex, currentWordIndex, currentWord + key)
 
-            const nextWord = this.state.results![resultIndex].words[wordIndex + 1]
+            const nextWord = this.state.results![currentResultIndex].words[currentWordIndex + 1]
 
-            if (nextWord !== undefined && (key === "." || key === "!")) {
-              this.setWord(resultIndex, wordIndex + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1))
+            if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
+              this.setWord(currentResultIndex, currentWordIndex + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1))
             }
           }
 
-          console.log("word", word)
+          console.log("word", currentWord)
 
           break
+
+        case "a":
+        case "b":
+        case "c":
+        case "d":
+        case "e":
+        case "f":
+        case "g":
+        case "h":
+        case "i":
+        case "j":
+        case "k":
+        case "l":
+        case "m":
+        case "n":
+        case "o":
+        case "p":
+        case "q":
+        case "r":
+        case "s":
+        case "t":
+        case "u":
+        case "v":
+        case "w":
+        case "x":
+        case "y":
+        case "z":
+        case "æ":
+        case "ø":
+        case "å":
+        case "A":
+        case "B":
+        case "C":
+        case "D":
+        case "E":
+        case "F":
+        case "G":
+        case "H":
+        case "I":
+        case "J":
+        case "K":
+        case "L":
+        case "M":
+        case "N":
+        case "O":
+        case "P":
+        case "Q":
+        case "R":
+        case "S":
+        case "T":
+        case "U":
+        case "V":
+        case "W":
+        case "X":
+        case "Y":
+        case "Z":
+        case "Æ":
+        case "Ø":
+        case "Å":
+          // Change the selected word
+
+          if (this.state.isEditing) {
+            this.setWord(currentResultIndex, currentWordIndex, this.state.results![currentResultIndex].words[currentWordIndex].word + key)
+          } else {
+            this.setWord(currentResultIndex, currentWordIndex, key)
+
+            this.setState({ isEditing: true })
+          }
       }
+
+      // Cancel the default action to avoid it being handled twice
+      event.preventDefault()
+      event.stopPropagation()
     }
   }
 
@@ -250,11 +363,13 @@ class TranscriptResults extends Component<IProps, IState> {
 
     results[resultIndex].words[wordIndex].word = text
 
+    const resultIdsWithChanges = this.state.resultIdsWithChanges!
+    resultIdsWithChanges.add(this.state.resultIds![resultIndex])
+
     this.setState({
+      resultIdsWithChanges,
       results,
     })
-
-    // database.collection(`transcripts/${this.props.transcriptId}/results/${resultId}`)
   }
 }
 

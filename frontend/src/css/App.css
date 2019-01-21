@@ -123,12 +123,17 @@ main#transcripts {
   grid-column-start: 2;
 }*/
 
-.playing {
-  background: #ffc600;
+.selecting {
+  background: #7cc988;
 }
 
-.selected {
-  background: #7cc988;
+.editing {
+  background: #8f94fb;
+}
+
+.playing {
+  background-blend-mode: darken;
+  background: #ffc600;
 }
 
 .results {

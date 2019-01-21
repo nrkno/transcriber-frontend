@@ -1,10 +1,11 @@
 import * as React from "react"
+import { WordState } from "../enums"
 import { IWord } from "../interfaces"
 
 interface IProps {
   word: IWord
-  isCurrentPlayingWord: boolean
-  isCurrentSelectedWord: boolean
+  wordState?: WordState
+  shouldSelectSpace: boolean
   resultIndex: number
   wordIndex: number
   setCurrentWord(word: IWord, resultIndex: number, wordIndex: number): void
@@ -14,9 +15,16 @@ class Word extends React.Component<IProps, {}> {
   public render() {
     return (
       <>
-        <span onClick={this.handleWordClick} className={"word " + `${this.props.isCurrentPlayingWord ? "playing " : ""}` + `${this.props.isCurrentSelectedWord ? "selected " : ""}`}>
+        <span onClick={this.handleWordClick} className={this.props.wordState}>
           {this.props.word.word}
-        </span>{" "}
+        </span>
+        {(() => {
+          if (this.props.shouldSelectSpace) {
+            return <span className={this.props.wordState}> </span>
+          } else {
+            return " "
+          }
+        })()}
       </>
     )
   }

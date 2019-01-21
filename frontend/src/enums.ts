@@ -1,3 +1,9 @@
+export enum WordState {
+  Selecting = "selecting",
+  Editing = "editing",
+  Playing = "playing",
+}
+
 export enum SweetProgressStatus {
   Active = "active",
   Error = "error",

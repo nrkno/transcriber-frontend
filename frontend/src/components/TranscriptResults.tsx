@@ -13,9 +13,12 @@ interface IProps {
 }
 
 interface IState {
-  currentResultIndex: number | undefined
   currentTime: number
-  currentWordIndex: number | undefined
+  currentPlayingResultIndex?: number
+  currentPlayingWordIndex?: number
+  currentSelectedResultIndex?: number
+  currentSelectedWordIndexStart?: number
+  currentSelectedWordIndexEnd?: number
   results?: IResult[]
   resultIds?: string[]
   resultIdsWithChanges: Set<string>
@@ -27,9 +30,7 @@ class TranscriptResults extends Component<IProps, IState> {
   constructor(props: any) {
     super(props)
     this.state = {
-      currentResultIndex: undefined,
       currentTime: 0,
-      currentWordIndex: undefined,
       isEditing: false,
       resultIdsWithChanges: new Set<string>(),
     }
@@ -65,9 +66,9 @@ class TranscriptResults extends Component<IProps, IState> {
       // Reset state
 
       this.setState({
-        currentResultIndex: undefined,
+        currentPlayingResultIndex: undefined,
         currentTime: 0,
-        currentWordIndex: undefined,
+        currentPlayingWordIndex: undefined,
         results: undefined,
       })
     }
@@ -79,7 +80,7 @@ class TranscriptResults extends Component<IProps, IState> {
   public handleTimeUpdate = (currentTime: number) => {
     // Find the next current result and word
 
-    const { currentResultIndex, currentWordIndex } = this.state
+    const { currentPlayingResultIndex: currentResultIndex, currentPlayingWordIndex: currentWordIndex } = this.state
 
     if (this.props.transcript === undefined || this.state.results === undefined) {
       return
@@ -133,7 +134,7 @@ class TranscriptResults extends Component<IProps, IState> {
           continue
         }
 
-        this.setState({ currentTime, currentResultIndex: i, currentWordIndex: j })
+        this.setState({ currentTime, currentPlayingResultIndex: i, currentPlayingWordIndex: j })
 
         return
       }
@@ -144,8 +145,8 @@ class TranscriptResults extends Component<IProps, IState> {
     this.playerRef.current!.setTime(word.startTime * 1e-9)
 
     this.setState({
-      currentResultIndex: resultIndex,
-      currentWordIndex: wordIndex,
+      currentPlayingResultIndex: resultIndex,
+      currentPlayingWordIndex: wordIndex,
     })
   }
 
@@ -170,8 +171,10 @@ class TranscriptResults extends Component<IProps, IState> {
                     {({ isVisible }) => {
                       if (isVisible) {
                         return result.words.map((word, j) => {
-                          const isCurrentWord = this.state.currentResultIndex === i && this.state.currentWordIndex === j
-                          return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
+                          const isCurrentPlayingWord = this.state.currentPlayingResultIndex === i && this.state.currentPlayingWordIndex === j
+                          const isCurrentSelectedWord = this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j <= this.state.currentSelectedWordIndexEnd
+
+                          return <Word key={`word-${i}-${j}`} word={word} isCurrentPlayingWord={isCurrentPlayingWord} isCurrentSelectedWord={isCurrentSelectedWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
                         })
                       } else {
                         return result.words.map(word => {
@@ -222,60 +225,82 @@ class TranscriptResults extends Component<IProps, IState> {
 
     // If left or right is pressed, we reset the indeces to 0,0 and return,
     // so that the first word is highlighted
-    if ((key === "ArrowLeft" || key === "ArrowRight") && this.state.currentResultIndex === undefined && this.state.currentWordIndex === undefined) {
-      this.setState({ currentResultIndex: 0, currentWordIndex: 0 })
+    if ((key === "ArrowLeft" || key === "ArrowRight") && this.state.currentSelectedResultIndex === undefined && this.state.currentSelectedWordIndexStart === undefined) {
+      this.setState({ currentSelectedResultIndex: 0, currentSelectedWordIndexStart: 0, currentSelectedWordIndexEnd: 0 })
       return
     }
 
-    const currentWordIndex = this.state.currentWordIndex!
-    const currentResultIndex = this.state.currentResultIndex!
+    const currentSelectedResultIndex = this.state.currentSelectedResultIndex!
+    const currentSelectedWordIndexStart = this.state.currentSelectedWordIndexStart!
+    const currentSelectedWordIndexEnd = this.state.currentSelectedWordIndexEnd!
     const results = this.state.results!
 
-    if (this.state.currentResultIndex !== undefined && this.state.currentWordIndex !== undefined) {
+    if (this.state.currentSelectedResultIndex !== undefined && this.state.currentSelectedWordIndexStart !== undefined) {
       switch (event.key) {
         case " ":
-          this.playerRef.current!.togglePlay()
+          if (this.state.isEditing === false) {
+            this.playerRef.current!.togglePlay()
+          }
         case "ArrowLeft":
         case "Left":
-          if (currentWordIndex - 1 >= 0) {
-            this.setState({ currentWordIndex: currentWordIndex - 1 })
-          } else if (currentResultIndex - 1 >= 0) {
-            this.setState({ currentResultIndex: currentResultIndex - 1, currentWordIndex: results![currentResultIndex - 1].words.length - 1 })
+          if (currentSelectedWordIndexStart - 1 >= 0) {
+            // Select previous word
+            const previousWordIndex = currentSelectedWordIndexStart - 1
+            this.setState({
+              currentSelectedWordIndexEnd: previousWordIndex,
+              currentSelectedWordIndexStart: previousWordIndex,
+              isEditing: false,
+            })
+          } else if (currentSelectedResultIndex - 1 >= 0) {
+            // Select last word in previous result
+            this.setState({
+              currentSelectedResultIndex: currentSelectedResultIndex - 1,
+              currentSelectedWordIndexStart: results![currentSelectedResultIndex - 1].words.length - 1,
+              isEditing: false,
+            })
           }
           break
 
         case "ArrowRight":
         case "Right":
-          if (currentWordIndex + 1 < results![currentResultIndex].words.length) {
-            this.setState({ currentWordIndex: currentWordIndex + 1 })
-          } else if (currentResultIndex + 1 < results!.length) {
-            this.setState({ currentResultIndex: currentResultIndex + 1, currentWordIndex: 0 })
+          const largestSelectedIndex = Math.max(currentSelectedWordIndexStart, currentSelectedWordIndexEnd)
+          // If shift key is pressed, check if there is another word after currentSelectedWordIndexEnd
+          if (event.getModifierState("Shift") && currentSelectedWordIndexEnd + 1 < results[currentSelectedResultIndex].words.length) {
+            this.setState({ currentSelectedWordIndexEnd: currentSelectedWordIndexEnd + 1 })
+          } else if (largestSelectedIndex + 1 < results![currentSelectedResultIndex].words.length) {
+            // Select next word
+            const nextWordIndex = largestSelectedIndex + 1
+            this.setState({ currentSelectedWordIndexStart: nextWordIndex, currentSelectedWordIndexEnd: nextWordIndex })
+          } else if (currentSelectedResultIndex + 1 < results!.length) {
+            // Select first word in next result
+            this.setState({ currentSelectedResultIndex: currentSelectedResultIndex + 1, currentSelectedWordIndexStart: 0 })
           }
+
           break
 
         case ".":
         case ",":
         case "!":
         case "?":
-          const currentWord = this.state.results![currentResultIndex].words[currentWordIndex].word
+          const currentWord = this.state.results![currentSelectedResultIndex].words[currentSelectedWordIndexStart].word
 
           if (currentWord.endsWith(key)) {
-            this.setWord(currentResultIndex, currentWordIndex, currentWord.slice(0, -1))
+            this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.slice(0, -1))
 
             // Decapitalize next word if it exist
 
-            const nextWord = this.state.results![currentResultIndex].words[currentWordIndex + 1]
+            const nextWord = this.state.results![currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
 
             if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
-              this.setWord(currentResultIndex, currentWordIndex + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1))
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1))
             }
           } else {
-            this.setWord(currentResultIndex, currentWordIndex, currentWord + key)
+            this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord + key)
 
-            const nextWord = this.state.results![currentResultIndex].words[currentWordIndex + 1]
+            const nextWord = this.state.results![currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
 
             if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
-              this.setWord(currentResultIndex, currentWordIndex + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1))
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1))
             }
           }
 
@@ -344,9 +369,9 @@ class TranscriptResults extends Component<IProps, IState> {
           // Change the selected word
 
           if (this.state.isEditing) {
-            this.setWord(currentResultIndex, currentWordIndex, this.state.results![currentResultIndex].words[currentWordIndex].word + key)
+            this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, this.state.results![currentSelectedResultIndex].words[currentSelectedWordIndexStart].word + key)
           } else {
-            this.setWord(currentResultIndex, currentWordIndex, key)
+            this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, key)
 
             this.setState({ isEditing: true })
           }

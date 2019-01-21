@@ -123,8 +123,12 @@ main#transcripts {
   grid-column-start: 2;
 }*/
 
-.active {
+.playing {
   background: #ffc600;
+}
+
+.selected {
+  background: #7cc988;
 }
 
 .results {

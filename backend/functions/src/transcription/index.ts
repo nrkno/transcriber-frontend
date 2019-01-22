@@ -107,7 +107,7 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     visitor.event("transcription", "transcoded", transcriptId).send()
     visitor.timing("transcription", "transcoding", Math.round(transcodedDuration), transcriptId).send()
 
-    console.log(transcriptId, "transcodedDuration", transcodedDuration)
+    console.log(transcriptId, "Transcoded duration", transcodedDuration)
 
     // ------------------
     // Step 2: Transcribe
@@ -116,13 +116,19 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     await database.setStep(transcriptId, Step.Transcribing)
     const speechRecognitionResults = await transcribe(transcriptId, transcript, gsUri)
 
-    const numberOfWords = speechRecognitionResults.reduce((accumulator, result) => {
-      if (result.alternatives.length > 0) {
-        return accumulator + result.alternatives[0].transcript.split(" ").length
-      } else {
-        return accumulator
+    let numberOfWords = 0
+    for (const speechRecognitionResult of speechRecognitionResults) {
+      // Accumulating number of words
+      if (speechRecognitionResult.alternatives.length > 0) {
+        numberOfWords += speechRecognitionResult.alternatives[0].words.length
+        // Logging confidence to GA
+        const confidence = speechRecognitionResult.alternatives[0].confidence
+
+        console.log(transcriptId, "confidence", confidence)
+        visitor.event("transcription", "confidence", transcriptId, confidence)
       }
-    }, 0)
+    }
+
     console.log(transcriptId, "Number of words", numberOfWords)
 
     // If there are no transcribed words, we cancel the process here.
@@ -143,7 +149,7 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     visitor.event("transcription", "transcribed", transcriptId).send()
     visitor.timing("transcription", "transcribing", Math.round(transcribedDuration), transcriptId).send()
 
-    console.log(transcriptId, "transcribedDuration", transcribedDuration)
+    console.log(transcriptId, "Transcribed duration", transcribedDuration)
 
     // ------------
     // Step 3: Save
@@ -155,7 +161,7 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     const savedDate = Date.now()
     const savedDuration = savedDate - transcribedDate
 
-    console.log(transcriptId, "savedDuration", savedDuration)
+    console.log(transcriptId, "Saved duration", savedDuration)
 
     visitor.set("cm7", Math.round(savedDuration / 1000))
     visitor.event("transcription", "saved", transcriptId).send()

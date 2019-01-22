@@ -132,7 +132,6 @@ main#transcripts {
 }
 
 .playing {
-  background-blend-mode: darken;
   background: #ffc600;
 }
 

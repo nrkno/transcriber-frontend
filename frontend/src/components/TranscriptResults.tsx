@@ -1,9 +1,9 @@
 import React, { Component } from "react"
 import KeyboardEventHandler from "react-keyboard-event-handler"
 import TrackVisibility from "react-on-screen"
+import { WordState } from "../enums"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
-import { WordState } from "../enums"
 import secondsToTime from "../secondsToTime"
 import Player from "./Player"
 import Word from "./Word"
@@ -262,7 +262,7 @@ class TranscriptResults extends Component<IProps, IState> {
             // Select last word in previous result
             this.setState({
               currentSelectedResultIndex: currentSelectedResultIndex - 1,
-              currentSelectedWordIndexStart: results![currentSelectedResultIndex - 1].words.length - 1,
+              currentSelectedWordIndexStart: results[currentSelectedResultIndex - 1].words.length - 1,
               editString: undefined,
             })
           }
@@ -277,7 +277,7 @@ class TranscriptResults extends Component<IProps, IState> {
               currentSelectedWordIndexEnd: currentSelectedWordIndexEnd + 1,
               editString: undefined,
             })
-          } else if (largestSelectedIndex + 1 < results![currentSelectedResultIndex].words.length) {
+          } else if (largestSelectedIndex + 1 < results[currentSelectedResultIndex].words.length) {
             // Select next word
             const nextWordIndex = largestSelectedIndex + 1
             this.setState({
@@ -289,6 +289,7 @@ class TranscriptResults extends Component<IProps, IState> {
             // Select first word in next result
             this.setState({
               currentSelectedResultIndex: currentSelectedResultIndex + 1,
+              currentSelectedWordIndexEnd: 0,
               currentSelectedWordIndexStart: 0,
               editString: undefined,
             })
@@ -326,9 +327,39 @@ class TranscriptResults extends Component<IProps, IState> {
 
           break
 
+        //
+        // Tab will rotate the word from lowercase, first letter capitalized to all caps
+        // Only works when not in edit mode, and only on a single word
+        case "Tab":
+          if (this.state.editString === undefined && currentSelectedWordIndexStart === currentSelectedWordIndexEnd) {
+            const currentWordX = this.state.results![currentSelectedResultIndex].words[currentSelectedWordIndexStart].word
+
+            // Lower case to capitalised case
+            if (currentWordX === currentWordX.toLowerCase()) {
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWordX[0].toUpperCase() + currentWordX.substring(1))
+            }
+            // Capitalised case to upper case
+            else if (currentWordX === currentWordX[0].toUpperCase() + currentWordX.substring(1).toLowerCase()) {
+              console.log(currentWordX)
+              console.log(currentWordX[0].toUpperCase() + currentWordX.substring(1))
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWordX.toUpperCase())
+            }
+            // Everything else to lower case
+            else {
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWordX.toLowerCase())
+            }
+          }
+          break
+
         case " ":
           if (this.state.editString === undefined) {
             this.playerRef.current!.togglePlay()
+            break
+          }
+        case "1":
+          if (event.getModifierState("Meta")) {
+            const firstWordInSelection = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart]
+            this.setCurrentWord(firstWordInSelection, currentSelectedResultIndex, currentSelectedWordIndexStart)
             break
           }
         case "a":

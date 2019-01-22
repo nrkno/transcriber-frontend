@@ -15,7 +15,7 @@ class Word extends React.Component<IProps, {}> {
   public render() {
     return (
       <>
-        <span onClick={this.handleWordClick} className={`word ${this.props.wordState}`}>
+        <span onClick={this.handleWordClick} className={`word ${this.props.wordState ? this.props.wordState : ""}`}>
           {this.props.word.word}
         </span>
         {(() => {

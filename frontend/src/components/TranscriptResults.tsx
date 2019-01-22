@@ -1,3 +1,4 @@
+import update from "immutability-helper"
 import React, { Component } from "react"
 import KeyboardEventHandler from "react-keyboard-event-handler"
 import TrackVisibility from "react-on-screen"
@@ -252,26 +253,7 @@ class TranscriptResults extends Component<IProps, IState> {
       switch (event.key) {
         case "Enter":
           if (event.getModifierState("Meta")) {
-            // New paragraph
-
-            // Check if there are any more words in the result
-
-            const remainingWords = results[currentSelectedResultIndex].words.splice(currentSelectedWordIndexStart + 1, results[currentSelectedResultIndex].words.length - currentSelectedWordIndexStart)
-
-            console.log(remainingWords)
-
-            const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
-
-            if (nextWord !== undefined) {
-              // Take the rest of the words and put in a new result
-              // const result: IResult = {
-              /*        startTime: number
-                confidence: number
-                transcript: string
-                words: Array<IWord>
-                      */
-              // }
-            }
+            this.splitResult(currentSelectedResultIndex, currentSelectedWordIndexStart)
           } else {
             console.log("Enter")
             // Go in and out of edit mode
@@ -531,27 +513,87 @@ class TranscriptResults extends Component<IProps, IState> {
 
     // Replace array of words in result
 
-    results[resultIndex].words.splice(wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords)
+    const newResults = update(this.state.results, {
+      [resultIndex]: {
+        words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords]] },
+      },
+    })
+
+    // results[resultIndex].words.splice(wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords)
 
     this.setState({
       currentSelectedWordIndexEnd: wordIndexStart + newWords.length - 1,
       editString: text,
-      results,
+      results: newResults,
     })
   }
   private setWord(resultIndex: number, wordIndex: number, text: string) {
-    console.log("setWord")
-    const results = this.state.results!
+    console.log("setWord", resultIndex, wordIndex)
 
-    results[resultIndex].words[wordIndex].word = text
+    const results = update(this.state.results, {
+      [resultIndex]: {
+        words: {
+          [wordIndex]: {
+            word: { $set: text },
+          },
+        },
+      },
+    })
 
-    const resultIdsWithChanges = this.state.resultIdsWithChanges!
-    resultIdsWithChanges.add(this.state.resultIds![resultIndex])
+    //    const resultIdsWithChanges = this.state.resultIdsWithChanges!
+    //  resultIdsWithChanges.add(this.state.resultIds![resultIndex])
 
     this.setState({
-      resultIdsWithChanges,
       results,
     })
+  }
+
+  private splitResult(resultIndex: number, wordIndex: number) {
+    const results = this.state.results!
+    // Return if we're at the last word in the result
+    if (wordIndex === results[resultIndex].words.length - 1) {
+      return
+    }
+
+    const from = wordIndex + 1
+    const to = results[resultIndex].words.length - wordIndex
+    // Deep clone the slice, which will be moved to the next result
+    const wordsToMove = JSON.parse(JSON.stringify(results[resultIndex].words.slice(from, to)))
+
+    console.log("wordToMove", wordsToMove)
+
+    const newResults = update(results, {
+      [resultIndex]: {
+        words: { $splice: [[wordIndex + 1, results[resultIndex].words.length - wordIndex]] },
+      },
+    })
+
+    newResults[resultIndex].words.splice(from, 0, ...wordsToMove)
+
+    console.log("results", results)
+    console.log("newResults", newResults)
+
+    this.setState({
+      results: newResults,
+    })
+
+    /*
+    const remainingWords = results[currentSelectedResultIndex].words.splice(currentSelectedWordIndexStart + 1, results[currentSelectedResultIndex].words.length - currentSelectedWordIndexStart)
+
+    console.log(remainingWords)
+
+    const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
+
+    if (nextWord !== undefined) {*/
+    // Take the rest of the words and put in a new result
+    // const result: IResult = {
+    /*        startTime: number
+                confidence: number
+                transcript: string
+                words: Array<IWord>
+                      */
+    // }
+    //}
   }
 }
 

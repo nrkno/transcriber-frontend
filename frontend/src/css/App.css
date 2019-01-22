@@ -309,3 +309,22 @@ input[type="range"]:focus::-ms-fill-lower {
 input[type="range"]:focus::-ms-fill-upper {
   background: #4e54c8;
 }
+
+/* Editor */
+/*
+.blinking-cursor {
+  font-size: 30px;
+  color: #2e3d48;
+  animation: 1s blink step-end infinite;
+}
+
+@keyframes blink {
+  from,
+  to {
+    color: transparent;
+  }
+  50% {
+    color: black;
+  }
+}
+*/

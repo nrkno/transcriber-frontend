@@ -60,6 +60,7 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public componentDidUpdate(prevProps: IProps) {
+    console.log("componentDidUpdate")
     if (this.props.transcriptId !== prevProps.transcriptId) {
       this.fetchResults()
 
@@ -232,21 +233,59 @@ class TranscriptResults extends Component<IProps, IState> {
     // If left or right is pressed, we reset the indeces to 0,0 and return,
     // so that the first word is highlighted
     if ((key === "ArrowLeft" || key === "ArrowRight") && this.state.currentSelectedResultIndex === undefined && this.state.currentSelectedWordIndexStart === undefined) {
-      this.setState({ currentSelectedResultIndex: 0, currentSelectedWordIndexStart: 0, currentSelectedWordIndexEnd: 0 })
+      this.setState({
+        currentSelectedResultIndex: 0,
+        currentSelectedWordIndexEnd: 0,
+        currentSelectedWordIndexStart: 0,
+      })
       return
     }
 
     const currentSelectedResultIndex = this.state.currentSelectedResultIndex!
     const currentSelectedWordIndexStart = this.state.currentSelectedWordIndexStart!
     const currentSelectedWordIndexEnd = this.state.currentSelectedWordIndexEnd!
-    const results = this.state.results!
+    const results = { ...this.state.results! }
 
-    if (this.state.currentSelectedResultIndex !== undefined && this.state.currentSelectedWordIndexStart !== undefined) {
+    if (currentSelectedResultIndex !== undefined && currentSelectedWordIndexStart !== undefined) {
+      const currentWord = results![currentSelectedResultIndex].words[currentSelectedWordIndexStart].word
+
       switch (event.key) {
         case "Enter":
-          this.setState({
-            editString: undefined,
-          })
+          if (event.getModifierState("Meta")) {
+            // New paragraph
+
+            // Check if there are any more words in the result
+
+            const remainingWords = results[currentSelectedResultIndex].words.splice(currentSelectedWordIndexStart + 1, results[currentSelectedResultIndex].words.length - currentSelectedWordIndexStart)
+
+            console.log(remainingWords)
+
+            const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
+
+            if (nextWord !== undefined) {
+              // Take the rest of the words and put in a new result
+              // const result: IResult = {
+              /*        startTime: number
+                confidence: number
+                transcript: string
+                words: Array<IWord>
+                      */
+              // }
+            }
+          } else {
+            console.log("Enter")
+            // Go in and out of edit mode
+            if (this.state.editString) {
+              this.setState({
+                editString: undefined,
+              })
+            } else {
+              this.setState({
+                editString: currentWord,
+              })
+            }
+          }
+
           break
         case "ArrowLeft":
         case "Left":
@@ -297,56 +336,24 @@ class TranscriptResults extends Component<IProps, IState> {
 
           break
 
-        case ".":
-        case ",":
-        case "!":
-        case "?":
-          const currentWord = this.state.results![currentSelectedResultIndex].words[currentSelectedWordIndexStart].word
-
-          if (currentWord.endsWith(key)) {
-            this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.slice(0, -1))
-
-            // Decapitalize next word if it exist
-
-            const nextWord = this.state.results![currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
-
-            if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1))
-            }
-          } else {
-            this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord + key)
-
-            const nextWord = this.state.results![currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
-
-            if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1))
-            }
-          }
-
-          console.log("word", currentWord)
-
-          break
-
         //
         // Tab will rotate the word from lowercase, first letter capitalized to all caps
         // Only works when not in edit mode, and only on a single word
         case "Tab":
           if (this.state.editString === undefined && currentSelectedWordIndexStart === currentSelectedWordIndexEnd) {
-            const currentWordX = this.state.results![currentSelectedResultIndex].words[currentSelectedWordIndexStart].word
-
             // Lower case to capitalised case
-            if (currentWordX === currentWordX.toLowerCase()) {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWordX[0].toUpperCase() + currentWordX.substring(1))
+            if (currentWord === currentWord.toLowerCase()) {
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord[0].toUpperCase() + currentWord.substring(1))
             }
             // Capitalised case to upper case
-            else if (currentWordX === currentWordX[0].toUpperCase() + currentWordX.substring(1).toLowerCase()) {
-              console.log(currentWordX)
-              console.log(currentWordX[0].toUpperCase() + currentWordX.substring(1))
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWordX.toUpperCase())
+            else if (currentWord === currentWord[0].toUpperCase() + currentWord.substring(1).toLowerCase()) {
+              console.log(currentWord)
+              console.log(currentWord[0].toUpperCase() + currentWord.substring(1))
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.toUpperCase())
             }
             // Everything else to lower case
             else {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWordX.toLowerCase())
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.toLowerCase())
             }
           }
           break
@@ -362,6 +369,39 @@ class TranscriptResults extends Component<IProps, IState> {
             this.setCurrentWord(firstWordInSelection, currentSelectedResultIndex, currentSelectedWordIndexStart)
             break
           }
+
+        // Punctation
+        // When we're not in edit mode,
+        case ".":
+        case ",":
+        case "!":
+        case "?":
+          if (this.state.editString === undefined) {
+            // Remove punctation
+            if (currentWord.endsWith(key)) {
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.slice(0, -1))
+
+              // Decapitalize next word if it exist
+
+              const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
+
+              if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
+                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1))
+              }
+              // Add punctation
+            } else {
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord + key)
+
+              const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
+
+              if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
+                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1))
+              }
+            }
+
+            break
+          }
+
         case "a":
         case "b":
         case "c":
@@ -420,6 +460,9 @@ class TranscriptResults extends Component<IProps, IState> {
         case "Æ":
         case "Ø":
         case "Å":
+        case "'":
+        case "-":
+        case '"':
         case "Backspace":
           // Change the selected word
 
@@ -427,10 +470,9 @@ class TranscriptResults extends Component<IProps, IState> {
 
           if (key === "Backspace") {
             if (editString === undefined) {
-              return
-            } else {
-              editString = editString.slice(0, -1)
+              editString = currentWord
             }
+            editString = editString.slice(0, -1)
           } else if (this.state.editString) {
             editString += key
           } else {
@@ -448,14 +490,16 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, text: string) {
+    const results = { ...this.state.results! }
+
     console.log("------SET WORDS------")
 
     console.log("text", text)
     console.log("wordIndexStart", wordIndexStart)
     console.log("wordIndexEnd", wordIndexEnd)
 
-    const wordStart = this.state.results![resultIndex].words[wordIndexStart]
-    const wordEnd = this.state.results![resultIndex].words[wordIndexEnd]
+    const wordStart = results[resultIndex].words[wordIndexStart]
+    const wordEnd = results[resultIndex].words[wordIndexEnd]
 
     console.log("wordStart", wordStart)
     console.log("wordEnd", wordEnd)
@@ -487,18 +531,16 @@ class TranscriptResults extends Component<IProps, IState> {
 
     // Replace array of words in result
 
-    const results = this.state.results!
-
     results[resultIndex].words.splice(wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords)
 
     this.setState({
       currentSelectedWordIndexEnd: wordIndexStart + newWords.length - 1,
       editString: text,
-
       results,
     })
   }
   private setWord(resultIndex: number, wordIndex: number, text: string) {
+    console.log("setWord")
     const results = this.state.results!
 
     results[resultIndex].words[wordIndex].word = text

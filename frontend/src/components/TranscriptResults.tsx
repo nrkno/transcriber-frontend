@@ -574,11 +574,22 @@ class TranscriptResults extends Component<IProps, IState> {
     const wordsToMove: IWord[] = JSON.parse(JSON.stringify(results[resultIndex].words.slice(start, results[resultIndex].words.length)))
     console.log("wordToMove", wordsToMove)
 
-    newResults[resultIndex + 1].words.splice(0, 0, ...wordsToMove)
+    // Check if there's another result after the current one
+    if (resultIndex + 1 < results.length) {
+      newResults[resultIndex + 1].words.splice(0, 0, ...wordsToMove)
 
-    // Also need to update the start time of the result where we just added words to move
+      // Also need to update the start time of the result where we just added words to move
+      newResults[resultIndex + 1].startTime = wordsToMove[0].startTime
+    } else {
+      // We push a new result to the array
 
-    newResults[resultIndex + 1].startTime = wordsToMove[0].startTime
+      const result: IResult = {
+        startTime: wordsToMove[0].startTime,
+        words: wordsToMove,
+      }
+
+      newResults.push(result)
+    }
 
     console.log("newResults", newResults)
     console.log("TIls lutt results", results)
@@ -586,24 +597,6 @@ class TranscriptResults extends Component<IProps, IState> {
     this.setState({
       results: newResults,
     })
-
-    /*
-    const remainingWords = results[currentSelectedResultIndex].words.splice(currentSelectedWordIndexStart + 1, results[currentSelectedResultIndex].words.length - currentSelectedWordIndexStart)
-
-    console.log(remainingWords)
-
-    const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
-
-    if (nextWord !== undefined) {*/
-    // Take the rest of the words and put in a new result
-    // const result: IResult = {
-    /*        startTime: number
-                confidence: number
-                transcript: string
-                words: Array<IWord>
-                      */
-    // }
-    // }
   }
 }
 

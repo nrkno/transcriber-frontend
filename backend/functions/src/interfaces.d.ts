@@ -41,9 +41,7 @@ interface ISpeechContext {
 }
 
 interface IResult {
-  confidence: number
   startTime: number
-  transcript: string
   words: Array<IWord>
 }
 

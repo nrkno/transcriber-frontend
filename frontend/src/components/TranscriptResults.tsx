@@ -281,11 +281,15 @@ class TranscriptResults extends Component<IProps, IState> {
             })
           } else if (currentSelectedResultIndex - 1 >= 0) {
             // Select last word in previous result
+
+            console.log(results[currentSelectedResultIndex - 1].words.length - 1)
             this.setState({
               currentSelectedResultIndex: currentSelectedResultIndex - 1,
+              currentSelectedWordIndexEnd: results[currentSelectedResultIndex - 1].words.length - 1,
               currentSelectedWordIndexStart: results[currentSelectedResultIndex - 1].words.length - 1,
               editString: undefined,
             })
+            console.log(this.state)
           }
           break
 
@@ -328,13 +332,7 @@ class TranscriptResults extends Component<IProps, IState> {
             if (currentWord === currentWord.toLowerCase()) {
               this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord[0].toUpperCase() + currentWord.substring(1))
             }
-            // Capitalised case to upper case
-            else if (currentWord === currentWord[0].toUpperCase() + currentWord.substring(1).toLowerCase()) {
-              console.log(currentWord)
-              console.log(currentWord[0].toUpperCase() + currentWord.substring(1))
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.toUpperCase())
-            }
-            // Everything else to lower case
+            // Lower case
             else {
               this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.toLowerCase())
             }
@@ -551,36 +549,34 @@ class TranscriptResults extends Component<IProps, IState> {
 
   private splitResult(resultIndex: number, wordIndex: number) {
     const results = this.state.results!
-    console.log("Opprinnelig results", results)
+
     // Return if we're at the last word in the result
     if (wordIndex === results[resultIndex].words.length - 1) {
       return
     }
 
+    // The split will be done from the next word
     const start = wordIndex + 1
-    const count = results[resultIndex].words.length - wordIndex
-    console.log("start", start)
-    console.log("count", count)
 
+    // Making a deep copy of the results, splicing off the rest of the words in the current result
     const newResults = update(results, {
       [resultIndex]: {
         words: { $splice: [[start]] },
       },
     })
 
-    console.log("newResults", newResults)
-
-    // Deep clone the slice, which will be moved to the next result
-    const wordsToMove: IWord[] = JSON.parse(JSON.stringify(results[resultIndex].words.slice(start, results[resultIndex].words.length)))
+    // Deep clone the the rest of the words, which will be moved to the next result
+    const wordsToMove: IWord[] = JSON.parse(JSON.stringify(results[resultIndex].words.slice(start)))
     console.log("wordToMove", wordsToMove)
 
     // Check if there's another result after the current one
     if (resultIndex + 1 < results.length) {
       newResults[resultIndex + 1].words.splice(0, 0, ...wordsToMove)
 
-      // Also need to update the start time of the result where we just added words to move
+      // Also need to update the start time of the result where we just added words
       newResults[resultIndex + 1].startTime = wordsToMove[0].startTime
     } else {
+      // We're at the last result, create a new one
       // We push a new result to the array
 
       const result: IResult = {
@@ -590,9 +586,6 @@ class TranscriptResults extends Component<IProps, IState> {
 
       newResults.push(result)
     }
-
-    console.log("newResults", newResults)
-    console.log("TIls lutt results", results)
 
     this.setState({
       results: newResults,

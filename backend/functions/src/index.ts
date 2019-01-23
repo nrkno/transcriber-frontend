@@ -13,11 +13,11 @@ import transcription from "./transcription"
 // --------------------
 
 exports.transcription = functions
+  .region("europe-west1")
   .runWith({
     memory: "2GB",
     timeoutSeconds: 540,
   })
-  .region("europe-west1")
   .firestore.document("transcripts/{transcriptId}")
   .onCreate(transcription)
 
@@ -26,11 +26,11 @@ exports.transcription = functions
 // --------------------
 
 exports.deleteTranscript = functions
+  .region("europe-west1")
   .runWith({
     memory: "2GB",
     timeoutSeconds: 540,
   })
-  .region("europe-west1")
   .https.onCall(deleteTranscript)
 
 // ------

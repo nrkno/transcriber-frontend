@@ -117,15 +117,13 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     const speechRecognitionResults = await transcribe(transcriptId, transcript, gsUri)
 
     let numberOfWords = 0
+    let accumulatedConfidence = 0
     for (const speechRecognitionResult of speechRecognitionResults) {
       // Accumulating number of words
       if (speechRecognitionResult.alternatives.length > 0) {
         numberOfWords += speechRecognitionResult.alternatives[0].words.length
         // Logging confidence to GA
-        const confidence = speechRecognitionResult.alternatives[0].confidence
-
-        console.log(transcriptId, "confidence", confidence)
-        visitor.event("transcription", "confidence", transcriptId, confidence)
+        accumulatedConfidence += speechRecognitionResult.alternatives[0].confidence * speechRecognitionResult.alternatives[0].words.length
       }
     }
 
@@ -139,8 +137,15 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
 
       return
     }
-
     visitor.set("cm4", numberOfWords)
+
+    // Calculating average confidence per word
+    // Confidence will have high precision, i.e. 0.9290443658828735
+    // We round it to two digits and log it as an integer, i.e. 9290,
+    // since GA only supports decimal numbers for currency.
+    const confidence = Math.round((accumulatedConfidence / numberOfWords) * 100 * 100)
+    visitor.set("cm9", confidence)
+    console.log(transcriptId, "Confidence", confidence)
 
     const transcribedDate = Date.now()
     const transcribedDuration = transcribedDate - transcodedDate

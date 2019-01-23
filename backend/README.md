@@ -57,11 +57,12 @@ Exceptions are logged.
 - cm1: Number of audio topic words
 - cm2: Number of speech contexts phrases
 - cm3: Audio duration
-- cm5: Number of words
-- cm6: Transcoding duration
-- cm7: Transcribing duration
-- cm8: Saving duration
-- cm9: Process duration (transcoding + transcribing + saving)
+- cm4: Number of words
+- cm5: Transcoding duration
+- cm6: Transcribing duration
+- cm7: Saving duration
+- cm8: Process duration (transcoding + transcribing + saving)
+- cm9: Confidence
 
 #### Events
 

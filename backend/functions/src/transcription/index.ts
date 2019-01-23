@@ -125,7 +125,7 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
         const confidence = speechRecognitionResult.alternatives[0].confidence
 
         console.log(transcriptId, "confidence", confidence)
-        visitor.event("transcription", "confidence", transcriptId, confidence)
+        visitor.event("transcription", "confidence", transcriptId, confidence).send()
       }
     }
 

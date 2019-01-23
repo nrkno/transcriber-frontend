@@ -245,7 +245,7 @@ class TranscriptResults extends Component<IProps, IState> {
     const currentSelectedResultIndex = this.state.currentSelectedResultIndex!
     const currentSelectedWordIndexStart = this.state.currentSelectedWordIndexStart!
     const currentSelectedWordIndexEnd = this.state.currentSelectedWordIndexEnd!
-    const results = { ...this.state.results! }
+    const results = this.state.results!
 
     if (currentSelectedResultIndex !== undefined && currentSelectedWordIndexStart !== undefined) {
       const currentWord = results![currentSelectedResultIndex].words[currentSelectedWordIndexStart].word
@@ -306,7 +306,8 @@ class TranscriptResults extends Component<IProps, IState> {
               currentSelectedWordIndexStart: nextWordIndex,
               editString: undefined,
             })
-          } else if (currentSelectedResultIndex + 1 < results!.length) {
+          } else if (currentSelectedResultIndex + 1 < results.length) {
+            console.log("Hiii")
             // Select first word in next result
             this.setState({
               currentSelectedResultIndex: currentSelectedResultIndex + 1,
@@ -550,28 +551,37 @@ class TranscriptResults extends Component<IProps, IState> {
 
   private splitResult(resultIndex: number, wordIndex: number) {
     const results = this.state.results!
+    console.log("Opprinnelig results", results)
     // Return if we're at the last word in the result
     if (wordIndex === results[resultIndex].words.length - 1) {
       return
     }
 
-    const from = wordIndex + 1
-    const to = results[resultIndex].words.length - wordIndex
-    // Deep clone the slice, which will be moved to the next result
-    const wordsToMove = JSON.parse(JSON.stringify(results[resultIndex].words.slice(from, to)))
-
-    console.log("wordToMove", wordsToMove)
+    const start = wordIndex + 1
+    const count = results[resultIndex].words.length - wordIndex
+    console.log("start", start)
+    console.log("count", count)
 
     const newResults = update(results, {
       [resultIndex]: {
-        words: { $splice: [[wordIndex + 1, results[resultIndex].words.length - wordIndex]] },
+        words: { $splice: [[start]] },
       },
     })
 
-    newResults[resultIndex].words.splice(from, 0, ...wordsToMove)
-
-    console.log("results", results)
     console.log("newResults", newResults)
+
+    // Deep clone the slice, which will be moved to the next result
+    const wordsToMove: IWord[] = JSON.parse(JSON.stringify(results[resultIndex].words.slice(start, results[resultIndex].words.length)))
+    console.log("wordToMove", wordsToMove)
+
+    newResults[resultIndex + 1].words.splice(0, 0, ...wordsToMove)
+
+    // Also need to update the start time of the result where we just added words to move
+
+    newResults[resultIndex + 1].startTime = wordsToMove[0].startTime
+
+    console.log("newResults", newResults)
+    console.log("TIls lutt results", results)
 
     this.setState({
       results: newResults,
@@ -593,7 +603,7 @@ class TranscriptResults extends Component<IProps, IState> {
                 words: Array<IWord>
                       */
     // }
-    //}
+    // }
   }
 }
 

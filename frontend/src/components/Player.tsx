@@ -6,6 +6,7 @@ import secondsToTime from "../secondsToTime"
 interface IState {
   isPlaying: boolean
   playbackUrl?: string
+  currentTime: number
 }
 
 interface IProps {
@@ -23,6 +24,7 @@ class Player extends React.Component<IProps, IState> {
     this.audioRef = React.createRef<HTMLAudioElement>()
 
     this.state = {
+      currentTime: 0,
       isPlaying: false,
     }
   }
@@ -163,6 +165,7 @@ class Player extends React.Component<IProps, IState> {
   private handleTimeUpdate = () => {
     const currentTime = this.audioRef.current!.currentTime
 
+    this.setState({ currentTime })
     this.props.handleTimeUpdate(currentTime)
   }
 }

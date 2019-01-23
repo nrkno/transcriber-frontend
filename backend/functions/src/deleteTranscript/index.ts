@@ -28,6 +28,9 @@ async function deleteTranscript(data: any, context: functions.https.CallableCont
 
     const transcript = await database.getTranscript(transcriptId)
 
+    // Setting user id
+    visitor.set("uid", transcript.userId)
+
     // Authentication / user information is automatically added to the request
 
     if (!context.auth) {

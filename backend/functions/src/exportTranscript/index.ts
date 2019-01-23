@@ -26,6 +26,10 @@ async function exportTranscript(request: functions.Request, response: functions.
     }
 
     const transcript = await database.getTranscript(id)
+
+    // Setting user id
+    visitor.set("uid", transcript.userId)
+
     const results = await database.getResults(id)
 
     const type = request.query.type

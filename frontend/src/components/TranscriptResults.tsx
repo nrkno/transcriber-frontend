@@ -1,5 +1,6 @@
 import update from "immutability-helper"
 import React, { Component } from "react"
+import ReactGA from "react-ga"
 import KeyboardEventHandler from "react-keyboard-event-handler"
 import TrackVisibility from "react-on-screen"
 import { WordState } from "../enums"
@@ -23,7 +24,7 @@ interface IState {
   currentSelectedWordIndexEnd?: number
   results?: IResult[]
   resultIds?: string[]
-  resultIdsWithChanges: Set<string>
+  resultIndecesWithChanges?: boolean[]
   editString?: string
 }
 
@@ -33,13 +34,13 @@ class TranscriptResults extends Component<IProps, IState> {
     super(props)
     this.state = {
       currentTime: 0,
-      resultIdsWithChanges: new Set<string>(),
     }
   }
 
   public fetchResults() {
     const results = Array<IResult>()
     const resultIds = Array<string>()
+    const resultIndecesWithChanges = Array<boolean>()
 
     database
       .collection(`transcripts/${this.props.transcriptId}/results`)
@@ -51,10 +52,12 @@ class TranscriptResults extends Component<IProps, IState> {
 
           results.push(result)
           resultIds.push(doc.id)
+          resultIndecesWithChanges.push(false)
         })
 
         this.setState({
           resultIds,
+          resultIndecesWithChanges,
           results,
         })
       })
@@ -156,7 +159,6 @@ class TranscriptResults extends Component<IProps, IState> {
     return (
       <>
         <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={(key, event) => this.handleKeyPressed(key, event)} />
-        <KeyboardEventHandler handleKeys={["meta+s", "ctrl+s"]} onKeyEvent={(key, event) => this.handleKeyPressedSave(key, event)} />
         {this.state.results &&
           this.state.results.map((result, i) => {
             const startTime = result.startTime
@@ -205,23 +207,6 @@ class TranscriptResults extends Component<IProps, IState> {
     )
   }
 
-  private async handleKeyPressedSave(key: string, event: KeyboardEvent) {
-    event.preventDefault() // So that the browser save dialog doesn't appear
-
-    // Check result changes for which results have changes
-
-    console.log("SAVESENNN")
-
-    for (const resultId of this.state.resultIdsWithChanges) {
-      console.log(resultId)
-
-      const index = this.state.resultIds!.indexOf(resultId)
-
-      const result = this.state.results![index]
-
-      await database.doc(`transcripts/${this.props.transcriptId}/results/${resultId}`).update({ words: result.words })
-    }
-  }
   private handleKeyPressed(keyX: string, event: KeyboardEvent) {
     if (event.defaultPrevented) {
       return // Do nothing if the event was already processed
@@ -431,6 +416,12 @@ class TranscriptResults extends Component<IProps, IState> {
         case "Q":
         case "R":
         case "S":
+          if (event.getModifierState("Meta")) {
+            this.save()
+
+            break
+          }
+
         case "T":
         case "U":
         case "V":
@@ -467,6 +458,37 @@ class TranscriptResults extends Component<IProps, IState> {
       // Cancel the default action to avoid it being handled twice
       event.preventDefault()
       event.stopPropagation()
+    }
+  }
+
+  private async save() {
+    const resultIndecesWithChanges = this.state.resultIndecesWithChanges!
+
+    try {
+      for (const [index, hasChanges] of resultIndecesWithChanges.entries()) {
+        const results = this.state.results!
+
+        console.log(index)
+        console.log(hasChanges)
+
+        if (hasChanges) {
+          const result = results[index]
+          const resultId = this.state.resultIds![index]
+
+          await database.doc(`transcripts/${this.props.transcriptId}/results/${resultId}`).set({ words: result.words }, { merge: true })
+
+          // await database.doc(`transcripts/${this.props.transcriptId}/results/${resultId}`).update({ words: result.words })
+        }
+      }
+
+      // Reset change flags
+      this.setState({ resultIndecesWithChanges: new Array(resultIndecesWithChanges.length).fill(false) })
+    } catch (error) {
+      console.error(error)
+      ReactGA.exception({
+        description: error.message,
+        fatal: false,
+      })
     }
   }
 
@@ -518,11 +540,14 @@ class TranscriptResults extends Component<IProps, IState> {
       },
     })
 
-    // results[resultIndex].words.splice(wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords)
+    const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
+      [resultIndex]: { $set: true },
+    })
 
     this.setState({
       currentSelectedWordIndexEnd: wordIndexStart + newWords.length - 1,
       editString: text,
+      resultIndecesWithChanges,
       results: newResults,
     })
   }
@@ -539,10 +564,12 @@ class TranscriptResults extends Component<IProps, IState> {
       },
     })
 
-    //    const resultIdsWithChanges = this.state.resultIdsWithChanges!
-    //  resultIdsWithChanges.add(this.state.resultIds![resultIndex])
+    const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
+      [resultIndex]: { $set: true },
+    })
 
     this.setState({
+      resultIndecesWithChanges,
       results,
     })
   }
@@ -569,12 +596,23 @@ class TranscriptResults extends Component<IProps, IState> {
     const wordsToMove: IWord[] = JSON.parse(JSON.stringify(results[resultIndex].words.slice(start)))
     console.log("wordToMove", wordsToMove)
 
+    // Flag changes in both resultIndex and resultIndex + 1
+    const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
+      [resultIndex]: { $set: true },
+      [resultIndex + 1]: { $set: true },
+    })
+
     // Check if there's another result after the current one
     if (resultIndex + 1 < results.length) {
       newResults[resultIndex + 1].words.splice(0, 0, ...wordsToMove)
 
       // Also need to update the start time of the result where we just added words
       newResults[resultIndex + 1].startTime = wordsToMove[0].startTime
+
+      this.setState({
+        resultIndecesWithChanges,
+        results: newResults,
+      })
     } else {
       // We're at the last result, create a new one
       // We push a new result to the array
@@ -585,11 +623,19 @@ class TranscriptResults extends Component<IProps, IState> {
       }
 
       newResults.push(result)
-    }
 
-    this.setState({
-      results: newResults,
-    })
+      // We also need to create a new id in result ids.
+
+      const resultId = database.collection("/dummypath").doc().id
+
+      const resultIds = update(this.state.resultIds, { $push: [resultId] })
+
+      this.setState({
+        resultIds,
+        resultIndecesWithChanges,
+        results: newResults,
+      })
+    }
   }
 }
 

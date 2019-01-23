@@ -140,7 +140,10 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     visitor.set("cm4", numberOfWords)
 
     // Calculating average confidence per word
-    const confidence = accumulatedConfidence / numberOfWords
+    // Confidence will have high precision, i.e. 0.9290443658828735
+    // We round it to two digits and log it as an integer, i.e. 9290,
+    // since GA only supports decimal numbers for currency.
+    const confidence = Math.round((accumulatedConfidence / numberOfWords) * 100 * 100)
     visitor.set("cm9", confidence)
     console.log(transcriptId, "Confidence", confidence)
 

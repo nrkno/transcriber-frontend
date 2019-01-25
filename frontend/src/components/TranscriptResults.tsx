@@ -280,25 +280,10 @@ class TranscriptResults extends Component<IProps, IState> {
         case "ArrowLeft":
         case "Left":
           if (event.getModifierState("Meta")) {
-            // The idea here is to mulitple the result index with 100.000 so
-            // that it will be easy to compare which
-            // of the markers are in front
-            const selectedValue = currentSelectedResultIndex * 100000 + currentSelectedWordIndexStart
-            const playingValue = currentPlayingResultIndex * 100000 + currentPlayingWordIndex
+            // Move playing marker to selected marker
 
-            // Playing Selected: Playing <-- Selected
-            if (playingValue < selectedValue) {
-              this.setState({
-                currentSelectedResultIndex: currentPlayingResultIndex,
-                currentSelectedWordIndexEnd: currentPlayingWordIndex,
-                currentSelectedWordIndexStart: currentPlayingWordIndex,
-              })
-            }
-            // Selected Playing: Selected <-- Playing
-            else {
-              const markedWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart]
-              this.setCurrentPlayingWord(markedWord, currentSelectedResultIndex, currentSelectedWordIndexStart)
-            }
+            const markedWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart]
+            this.setCurrentPlayingWord(markedWord, currentSelectedResultIndex, currentSelectedWordIndexStart)
           } else {
             // Move selected marker
 
@@ -329,25 +314,13 @@ class TranscriptResults extends Component<IProps, IState> {
         case "ArrowRight":
         case "Right":
           if (event.getModifierState("Meta")) {
-            // The idea here is to multiple the result index with 100.000 so
-            // that it will be easy to compare which
-            // of the markers are in front
-            const selectedValue = currentSelectedResultIndex * 100000 + currentSelectedWordIndexStart
-            const playingValue = currentPlayingResultIndex * 100000 + currentPlayingWordIndex
+            // Move selected marker to playing marker
 
-            // Playing Selected: Playing --> Selected
-            if (playingValue < selectedValue) {
-              const markedWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart]
-              this.setCurrentPlayingWord(markedWord, currentSelectedResultIndex, currentSelectedWordIndexStart)
-            }
-            // Selected Playing: Selected --> Playing
-            else {
-              this.setState({
-                currentSelectedResultIndex: currentPlayingResultIndex,
-                currentSelectedWordIndexEnd: currentPlayingWordIndex,
-                currentSelectedWordIndexStart: currentPlayingWordIndex,
-              })
-            }
+            this.setState({
+              currentSelectedResultIndex: currentPlayingResultIndex,
+              currentSelectedWordIndexEnd: currentPlayingWordIndex,
+              currentSelectedWordIndexStart: currentPlayingWordIndex,
+            })
           } else {
             const largestSelectedIndex = Math.max(currentSelectedWordIndexStart, currentSelectedWordIndexEnd)
             // If shift key is pressed, check if there is another word after currentSelectedWordIndexEnd

@@ -605,20 +605,22 @@ input[type="range"]:focus::-ms-fill-upper {
 }
 
 /* Editor */
-/*
-.blinking-cursor {
-  font-size: 30px;
-  color: #2e3d48;
-  animation: 1s blink step-end infinite;
+.typewriter {
+  overflow: hidden; /* Ensures the content is not revealed until the animation */
+  border-right: 0.15em solid black; /* The typwriter cursor */
+  white-space: nowrap; /* Keeps the content on a single line */
+  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+  letter-spacing: 0.15em; /* Adjust as needed */
+  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
 }
 
-@keyframes blink {
+/* The typewriter cursor effect */
+@keyframes blink-caret {
   from,
   to {
-    color: transparent;
+    border-color: transparent;
   }
   50% {
-    color: black;
+    border-color: black;
   }
 }
-*/

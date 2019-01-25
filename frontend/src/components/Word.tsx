@@ -18,13 +18,13 @@ class Word extends React.Component<IProps, {}> {
       <>
         <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${this.props.wordState ? this.props.wordState : ""}`}>
           {this.props.word.word}
-          {/*(() => {
+          {(() => {
             if (this.props.wordState === WordState.Editing) {
-              return <span className="blinking-cursor">|</span>
+              return <span className="typewriter" />
             } else {
               return
             }
-          })()*/}
+          })()}
         </span>
 
         {(() => {

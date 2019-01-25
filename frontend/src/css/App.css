@@ -351,24 +351,12 @@ header div.user a {
 .confidence-93 {
   background-color: #fff7d2;
 }
-.confidence-94 {
-  background-color: #fff8d9;
-}
-.confidence-95 {
-  background-color: #fff9df;
-}
-.confidence-96 {
-  background-color: #fffbe6;
-}
-.confidence-97 {
-  background-color: #fffcec;
-}
-.confidence-98 {
-  background-color: #fffdf2;
-}
-.confidence-99 {
-  background-color: #fffef9;
-}
+.confidence-94,
+.confidence-95,
+.confidence-96,
+.confidence-97,
+.confidence-98,
+.confidence-99,
 .confidence-100 {
   background-color: #ffffff;
 }

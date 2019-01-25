@@ -1,4 +1,3 @@
-import colormap from "colormap"
 import update from "immutability-helper"
 import React, { Component } from "react"
 import ReactGA from "react-ga"
@@ -30,12 +29,6 @@ interface IState {
 }
 
 class TranscriptResults extends Component<IProps, IState> {
-  private heatMap = colormap({
-    alpha: 1,
-    colormap: "hot",
-    format: "hex",
-    nshades: 101,
-  })
   private playerRef = React.createRef<Player>()
 
   constructor(props: any) {
@@ -46,8 +39,6 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public fetchResults() {
-    console.dir(this.heatMap)
-
     const results = Array<IResult>()
     const resultIds = Array<string>()
     const resultIndecesWithChanges = Array<boolean>()

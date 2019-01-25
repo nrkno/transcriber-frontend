@@ -64,6 +64,7 @@ export async function transcribe(transcriptId: string, transcript: ITranscript, 
     audio: { uri },
     config: {
       enableAutomaticPunctuation,
+      enableWordConfidence: true,
       enableWordTimeOffsets: true,
       languageCode,
       metadata: recognitionMetadata,

@@ -3,6 +3,7 @@ import { WordState } from "../enums"
 import { IWord } from "../interfaces"
 
 interface IProps {
+  confidence: number
   word: IWord
   wordState?: WordState
   shouldSelectSpace: boolean
@@ -15,7 +16,7 @@ class Word extends React.Component<IProps, {}> {
   public render() {
     return (
       <>
-        <span onClick={this.handleWordClick} className={`word ${this.props.wordState ? this.props.wordState : ""}`}>
+        <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${this.props.wordState ? this.props.wordState : ""}`}>
           {this.props.word.word}
           {/*(() => {
             if (this.props.wordState === WordState.Editing) {

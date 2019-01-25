@@ -31,6 +31,7 @@ export async function saveResult(speechRecognitionResults: any, transcriptId: st
       }
 
       const word: IWord = {
+        confidence: wordInfo.confidence,
         endTime,
         startTime,
         word: wordInfo.word,

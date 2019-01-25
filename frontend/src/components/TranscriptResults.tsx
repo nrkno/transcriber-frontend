@@ -1,3 +1,4 @@
+import colormap from "colormap"
 import update from "immutability-helper"
 import React, { Component } from "react"
 import ReactGA from "react-ga"
@@ -29,7 +30,14 @@ interface IState {
 }
 
 class TranscriptResults extends Component<IProps, IState> {
+  private heatMap = colormap({
+    alpha: 1,
+    colormap: "hot",
+    format: "hex",
+    nshades: 101,
+  })
   private playerRef = React.createRef<Player>()
+
   constructor(props: any) {
     super(props)
     this.state = {
@@ -38,6 +46,8 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public fetchResults() {
+    console.dir(this.heatMap)
+
     const results = Array<IResult>()
     const resultIds = Array<string>()
     const resultIndecesWithChanges = Array<boolean>()
@@ -188,7 +198,18 @@ class TranscriptResults extends Component<IProps, IState> {
                           }
 
                           const shouldSelectSpace = this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j < this.state.currentSelectedWordIndexEnd
-                          return <Word key={`word-${i}-${j}`} word={word} wordState={wordState} shouldSelectSpace={shouldSelectSpace} setCurrentWord={this.setCurrentPlayingWord} resultIndex={i} wordIndex={j} />
+                          return (
+                            <Word
+                              key={`word-${i}-${j}`}
+                              confidence={Math.round(word.confidence * 100)}
+                              word={word}
+                              wordState={wordState}
+                              shouldSelectSpace={shouldSelectSpace}
+                              setCurrentWord={this.setCurrentPlayingWord}
+                              resultIndex={i}
+                              wordIndex={j}
+                            />
+                          )
                         })
                       } else {
                         return result.words.map(word => {
@@ -364,11 +385,11 @@ class TranscriptResults extends Component<IProps, IState> {
           if (this.state.editString === undefined && currentSelectedWordIndexStart === currentSelectedWordIndexEnd) {
             // Lower case to capitalised case
             if (currentWord === currentWord.toLowerCase()) {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord[0].toUpperCase() + currentWord.substring(1))
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord[0].toUpperCase() + currentWord.substring(1), true)
             }
             // Lower case
             else {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.toLowerCase())
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.toLowerCase(), true)
             }
           }
           break
@@ -388,23 +409,23 @@ class TranscriptResults extends Component<IProps, IState> {
           if (this.state.editString === undefined) {
             // Remove punctation
             if (currentWord.endsWith(key)) {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.slice(0, -1))
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.slice(0, -1), true)
 
               // Decapitalize next word if it exist
 
               const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
 
               if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
-                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1))
+                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
               }
               // Add punctation
             } else {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord + key)
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord + key, true)
 
               const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
 
               if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
-                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1))
+                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1), false)
               }
             }
 
@@ -565,6 +586,7 @@ class TranscriptResults extends Component<IProps, IState> {
       const endTime = startTime + duration
       console.log("endTime", endTime)
       newWords.push({
+        confidence: 1,
         endTime,
         startTime,
         word: t,
@@ -594,13 +616,14 @@ class TranscriptResults extends Component<IProps, IState> {
       results: newResults,
     })
   }
-  private setWord(resultIndex: number, wordIndex: number, text: string) {
+  private setWord(resultIndex: number, wordIndex: number, text: string, isEditedByUser: boolean) {
     console.log("setWord", resultIndex, wordIndex)
 
     const results = update(this.state.results, {
       [resultIndex]: {
         words: {
           [wordIndex]: {
+            confidence: { $set: isEditedByUser ? 1 : this.state.results[resultIndex].words[wordIndex].confidence },
             word: { $set: text },
           },
         },

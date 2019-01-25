@@ -9,6 +9,7 @@
   },
   "browserslist": ">0.25% in my stats, not IE > 0",
   "dependencies": {
+    "colormap": "^2.3.0",
     "firebase": "^5.8.0",
     "immutability-helper": "^2.9.0",
     "moment": "^2.24.0",

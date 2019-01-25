@@ -146,7 +146,7 @@ class TranscriptResults extends Component<IProps, IState> {
     }
   }
 
-  public setCurrentWord = (word: IWord, resultIndex: number, wordIndex: number) => {
+  public setCurrentPlayingWord = (word: IWord, resultIndex: number, wordIndex: number) => {
     this.playerRef.current!.setTime(word.startTime * 1e-9)
 
     this.setState({
@@ -188,7 +188,7 @@ class TranscriptResults extends Component<IProps, IState> {
                           }
 
                           const shouldSelectSpace = this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j < this.state.currentSelectedWordIndexEnd
-                          return <Word key={`word-${i}-${j}`} word={word} wordState={wordState} shouldSelectSpace={shouldSelectSpace} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
+                          return <Word key={`word-${i}-${j}`} word={word} wordState={wordState} shouldSelectSpace={shouldSelectSpace} setCurrentWord={this.setCurrentPlayingWord} resultIndex={i} wordIndex={j} />
                         })
                       } else {
                         return result.words.map(word => {
@@ -227,6 +227,8 @@ class TranscriptResults extends Component<IProps, IState> {
       return
     }
 
+    const currentPlayingResultIndex = this.state.currentPlayingResultIndex!
+    const currentPlayingWordIndex = this.state.currentPlayingWordIndex!
     const currentSelectedResultIndex = this.state.currentSelectedResultIndex!
     const currentSelectedWordIndexStart = this.state.currentSelectedWordIndexStart!
     const currentSelectedWordIndexEnd = this.state.currentSelectedWordIndexEnd!
@@ -256,54 +258,101 @@ class TranscriptResults extends Component<IProps, IState> {
           break
         case "ArrowLeft":
         case "Left":
-          if (currentSelectedWordIndexStart - 1 >= 0) {
-            // Select previous word
-            const previousWordIndex = currentSelectedWordIndexStart - 1
-            this.setState({
-              currentSelectedWordIndexEnd: previousWordIndex,
-              currentSelectedWordIndexStart: previousWordIndex,
-              editString: undefined,
-            })
-          } else if (currentSelectedResultIndex - 1 >= 0) {
-            // Select last word in previous result
+          if (event.getModifierState("Meta")) {
+            // The idea here is to mulitple the result index with 100.000 so
+            // that it will be easy to compare which
+            // of the markers are in front
+            const selectedValue = currentSelectedResultIndex * 100000 + currentSelectedWordIndexStart
+            const playingValue = currentPlayingResultIndex * 100000 + currentPlayingWordIndex
 
-            console.log(results[currentSelectedResultIndex - 1].words.length - 1)
-            this.setState({
-              currentSelectedResultIndex: currentSelectedResultIndex - 1,
-              currentSelectedWordIndexEnd: results[currentSelectedResultIndex - 1].words.length - 1,
-              currentSelectedWordIndexStart: results[currentSelectedResultIndex - 1].words.length - 1,
-              editString: undefined,
-            })
-            console.log(this.state)
+            // Playing Selected: Playing <-- Selected
+            if (playingValue < selectedValue) {
+              this.setState({
+                currentSelectedResultIndex: currentPlayingResultIndex,
+                currentSelectedWordIndexEnd: currentPlayingWordIndex,
+                currentSelectedWordIndexStart: currentPlayingWordIndex,
+              })
+            }
+            // Selected Playing: Selected <-- Playing
+            else {
+              const markedWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart]
+              this.setCurrentPlayingWord(markedWord, currentSelectedResultIndex, currentSelectedWordIndexStart)
+            }
+          } else {
+            // Move selected marker
+
+            if (currentSelectedWordIndexStart - 1 >= 0) {
+              // Select previous word
+              const previousWordIndex = currentSelectedWordIndexStart - 1
+              this.setState({
+                currentSelectedWordIndexEnd: previousWordIndex,
+                currentSelectedWordIndexStart: previousWordIndex,
+                editString: undefined,
+              })
+            } else if (currentSelectedResultIndex - 1 >= 0) {
+              // Select last word in previous result
+
+              console.log(results[currentSelectedResultIndex - 1].words.length - 1)
+              this.setState({
+                currentSelectedResultIndex: currentSelectedResultIndex - 1,
+                currentSelectedWordIndexEnd: results[currentSelectedResultIndex - 1].words.length - 1,
+                currentSelectedWordIndexStart: results[currentSelectedResultIndex - 1].words.length - 1,
+                editString: undefined,
+              })
+              console.log(this.state)
+            }
           }
+
           break
 
         case "ArrowRight":
         case "Right":
-          const largestSelectedIndex = Math.max(currentSelectedWordIndexStart, currentSelectedWordIndexEnd)
-          // If shift key is pressed, check if there is another word after currentSelectedWordIndexEnd
-          if (event.getModifierState("Shift") && currentSelectedWordIndexEnd + 1 < results[currentSelectedResultIndex].words.length) {
-            this.setState({
-              currentSelectedWordIndexEnd: currentSelectedWordIndexEnd + 1,
-              editString: undefined,
-            })
-          } else if (largestSelectedIndex + 1 < results[currentSelectedResultIndex].words.length) {
-            // Select next word
-            const nextWordIndex = largestSelectedIndex + 1
-            this.setState({
-              currentSelectedWordIndexEnd: nextWordIndex,
-              currentSelectedWordIndexStart: nextWordIndex,
-              editString: undefined,
-            })
-          } else if (currentSelectedResultIndex + 1 < results.length) {
-            console.log("Hiii")
-            // Select first word in next result
-            this.setState({
-              currentSelectedResultIndex: currentSelectedResultIndex + 1,
-              currentSelectedWordIndexEnd: 0,
-              currentSelectedWordIndexStart: 0,
-              editString: undefined,
-            })
+          if (event.getModifierState("Meta")) {
+            // The idea here is to multiple the result index with 100.000 so
+            // that it will be easy to compare which
+            // of the markers are in front
+            const selectedValue = currentSelectedResultIndex * 100000 + currentSelectedWordIndexStart
+            const playingValue = currentPlayingResultIndex * 100000 + currentPlayingWordIndex
+
+            // Playing Selected: Playing --> Selected
+            if (playingValue < selectedValue) {
+              const markedWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart]
+              this.setCurrentPlayingWord(markedWord, currentSelectedResultIndex, currentSelectedWordIndexStart)
+            }
+            // Selected Playing: Selected --> Playing
+            else {
+              this.setState({
+                currentSelectedResultIndex: currentPlayingResultIndex,
+                currentSelectedWordIndexEnd: currentPlayingWordIndex,
+                currentSelectedWordIndexStart: currentPlayingWordIndex,
+              })
+            }
+          } else {
+            const largestSelectedIndex = Math.max(currentSelectedWordIndexStart, currentSelectedWordIndexEnd)
+            // If shift key is pressed, check if there is another word after currentSelectedWordIndexEnd
+            if (event.getModifierState("Shift") && currentSelectedWordIndexEnd + 1 < results[currentSelectedResultIndex].words.length) {
+              this.setState({
+                currentSelectedWordIndexEnd: currentSelectedWordIndexEnd + 1,
+                editString: undefined,
+              })
+            } else if (largestSelectedIndex + 1 < results[currentSelectedResultIndex].words.length) {
+              // Select next word
+              const nextWordIndex = largestSelectedIndex + 1
+              this.setState({
+                currentSelectedWordIndexEnd: nextWordIndex,
+                currentSelectedWordIndexStart: nextWordIndex,
+                editString: undefined,
+              })
+            } else if (currentSelectedResultIndex + 1 < results.length) {
+              console.log("Hiii")
+              // Select first word in next result
+              this.setState({
+                currentSelectedResultIndex: currentSelectedResultIndex + 1,
+                currentSelectedWordIndexEnd: 0,
+                currentSelectedWordIndexStart: 0,
+                editString: undefined,
+              })
+            }
           }
 
           break
@@ -327,12 +376,6 @@ class TranscriptResults extends Component<IProps, IState> {
         case " ":
           if (this.state.editString === undefined) {
             this.playerRef.current!.togglePlay()
-            break
-          }
-        case "1":
-          if (event.getModifierState("Meta")) {
-            const firstWordInSelection = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart]
-            this.setCurrentWord(firstWordInSelection, currentSelectedResultIndex, currentSelectedWordIndexStart)
             break
           }
 

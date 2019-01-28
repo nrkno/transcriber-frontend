@@ -64,8 +64,29 @@ class TranscriptResults extends Component<IProps, IState> {
       })
   }
 
-  public componentDidUpdate(prevProps: IProps) {
+  public componentDidUpdate(prevProps: IProps, prevState: IState) {
     console.log("componentDidUpdate")
+
+    // Check last editing words ends with a space, in that case, we remove it.
+    // Edit string ends with space and we are finished editing. We remove the extra space
+
+    if (this.state.editString === undefined && prevState.editString && prevState.editString.endsWith(" ") && this.state.results && prevState.currentSelectedResultIndex !== undefined && prevState.currentSelectedWordIndexEnd !== undefined) {
+      const wordWithoutSpace = this.state.results[prevState.currentSelectedResultIndex].words[prevState.currentSelectedWordIndexEnd].word.trim()
+
+      console.log(`wordWithoutSpace${wordWithoutSpace}X`)
+      const results = update(this.state.results, {
+        [prevState.currentSelectedResultIndex]: {
+          words: {
+            [prevState.currentSelectedWordIndexEnd]: {
+              word: { $set: wordWithoutSpace },
+            },
+          },
+        },
+      })
+
+      this.setState({ results })
+    }
+
     if (this.props.transcriptId !== prevProps.transcriptId) {
       this.fetchResults()
 
@@ -188,11 +209,14 @@ class TranscriptResults extends Component<IProps, IState> {
                             }
                           }
 
+                          const isEditingWord = wordState === WordState.Editing && j === this.state.currentSelectedWordIndexEnd
+
                           const shouldSelectSpace = this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j < this.state.currentSelectedWordIndexEnd
                           return (
                             <Word
                               key={`word-${i}-${j}`}
                               confidence={Math.round(word.confidence * 100)}
+                              isEditingWord={isEditingWord}
                               word={word}
                               wordState={wordState}
                               shouldSelectSpace={shouldSelectSpace}
@@ -521,34 +545,35 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, text: string) {
-    const results = { ...this.state.results! }
+    // Replaces a consecutive set of whitespace characters by a single white space.
+    // White spaces in the beginning and end are removed too
+    // "    This    should  become   something          else   too. ";
+    // becomes
+    // "This should become something else too."
+    let cleanText = text.replace(/\s+/g, " ").trim()
 
-    console.log("------SET WORDS------")
+    const textLengthWithoutSpaces = cleanText.split(" ").join("").length
 
-    console.log("text", text)
-    console.log("wordIndexStart", wordIndexStart)
-    console.log("wordIndexEnd", wordIndexEnd)
-
+    const results = this.state.results!
     const wordStart = results[resultIndex].words[wordIndexStart]
     const wordEnd = results[resultIndex].words[wordIndexEnd]
 
-    console.log("wordStart", wordStart)
-    console.log("wordEnd", wordEnd)
+    if (textLengthWithoutSpaces === 0) {
+      // Delete words
+    }
 
-    const textLengthWithoutSpaces = text
-      .trim()
-      .split(" ")
-      .join("").length
+    console.log("textLengthWithoutSpaces", textLengthWithoutSpaces)
 
     const nanosecondsPerCharacter = (wordEnd.endTime - wordStart.startTime) / textLengthWithoutSpaces
     console.log("nanosecondsPerCharacter", nanosecondsPerCharacter)
     const newWords = Array<IWord>()
 
     let startTime = wordStart.startTime
-    for (const t of text.trim().split(" ")) {
+    for (const t of cleanText.split(" ")) {
       const duration = t.length * nanosecondsPerCharacter
       const endTime = startTime + duration
       console.log("endTime", endTime)
+      console.log("t", t)
       newWords.push({
         confidence: 1,
         endTime,
@@ -559,7 +584,14 @@ class TranscriptResults extends Component<IProps, IState> {
       startTime = endTime
     }
 
-    console.dir(newWords)
+    console.log("newWords", newWords)
+
+    // If original entered string ends with a space, we add it to the last word again
+
+    if (text.endsWith(" ")) {
+      cleanText += " "
+      newWords[newWords.length - 1].word += " "
+    }
 
     // Replace array of words in result
 
@@ -575,7 +607,7 @@ class TranscriptResults extends Component<IProps, IState> {
 
     this.setState({
       currentSelectedWordIndexEnd: wordIndexStart + newWords.length - 1,
-      editString: text,
+      editString: cleanText,
       resultIndecesWithChanges,
       results: newResults,
     })

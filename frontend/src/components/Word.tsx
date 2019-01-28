@@ -4,6 +4,7 @@ import { IWord } from "../interfaces"
 
 interface IProps {
   confidence: number
+  isEditingWord: boolean
   word: IWord
   wordState?: WordState
   shouldSelectSpace: boolean
@@ -19,7 +20,7 @@ class Word extends React.Component<IProps, {}> {
         <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${this.props.wordState ? this.props.wordState : ""}`}>
           {this.props.word.word}
           {(() => {
-            if (this.props.wordState === WordState.Editing) {
+            if (this.props.isEditingWord) {
               return <span className="typewriter" />
             } else {
               return
@@ -29,7 +30,7 @@ class Word extends React.Component<IProps, {}> {
 
         {(() => {
           if (this.props.shouldSelectSpace) {
-            return <span className={this.props.wordState}> </span>
+            return <span className={this.props.wordState}>&nbsp;</span>
           } else {
             return " "
           }

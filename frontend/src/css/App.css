@@ -70,286 +70,286 @@ header div.user a {
 /* Heat map */
 
 .confidence-0 {
-  text-decoration: underline #000000;
+  border-bottom: 1px solid #000000;
 }
 .confidence-1 {
-  text-decoration: underline #080000;
+  border-bottom: 1px solid #080000;
 }
 .confidence-2 {
-  text-decoration: underline #0f0000;
+  border-bottom: 1px solid #0f0000;
 }
 .confidence-3 {
-  text-decoration: underline #170000;
+  border-bottom: 1px solid #170000;
 }
 .confidence-4 {
-  text-decoration: underline #1f0000;
+  border-bottom: 1px solid #1f0000;
 }
 .confidence-5 {
-  text-decoration: underline #260000;
+  border-bottom: 1px solid #260000;
 }
 .confidence-6 {
-  text-decoration: underline #2e0000;
+  border-bottom: 1px solid #2e0000;
 }
 .confidence-7 {
-  text-decoration: underline #360000;
+  border-bottom: 1px solid #360000;
 }
 .confidence-8 {
-  text-decoration: underline #3d0000;
+  border-bottom: 1px solid #3d0000;
 }
 .confidence-9 {
-  text-decoration: underline #450000;
+  border-bottom: 1px solid #450000;
 }
 .confidence-10 {
-  text-decoration: underline #4d0000;
+  border-bottom: 1px solid #4d0000;
 }
 .confidence-11 {
-  text-decoration: underline #540000;
+  border-bottom: 1px solid #540000;
 }
 .confidence-12 {
-  text-decoration: underline #5c0000;
+  border-bottom: 1px solid #5c0000;
 }
 .confidence-13 {
-  text-decoration: underline #640000;
+  border-bottom: 1px solid #640000;
 }
 .confidence-14 {
-  text-decoration: underline #6b0000;
+  border-bottom: 1px solid #6b0000;
 }
 .confidence-15 {
-  text-decoration: underline #730000;
+  border-bottom: 1px solid #730000;
 }
 .confidence-16 {
-  text-decoration: underline #7b0000;
+  border-bottom: 1px solid #7b0000;
 }
 .confidence-17 {
-  text-decoration: underline #820000;
+  border-bottom: 1px solid #820000;
 }
 .confidence-18 {
-  text-decoration: underline #8a0000;
+  border-bottom: 1px solid #8a0000;
 }
 .confidence-19 {
-  text-decoration: underline #920000;
+  border-bottom: 1px solid #920000;
 }
 .confidence-20 {
-  text-decoration: underline #990000;
+  border-bottom: 1px solid #990000;
 }
 .confidence-21 {
-  text-decoration: underline #a10000;
+  border-bottom: 1px solid #a10000;
 }
 .confidence-22 {
-  text-decoration: underline #a90000;
+  border-bottom: 1px solid #a90000;
 }
 .confidence-23 {
-  text-decoration: underline #b00000;
+  border-bottom: 1px solid #b00000;
 }
 .confidence-24 {
-  text-decoration: underline #b80000;
+  border-bottom: 1px solid #b80000;
 }
 .confidence-25 {
-  text-decoration: underline #c00000;
+  border-bottom: 1px solid #c00000;
 }
 .confidence-26 {
-  text-decoration: underline #c70000;
+  border-bottom: 1px solid #c70000;
 }
 .confidence-27 {
-  text-decoration: underline #cf0000;
+  border-bottom: 1px solid #cf0000;
 }
 .confidence-28 {
-  text-decoration: underline #d70000;
+  border-bottom: 1px solid #d70000;
 }
 .confidence-29 {
-  text-decoration: underline #de0000;
+  border-bottom: 1px solid #de0000;
 }
 .confidence-30 {
-  text-decoration: underline #e60000;
+  border-bottom: 1px solid #e60000;
 }
 .confidence-31 {
-  text-decoration: underline #e70700;
+  border-bottom: 1px solid #e70700;
 }
 .confidence-32 {
-  text-decoration: underline #e80e00;
+  border-bottom: 1px solid #e80e00;
 }
 .confidence-33 {
-  text-decoration: underline #e91500;
+  border-bottom: 1px solid #e91500;
 }
 .confidence-34 {
-  text-decoration: underline #e91c00;
+  border-bottom: 1px solid #e91c00;
 }
 .confidence-35 {
-  text-decoration: underline #ea2300;
+  border-bottom: 1px solid #ea2300;
 }
 .confidence-36 {
-  text-decoration: underline #eb2a00;
+  border-bottom: 1px solid #eb2a00;
 }
 .confidence-37 {
-  text-decoration: underline #ec3100;
+  border-bottom: 1px solid #ec3100;
 }
 .confidence-38 {
-  text-decoration: underline #ed3800;
+  border-bottom: 1px solid #ed3800;
 }
 .confidence-39 {
-  text-decoration: underline #ee3f00;
+  border-bottom: 1px solid #ee3f00;
 }
 .confidence-40 {
-  text-decoration: underline #ee4600;
+  border-bottom: 1px solid #ee4600;
 }
 .confidence-41 {
-  text-decoration: underline #ef4d00;
+  border-bottom: 1px solid #ef4d00;
 }
 .confidence-42 {
-  text-decoration: underline #f05400;
+  border-bottom: 1px solid #f05400;
 }
 .confidence-43 {
-  text-decoration: underline #f15b00;
+  border-bottom: 1px solid #f15b00;
 }
 .confidence-44 {
-  text-decoration: underline #f26200;
+  border-bottom: 1px solid #f26200;
 }
 .confidence-45 {
-  text-decoration: underline #f36900;
+  border-bottom: 1px solid #f36900;
 }
 .confidence-46 {
-  text-decoration: underline #f37000;
+  border-bottom: 1px solid #f37000;
 }
 .confidence-47 {
-  text-decoration: underline #f47700;
+  border-bottom: 1px solid #f47700;
 }
 .confidence-48 {
-  text-decoration: underline #f57e00;
+  border-bottom: 1px solid #f57e00;
 }
 .confidence-49 {
-  text-decoration: underline #f68500;
+  border-bottom: 1px solid #f68500;
 }
 .confidence-50 {
-  text-decoration: underline #f78c00;
+  border-bottom: 1px solid #f78c00;
 }
 .confidence-51 {
-  text-decoration: underline #f89300;
+  border-bottom: 1px solid #f89300;
 }
 .confidence-52 {
-  text-decoration: underline #f89a00;
+  border-bottom: 1px solid #f89a00;
 }
 .confidence-53 {
-  text-decoration: underline #f9a100;
+  border-bottom: 1px solid #f9a100;
 }
 .confidence-54 {
-  text-decoration: underline #faa800;
+  border-bottom: 1px solid #faa800;
 }
 .confidence-55 {
-  text-decoration: underline #fbaf00;
+  border-bottom: 1px solid #fbaf00;
 }
 .confidence-56 {
-  text-decoration: underline #fcb600;
+  border-bottom: 1px solid #fcb600;
 }
 .confidence-57 {
-  text-decoration: underline #fdbd00;
+  border-bottom: 1px solid #fdbd00;
 }
 .confidence-58 {
-  text-decoration: underline #fdc400;
+  border-bottom: 1px solid #fdc400;
 }
 .confidence-59 {
-  text-decoration: underline #fecb00;
+  border-bottom: 1px solid #fecb00;
 }
 .confidence-60 {
-  text-decoration: underline #ffd200;
+  border-bottom: 1px solid #ffd200;
 }
 .confidence-61 {
-  text-decoration: underline #ffd306;
+  border-bottom: 1px solid #ffd306;
 }
 .confidence-62 {
-  text-decoration: underline #ffd40d;
+  border-bottom: 1px solid #ffd40d;
 }
 .confidence-63 {
-  text-decoration: underline #ffd513;
+  border-bottom: 1px solid #ffd513;
 }
 .confidence-64 {
-  text-decoration: underline #ffd71a;
+  border-bottom: 1px solid #ffd71a;
 }
 .confidence-65 {
-  text-decoration: underline #ffd820;
+  border-bottom: 1px solid #ffd820;
 }
 .confidence-66 {
-  text-decoration: underline #ffd926;
+  border-bottom: 1px solid #ffd926;
 }
 .confidence-67 {
-  text-decoration: underline #ffda2d;
+  border-bottom: 1px solid #ffda2d;
 }
 .confidence-68 {
-  text-decoration: underline #ffdb33;
+  border-bottom: 1px solid #ffdb33;
 }
 .confidence-69 {
-  text-decoration: underline #ffdc39;
+  border-bottom: 1px solid #ffdc39;
 }
 .confidence-70 {
-  text-decoration: underline #ffdd40;
+  border-bottom: 1px solid #ffdd40;
 }
 .confidence-71 {
-  text-decoration: underline #ffde46;
+  border-bottom: 1px solid #ffde46;
 }
 .confidence-72 {
-  text-decoration: underline #ffe04d;
+  border-bottom: 1px solid #ffe04d;
 }
 .confidence-73 {
-  text-decoration: underline #ffe153;
+  border-bottom: 1px solid #ffe153;
 }
 .confidence-74 {
-  text-decoration: underline #ffe259;
+  border-bottom: 1px solid #ffe259;
 }
 .confidence-75 {
-  text-decoration: underline #ffe360;
+  border-bottom: 1px solid #ffe360;
 }
 .confidence-76 {
-  text-decoration: underline #ffe466;
+  border-bottom: 1px solid #ffe466;
 }
 .confidence-77 {
-  text-decoration: underline #ffe56c;
+  border-bottom: 1px solid #ffe56c;
 }
 .confidence-78 {
-  text-decoration: underline #ffe673;
+  border-bottom: 1px solid #ffe673;
 }
 .confidence-79 {
-  text-decoration: underline #ffe779;
+  border-bottom: 1px solid #ffe779;
 }
 .confidence-80 {
-  text-decoration: underline #ffe980;
+  border-bottom: 1px solid #ffe980;
 }
 .confidence-81 {
-  text-decoration: underline #ffea86;
+  border-bottom: 1px solid #ffea86;
 }
 .confidence-82 {
-  text-decoration: underline #ffeb8c;
+  border-bottom: 1px solid #ffeb8c;
 }
 .confidence-83 {
-  text-decoration: underline #ffec93;
+  border-bottom: 1px solid #ffec93;
 }
 .confidence-84 {
-  text-decoration: underline #ffed99;
+  border-bottom: 1px solid #ffed99;
 }
 .confidence-85 {
-  text-decoration: underline #ffee9f;
+  border-bottom: 1px solid #ffee9f;
 }
 .confidence-86 {
-  text-decoration: underline #ffefa6;
+  border-bottom: 1px solid #ffefa6;
 }
 .confidence-87 {
-  text-decoration: underline #fff0ac;
+  border-bottom: 1px solid #fff0ac;
 }
 .confidence-88 {
-  text-decoration: underline #fff2b3;
+  border-bottom: 1px solid #fff2b3;
 }
 .confidence-89 {
-  text-decoration: underline #fff3b9;
+  border-bottom: 1px solid #fff3b9;
 }
 .confidence-90 {
-  text-decoration: underline #fff4bf;
+  border-bottom: 1px solid #fff4bf;
 }
 .confidence-91 {
-  text-decoration: underline #fff5c6;
+  border-bottom: 1px solid #fff5c6;
 }
 .confidence-92 {
-  text-decoration: underline #fff6cc;
+  border-bottom: 1px solid #fff6cc;
 }
 .confidence-93 {
-  text-decoration: underline #fff7d2;
+  border-bottom: 1px solid #fff7d2;
 }
 .confidence-94,
 .confidence-95,
@@ -425,7 +425,7 @@ main#transcripts {
 }
 
 .playing.selecting {
-  text-decoration: underline #7cc988;
+  border-top: 1px solid #7cc988;
 }
 
 .results {

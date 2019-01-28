@@ -70,286 +70,286 @@ header div.user a {
 /* Heat map */
 
 .confidence-0 {
-  background-color: #000000;
+  text-decoration: underline #000000;
 }
 .confidence-1 {
-  background-color: #080000;
+  text-decoration: underline #080000;
 }
 .confidence-2 {
-  background-color: #0f0000;
+  text-decoration: underline #0f0000;
 }
 .confidence-3 {
-  background-color: #170000;
+  text-decoration: underline #170000;
 }
 .confidence-4 {
-  background-color: #1f0000;
+  text-decoration: underline #1f0000;
 }
 .confidence-5 {
-  background-color: #260000;
+  text-decoration: underline #260000;
 }
 .confidence-6 {
-  background-color: #2e0000;
+  text-decoration: underline #2e0000;
 }
 .confidence-7 {
-  background-color: #360000;
+  text-decoration: underline #360000;
 }
 .confidence-8 {
-  background-color: #3d0000;
+  text-decoration: underline #3d0000;
 }
 .confidence-9 {
-  background-color: #450000;
+  text-decoration: underline #450000;
 }
 .confidence-10 {
-  background-color: #4d0000;
+  text-decoration: underline #4d0000;
 }
 .confidence-11 {
-  background-color: #540000;
+  text-decoration: underline #540000;
 }
 .confidence-12 {
-  background-color: #5c0000;
+  text-decoration: underline #5c0000;
 }
 .confidence-13 {
-  background-color: #640000;
+  text-decoration: underline #640000;
 }
 .confidence-14 {
-  background-color: #6b0000;
+  text-decoration: underline #6b0000;
 }
 .confidence-15 {
-  background-color: #730000;
+  text-decoration: underline #730000;
 }
 .confidence-16 {
-  background-color: #7b0000;
+  text-decoration: underline #7b0000;
 }
 .confidence-17 {
-  background-color: #820000;
+  text-decoration: underline #820000;
 }
 .confidence-18 {
-  background-color: #8a0000;
+  text-decoration: underline #8a0000;
 }
 .confidence-19 {
-  background-color: #920000;
+  text-decoration: underline #920000;
 }
 .confidence-20 {
-  background-color: #990000;
+  text-decoration: underline #990000;
 }
 .confidence-21 {
-  background-color: #a10000;
+  text-decoration: underline #a10000;
 }
 .confidence-22 {
-  background-color: #a90000;
+  text-decoration: underline #a90000;
 }
 .confidence-23 {
-  background-color: #b00000;
+  text-decoration: underline #b00000;
 }
 .confidence-24 {
-  background-color: #b80000;
+  text-decoration: underline #b80000;
 }
 .confidence-25 {
-  background-color: #c00000;
+  text-decoration: underline #c00000;
 }
 .confidence-26 {
-  background-color: #c70000;
+  text-decoration: underline #c70000;
 }
 .confidence-27 {
-  background-color: #cf0000;
+  text-decoration: underline #cf0000;
 }
 .confidence-28 {
-  background-color: #d70000;
+  text-decoration: underline #d70000;
 }
 .confidence-29 {
-  background-color: #de0000;
+  text-decoration: underline #de0000;
 }
 .confidence-30 {
-  background-color: #e60000;
+  text-decoration: underline #e60000;
 }
 .confidence-31 {
-  background-color: #e70700;
+  text-decoration: underline #e70700;
 }
 .confidence-32 {
-  background-color: #e80e00;
+  text-decoration: underline #e80e00;
 }
 .confidence-33 {
-  background-color: #e91500;
+  text-decoration: underline #e91500;
 }
 .confidence-34 {
-  background-color: #e91c00;
+  text-decoration: underline #e91c00;
 }
 .confidence-35 {
-  background-color: #ea2300;
+  text-decoration: underline #ea2300;
 }
 .confidence-36 {
-  background-color: #eb2a00;
+  text-decoration: underline #eb2a00;
 }
 .confidence-37 {
-  background-color: #ec3100;
+  text-decoration: underline #ec3100;
 }
 .confidence-38 {
-  background-color: #ed3800;
+  text-decoration: underline #ed3800;
 }
 .confidence-39 {
-  background-color: #ee3f00;
+  text-decoration: underline #ee3f00;
 }
 .confidence-40 {
-  background-color: #ee4600;
+  text-decoration: underline #ee4600;
 }
 .confidence-41 {
-  background-color: #ef4d00;
+  text-decoration: underline #ef4d00;
 }
 .confidence-42 {
-  background-color: #f05400;
+  text-decoration: underline #f05400;
 }
 .confidence-43 {
-  background-color: #f15b00;
+  text-decoration: underline #f15b00;
 }
 .confidence-44 {
-  background-color: #f26200;
+  text-decoration: underline #f26200;
 }
 .confidence-45 {
-  background-color: #f36900;
+  text-decoration: underline #f36900;
 }
 .confidence-46 {
-  background-color: #f37000;
+  text-decoration: underline #f37000;
 }
 .confidence-47 {
-  background-color: #f47700;
+  text-decoration: underline #f47700;
 }
 .confidence-48 {
-  background-color: #f57e00;
+  text-decoration: underline #f57e00;
 }
 .confidence-49 {
-  background-color: #f68500;
+  text-decoration: underline #f68500;
 }
 .confidence-50 {
-  background-color: #f78c00;
+  text-decoration: underline #f78c00;
 }
 .confidence-51 {
-  background-color: #f89300;
+  text-decoration: underline #f89300;
 }
 .confidence-52 {
-  background-color: #f89a00;
+  text-decoration: underline #f89a00;
 }
 .confidence-53 {
-  background-color: #f9a100;
+  text-decoration: underline #f9a100;
 }
 .confidence-54 {
-  background-color: #faa800;
+  text-decoration: underline #faa800;
 }
 .confidence-55 {
-  background-color: #fbaf00;
+  text-decoration: underline #fbaf00;
 }
 .confidence-56 {
-  background-color: #fcb600;
+  text-decoration: underline #fcb600;
 }
 .confidence-57 {
-  background-color: #fdbd00;
+  text-decoration: underline #fdbd00;
 }
 .confidence-58 {
-  background-color: #fdc400;
+  text-decoration: underline #fdc400;
 }
 .confidence-59 {
-  background-color: #fecb00;
+  text-decoration: underline #fecb00;
 }
 .confidence-60 {
-  background-color: #ffd200;
+  text-decoration: underline #ffd200;
 }
 .confidence-61 {
-  background-color: #ffd306;
+  text-decoration: underline #ffd306;
 }
 .confidence-62 {
-  background-color: #ffd40d;
+  text-decoration: underline #ffd40d;
 }
 .confidence-63 {
-  background-color: #ffd513;
+  text-decoration: underline #ffd513;
 }
 .confidence-64 {
-  background-color: #ffd71a;
+  text-decoration: underline #ffd71a;
 }
 .confidence-65 {
-  background-color: #ffd820;
+  text-decoration: underline #ffd820;
 }
 .confidence-66 {
-  background-color: #ffd926;
+  text-decoration: underline #ffd926;
 }
 .confidence-67 {
-  background-color: #ffda2d;
+  text-decoration: underline #ffda2d;
 }
 .confidence-68 {
-  background-color: #ffdb33;
+  text-decoration: underline #ffdb33;
 }
 .confidence-69 {
-  background-color: #ffdc39;
+  text-decoration: underline #ffdc39;
 }
 .confidence-70 {
-  background-color: #ffdd40;
+  text-decoration: underline #ffdd40;
 }
 .confidence-71 {
-  background-color: #ffde46;
+  text-decoration: underline #ffde46;
 }
 .confidence-72 {
-  background-color: #ffe04d;
+  text-decoration: underline #ffe04d;
 }
 .confidence-73 {
-  background-color: #ffe153;
+  text-decoration: underline #ffe153;
 }
 .confidence-74 {
-  background-color: #ffe259;
+  text-decoration: underline #ffe259;
 }
 .confidence-75 {
-  background-color: #ffe360;
+  text-decoration: underline #ffe360;
 }
 .confidence-76 {
-  background-color: #ffe466;
+  text-decoration: underline #ffe466;
 }
 .confidence-77 {
-  background-color: #ffe56c;
+  text-decoration: underline #ffe56c;
 }
 .confidence-78 {
-  background-color: #ffe673;
+  text-decoration: underline #ffe673;
 }
 .confidence-79 {
-  background-color: #ffe779;
+  text-decoration: underline #ffe779;
 }
 .confidence-80 {
-  background-color: #ffe980;
+  text-decoration: underline #ffe980;
 }
 .confidence-81 {
-  background-color: #ffea86;
+  text-decoration: underline #ffea86;
 }
 .confidence-82 {
-  background-color: #ffeb8c;
+  text-decoration: underline #ffeb8c;
 }
 .confidence-83 {
-  background-color: #ffec93;
+  text-decoration: underline #ffec93;
 }
 .confidence-84 {
-  background-color: #ffed99;
+  text-decoration: underline #ffed99;
 }
 .confidence-85 {
-  background-color: #ffee9f;
+  text-decoration: underline #ffee9f;
 }
 .confidence-86 {
-  background-color: #ffefa6;
+  text-decoration: underline #ffefa6;
 }
 .confidence-87 {
-  background-color: #fff0ac;
+  text-decoration: underline #fff0ac;
 }
 .confidence-88 {
-  background-color: #fff2b3;
+  text-decoration: underline #fff2b3;
 }
 .confidence-89 {
-  background-color: #fff3b9;
+  text-decoration: underline #fff3b9;
 }
 .confidence-90 {
-  background-color: #fff4bf;
+  text-decoration: underline #fff4bf;
 }
 .confidence-91 {
-  background-color: #fff5c6;
+  text-decoration: underline #fff5c6;
 }
 .confidence-92 {
-  background-color: #fff6cc;
+  text-decoration: underline #fff6cc;
 }
 .confidence-93 {
-  background-color: #fff7d2;
+  text-decoration: underline #fff7d2;
 }
 .confidence-94,
 .confidence-95,
@@ -358,7 +358,6 @@ header div.user a {
 .confidence-98,
 .confidence-99,
 .confidence-100 {
-  background-color: #ffffff;
 }
 
 /* Transcripts */
@@ -427,6 +426,14 @@ main#transcripts {
 
 .playing {
   background: #0bb5ff;
+}
+
+.playing.editing {
+  text-decoration: underline #8f94fb;
+}
+
+.playing.selecting {
+  text-decoration: underline #7cc988;
 }
 
 .results {

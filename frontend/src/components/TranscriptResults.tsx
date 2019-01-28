@@ -197,30 +197,36 @@ class TranscriptResults extends Component<IProps, IState> {
                     {({ isVisible }) => {
                       if (isVisible) {
                         return result.words.map((word, j) => {
-                          let wordState
+                          let wordStates = ""
 
                           if (this.state.currentPlayingResultIndex === i && this.state.currentPlayingWordIndex === j) {
-                            wordState = WordState.Playing
-                          } else if (this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j <= this.state.currentSelectedWordIndexEnd) {
-                            if (this.state.editString !== undefined) {
-                              wordState = WordState.Editing
-                            } else {
-                              wordState = WordState.Selecting
-                            }
+                            wordStates += WordState.Playing
                           }
 
-                          const isEditingWord = wordState === WordState.Editing && j === this.state.currentSelectedWordIndexEnd
+                          let showBlinkingCursor = false
+
+                          if (this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j <= this.state.currentSelectedWordIndexEnd) {
+                            if (this.state.editString !== undefined) {
+                              wordStates += ` ${WordState.Editing}`
+
+                              if (j === this.state.currentSelectedWordIndexEnd) {
+                                showBlinkingCursor = true
+                              }
+                            } else {
+                              wordStates += ` ${WordState.Selecting}`
+                            }
+                          }
 
                           const shouldSelectSpace = this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j < this.state.currentSelectedWordIndexEnd
                           return (
                             <Word
                               key={`word-${i}-${j}`}
                               confidence={Math.round(word.confidence * 100)}
-                              isEditingWord={isEditingWord}
                               word={word}
-                              wordState={wordState}
+                              wordStates={wordStates}
                               shouldSelectSpace={shouldSelectSpace}
                               setCurrentWord={this.setCurrentPlayingWord}
+                              showBlinkingCursor={showBlinkingCursor}
                               resultIndex={i}
                               wordIndex={j}
                             />
@@ -419,6 +425,13 @@ class TranscriptResults extends Component<IProps, IState> {
 
             break
           }
+        // Saving
+        case "S":
+          if (event.getModifierState("Meta")) {
+            this.save()
+
+            break
+          }
 
         case "a":
         case "b":
@@ -467,13 +480,6 @@ class TranscriptResults extends Component<IProps, IState> {
         case "P":
         case "Q":
         case "R":
-        case "S":
-          if (event.getModifierState("Meta")) {
-            this.save()
-
-            break
-          }
-
         case "T":
         case "U":
         case "V":
@@ -487,9 +493,7 @@ class TranscriptResults extends Component<IProps, IState> {
         case "'":
         case "-":
         case '"':
-        case "Delete":
-          this.deleteWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, false)
-          break
+
         case "Backspace":
           // Change the selected word
 
@@ -507,6 +511,9 @@ class TranscriptResults extends Component<IProps, IState> {
           }
           console.log("EDIT STRING: ", editString)
           this.setWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, editString)
+          break
+        case "Delete":
+          this.deleteWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, false)
           break
       }
 

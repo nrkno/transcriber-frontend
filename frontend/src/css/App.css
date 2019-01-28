@@ -420,16 +420,8 @@ main#transcripts {
   background: #7cc988;
 }
 
-.editing {
-  background: #8f94fb;
-}
-
 .playing {
   background: #0bb5ff;
-}
-
-.playing.editing {
-  text-decoration: underline #8f94fb;
 }
 
 .playing.selecting {

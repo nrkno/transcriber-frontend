@@ -197,36 +197,20 @@ class TranscriptResults extends Component<IProps, IState> {
                     {({ isVisible }) => {
                       if (isVisible) {
                         return result.words.map((word, j) => {
-                          let wordStates = ""
-
-                          if (this.state.currentPlayingResultIndex === i && this.state.currentPlayingWordIndex === j) {
-                            wordStates += WordState.Playing
-                          }
-
-                          let showBlinkingCursor = false
-
-                          if (this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j <= this.state.currentSelectedWordIndexEnd) {
-                            if (this.state.editString !== undefined) {
-                              wordStates += ` ${WordState.Editing}`
-
-                              if (j === this.state.currentSelectedWordIndexEnd) {
-                                showBlinkingCursor = true
-                              }
-                            } else {
-                              wordStates += ` ${WordState.Selecting}`
-                            }
-                          }
-
+                          const isPlaying = this.state.currentPlayingResultIndex === i && this.state.currentPlayingWordIndex === j
+                          const isSelecting = this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j <= this.state.currentSelectedWordIndexEnd
+                          const isEditing = isSelecting && j === this.state.currentSelectedWordIndexEnd && this.state.editString
                           const shouldSelectSpace = this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j < this.state.currentSelectedWordIndexEnd
                           return (
                             <Word
                               key={`word-${i}-${j}`}
                               confidence={Math.round(word.confidence * 100)}
                               word={word}
-                              wordStates={wordStates}
+                              isPlaying={isPlaying}
+                              isSelecting={isSelecting}
+                              isEditing={isEditing}
                               shouldSelectSpace={shouldSelectSpace}
                               setCurrentWord={this.setCurrentPlayingWord}
-                              showBlinkingCursor={showBlinkingCursor}
                               resultIndex={i}
                               wordIndex={j}
                             />
@@ -341,6 +325,7 @@ class TranscriptResults extends Component<IProps, IState> {
               currentSelectedResultIndex: currentPlayingResultIndex,
               currentSelectedWordIndexEnd: currentPlayingWordIndex,
               currentSelectedWordIndexStart: currentPlayingWordIndex,
+              editString: undefined,
             })
           } else {
             const largestSelectedIndex = Math.max(currentSelectedWordIndexStart, currentSelectedWordIndexEnd)
@@ -401,25 +386,42 @@ class TranscriptResults extends Component<IProps, IState> {
         case "!":
         case "?":
           if (this.state.editString === undefined) {
-            // Remove punctation
-            if (currentWord.endsWith(key)) {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd, currentWord.slice(0, -1), true)
+            let word = results![currentSelectedResultIndex].words[currentSelectedWordIndexEnd].word
 
-              // Decapitalize next word if it exist
+            const lastChar = word.charAt(word.length - 1)
+
+            // If last char is a punctation char, we remove it
+
+            if (lastChar === "." || lastChar === "," || lastChar === "!" || lastChar === "?") {
+              console.log("REMOVE CHAR")
+
+              word = word.slice(0, -1)
+
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd, word, true)
+
+              // Lower case next word if it exist
 
               const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexEnd + 1]
 
               if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
                 this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
               }
-              // Add punctation
-            } else {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd, currentWord + key, true)
+            }
+
+            // Add punctation
+
+            if (lastChar !== key) {
+              console.log("ADD CHAR")
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd, word + key, true)
 
               const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexEnd + 1]
 
-              if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
-                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1), false)
+              if (nextWord !== undefined) {
+                if (key === "." || key === "!" || key === "?") {
+                  this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1), false)
+                } else {
+                  this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
+                }
               }
             }
 

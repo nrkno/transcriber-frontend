@@ -4,10 +4,11 @@ import { IWord } from "../interfaces"
 
 interface IProps {
   confidence: number
+  isPlaying: boolean
+  isSelecting: boolean
+  isEditing: boolean
   word: IWord
-  wordStates?: string
   shouldSelectSpace: boolean
-  showBlinkingCursor: boolean
   resultIndex: number
   wordIndex: number
   setCurrentWord(word: IWord, resultIndex: number, wordIndex: number): void
@@ -15,12 +16,20 @@ interface IProps {
 
 class Word extends React.Component<IProps, {}> {
   public render() {
+    let classNames = ""
+    if (this.props.isPlaying) {
+      classNames += "playing"
+    }
+    if (this.props.isSelecting) {
+      classNames += " selecting"
+    }
+
     return (
       <>
-        <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${this.props.wordStates ? this.props.wordStates : ""}`}>
+        <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${classNames}`}>
           {this.props.word.word}
           {(() => {
-            if (this.props.showBlinkingCursor) {
+            if (this.props.isEditing) {
               return <span className="typewriter" />
             } else {
               return
@@ -30,7 +39,7 @@ class Word extends React.Component<IProps, {}> {
 
         {(() => {
           if (this.props.shouldSelectSpace) {
-            return <span className={this.props.wordStates}> </span>
+            return <span className={classNames}> </span>
           } else {
             return " "
           }

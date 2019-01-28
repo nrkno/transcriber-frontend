@@ -271,7 +271,7 @@ class TranscriptResults extends Component<IProps, IState> {
     const results = this.state.results!
 
     if (currentSelectedResultIndex !== undefined && currentSelectedWordIndexStart !== undefined) {
-      const currentWord = results![currentSelectedResultIndex].words[currentSelectedWordIndexStart].word
+      const currentWord = results![currentSelectedResultIndex].words[currentSelectedWordIndexEnd].word
 
       switch (event.key) {
         case "Enter":
@@ -397,23 +397,23 @@ class TranscriptResults extends Component<IProps, IState> {
           if (this.state.editString === undefined) {
             // Remove punctation
             if (currentWord.endsWith(key)) {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.slice(0, -1), true)
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd, currentWord.slice(0, -1), true)
 
               // Decapitalize next word if it exist
 
-              const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
+              const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexEnd + 1]
 
               if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
-                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
+                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
               }
               // Add punctation
             } else {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord + key, true)
+              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd, currentWord + key, true)
 
-              const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart + 1]
+              const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexEnd + 1]
 
               if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
-                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1), false)
+                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1), false)
               }
             }
 
@@ -487,6 +487,9 @@ class TranscriptResults extends Component<IProps, IState> {
         case "'":
         case "-":
         case '"':
+        case "Delete":
+          this.deleteWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, false)
+          break
         case "Backspace":
           // Change the selected word
 
@@ -544,6 +547,33 @@ class TranscriptResults extends Component<IProps, IState> {
     }
   }
 
+  private deleteWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, selectPreviousWord: boolean) {
+    const results = update(this.state.results, {
+      [resultIndex]: {
+        words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1]] },
+      },
+    })
+
+    const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
+      [resultIndex]: { $set: true },
+    })
+
+    let currentSelectedWordIndexStart = this.state.currentSelectedWordIndexStart!
+
+    // Select the previous word
+    if (selectPreviousWord && wordIndexStart > 0) {
+      currentSelectedWordIndexStart--
+    }
+
+    this.setState({
+      currentSelectedWordIndexEnd: currentSelectedWordIndexStart,
+      currentSelectedWordIndexStart,
+      editString: undefined,
+      resultIndecesWithChanges,
+      results,
+    })
+  }
+
   private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, text: string) {
     // Replaces a consecutive set of whitespace characters by a single white space.
     // White spaces in the beginning and end are removed too
@@ -560,6 +590,9 @@ class TranscriptResults extends Component<IProps, IState> {
 
     if (textLengthWithoutSpaces === 0) {
       // Delete words
+      console.log("HSOULD DELETE")
+      this.deleteWords(resultIndex, wordIndexStart, wordIndexEnd, true)
+      return
     }
 
     console.log("textLengthWithoutSpaces", textLengthWithoutSpaces)

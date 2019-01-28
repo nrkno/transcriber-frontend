@@ -357,6 +357,50 @@ class TranscriptResults extends Component<IProps, IState> {
 
           break
 
+        case "ArrowUp":
+        case "Up":
+          // Jump to first word in current result
+          if (currentSelectedWordIndexStart > 0) {
+            this.setState({
+              currentSelectedWordIndexEnd: 0,
+              currentSelectedWordIndexStart: 0,
+              editString: undefined,
+            })
+            // Jump to previous result
+          } else if (currentSelectedResultIndex > 0) {
+            this.setState({
+              currentSelectedResultIndex: currentSelectedResultIndex - 1,
+              currentSelectedWordIndexEnd: 0,
+              currentSelectedWordIndexStart: 0,
+              editString: undefined,
+            })
+          }
+
+          break
+
+        case "ArrowDown":
+        case "Down":
+          // Jump to next result if it exists
+          if (currentSelectedResultIndex < results.length - 1) {
+            this.setState({
+              currentSelectedResultIndex: currentSelectedResultIndex + 1,
+              currentSelectedWordIndexEnd: 0,
+              currentSelectedWordIndexStart: 0,
+              editString: undefined,
+            })
+          }
+          // Jump to last word
+          else {
+            const indexOfLastWord = results[currentSelectedResultIndex].words.length - 1
+            this.setState({
+              currentSelectedWordIndexEnd: indexOfLastWord,
+              currentSelectedWordIndexStart: indexOfLastWord,
+              editString: undefined,
+            })
+          }
+
+          break
+
         //
         // Tab will rotate the word from lowercase, first letter capitalized to all caps
         // Only works when not in edit mode, and only on a single word

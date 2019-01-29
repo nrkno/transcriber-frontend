@@ -1,10 +1,17 @@
 import firebase from "firebase/app"
 import * as React from "react"
 import ReactGA from "react-ga"
+import { connect } from "react-redux"
 import "react-sweet-progress/lib/style.css"
+import { Dispatch } from "redux"
 import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Step } from "../enums"
 import { database, storage } from "../firebaseApp"
 import { IMetadata, ITranscript } from "../interfaces"
+import { createTranscript } from "../store/actions/transcriptActions"
+
+interface IDispatchProps {
+  createTranscript: (transcriptId: string, transcript: ITranscript) => void
+}
 
 interface IState {
   fileUploaded: boolean
@@ -15,7 +22,6 @@ interface IState {
 
 interface IProps {
   file: File
-  transcriptCreated: (transcriptId: string) => void
   userId: string
 }
 
@@ -215,6 +221,9 @@ class CreateTranscript extends React.Component<IProps, IState> {
 
       const transcriptId = this.state.transcriptId
 
+      this.props.createTranscript(transcriptId, transcript)
+
+      /*
       database
         .doc(`transcripts/${transcriptId}`)
         .set(transcript)
@@ -227,6 +236,8 @@ class CreateTranscript extends React.Component<IProps, IState> {
             fatal: false,
           })
         })
+
+        */
     }
   }
 
@@ -525,4 +536,13 @@ class CreateTranscript extends React.Component<IProps, IState> {
   }
 }
 
-export default CreateTranscript
+const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
+  return {
+    createTranscript: (transcriptId: string, transcript: ITranscript) => dispatch(createTranscript(transcriptId, transcript)),
+  }
+}
+
+export default connect<void, IDispatchProps, void>(
+  null,
+  mapDispatchToProps,
+)(CreateTranscript)

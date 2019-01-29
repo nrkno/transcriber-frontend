@@ -20,8 +20,6 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
   }
 
   public render() {
-    console.log("TRANSCIPRS", this.props.user)
-
     return (
       <main id="transcripts">
         {this.props.user.uid ? (

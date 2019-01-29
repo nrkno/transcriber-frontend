@@ -21,13 +21,13 @@ const resultReducer = (state = initState, action: Action) => {
 
       console.log("KOMMER HIT", isEditedByUser, resultIndex, text, wordIndex)
 
-      console.log("setWord", resultIndex, wordIndex)
+      console.log("state", state)
 
       const results = update(state.results, {
         [resultIndex]: {
           words: {
             [wordIndex]: {
-              confidence: { $set: isEditedByUser ? 1 : this.props.results.results[resultIndex].words[wordIndex].confidence },
+              // TODO confidence: { $set: isEditedByUser ? 1 : state.results[resultIndex].words[wordIndex].confidence },
               word: { $set: text },
             },
           },

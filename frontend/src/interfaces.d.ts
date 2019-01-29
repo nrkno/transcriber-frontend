@@ -35,12 +35,11 @@ interface ISpeechContext {
 
 interface IResult {
   startTime: number
-  confidence: number
-  transcript: string
   words: Array<IWord>
 }
 
 interface IWord {
+  confidence: number
   word: string
   endTime: number
   startTime: number

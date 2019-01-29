@@ -49,24 +49,32 @@ class Player extends React.Component<IProps, IState> {
     clearInterval(this.timer)
   }
 
-  public handlePlay = (event: React.FormEvent<HTMLButtonElement>) => {
-    this.play()
+  public togglePlay() {
+    if (this.state.isPlaying) {
+      this.audioRef.current!.pause()
 
-    ReactGA.event({
-      action: "play button pressed",
-      category: "player",
-    })
+      clearInterval(this.timer)
+
+      this.setState({ isPlaying: false })
+      ReactGA.event({
+        action: "pause button pressed",
+        category: "player",
+      })
+    } else {
+      this.play()
+
+      ReactGA.event({
+        action: "play button pressed",
+        category: "player",
+      })
+    }
+  }
+
+  public handlePlay = (event: React.FormEvent<HTMLButtonElement>) => {
+    this.togglePlay()
   }
   public handlePause = (event: React.FormEvent<HTMLButtonElement>) => {
-    this.audioRef.current!.pause()
-
-    clearInterval(this.timer)
-
-    this.setState({ isPlaying: false })
-    ReactGA.event({
-      action: "pause button pressed",
-      category: "player",
-    })
+    this.togglePlay()
   }
   public handleVolume = (event: React.FormEvent<HTMLInputElement>) => {
     this.audioRef.current!.volume = Number(event.currentTarget.value)

@@ -60,6 +60,10 @@ class Login extends Component<RouteComponentProps<{}> & IProps, any> {
       this.props.logout()
     } catch (error) {
       console.error(error)
+      ReactGA.exception({
+        description: error.message,
+        fatal: false,
+      })
     }
 
     */

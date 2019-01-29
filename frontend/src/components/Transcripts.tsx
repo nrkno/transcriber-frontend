@@ -1,13 +1,12 @@
 import React, { Component } from "react"
-import ReactGA from "react-ga"
+import { connect } from "react-redux"
 import { RouteComponentProps } from "react-router"
-import { functions } from "../firebaseApp"
 import CreateTranscript from "./CreateTranscript"
 import Transcript from "./Transcript"
 import TranscriptsList from "./TranscriptsList"
 
-interface IProps {
-  user?: firebase.User
+interface IStateProps {
+  user: firebase.User
 }
 
 interface IState {
@@ -21,9 +20,11 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
   }
 
   public render() {
+    console.log("TRANSCIPRS", this.props.user)
+
     return (
       <main id="transcripts">
-        {this.props.user ? (
+        {this.props.user.uid ? (
           <>
             <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} handleFileSelected={this.handleFileSelected} handleTranscriptIdSelected={this.handleTranscriptIdSelected} />
 
@@ -59,4 +60,10 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
   }
 }
 
-export default Transcripts
+const mapStateToProps = (state: State): IStateProps => {
+  return {
+    user: state.firebase.auth,
+  }
+}
+
+export default connect(mapStateToProps)(Transcripts)

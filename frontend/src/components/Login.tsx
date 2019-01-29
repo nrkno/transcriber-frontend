@@ -21,8 +21,6 @@ interface IDispatchProps {
 
 class Login extends Component<RouteComponentProps<{}> & IProps, any> {
   public render() {
-    console.log("LOGIN comp")
-
     this.props.fetchUser()
 
     return (

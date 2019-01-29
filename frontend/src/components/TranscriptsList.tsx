@@ -1,9 +1,11 @@
 import moment from "moment"
 import React, { Component } from "react"
 import ReactGA from "react-ga"
+import { connect } from "react-redux"
+import { firestoreConnect } from "react-redux-firebase"
+import { compose } from "redux"
 import "../css/TranscriptsList.css"
 import { Step } from "../enums"
-import { database } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 import UploadButton from "./UploadButton"
 
@@ -28,13 +30,7 @@ class TranscriptsList extends Component<IProps, IState> {
   }
 
   public componentDidMount() {
-    this.fetchTranscripts(this.props.userId)
-  }
-
-  public componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.userId !== undefined && this.state.transcripts === undefined) {
-      this.fetchTranscripts(this.props.userId)
-    }
+    // this.fetchTranscripts(this.props.userId)
   }
 
   public render() {
@@ -54,8 +50,8 @@ class TranscriptsList extends Component<IProps, IState> {
             </tr>
           </thead>
           <tbody>
-            {this.state.transcripts &&
-              this.state.transcripts.map((transcript, index) => {
+            {this.props.transcripts &&
+              this.props.transcripts.map(transcript => {
                 let createdAt: string
 
                 if (transcript.createdAt !== null) {
@@ -68,7 +64,7 @@ class TranscriptsList extends Component<IProps, IState> {
                   createdAt = ""
                 }
 
-                const transcriptId = this.state.transcriptIds[index]
+                const transcriptId = transcript.id
                 const duration = moment.duration(transcript.metadata.audioDuration * 1000)
 
                 let className = "trans-item"
@@ -141,40 +137,20 @@ class TranscriptsList extends Component<IProps, IState> {
 
     this.props.handleTranscriptIdSelected(transcriptId)
   }
-
-  private fetchTranscripts(userId: string) {
-    this.unsubscribe = database
-      .collection("/transcripts")
-      .where("userId", "==", userId)
-      .orderBy("createdAt", "desc")
-      .onSnapshot(
-        querySnapshot => {
-          const transcripts = Array<ITranscript>()
-          const transcriptIds = Array<string>()
-
-          querySnapshot.forEach(doc => {
-            // doc.data() is never undefined for query doc snapshots
-            const transcript = doc.data() as ITranscript
-
-            transcripts.push(transcript)
-            transcriptIds.push(doc.id)
-          })
-
-          this.setState({
-            transcriptIds,
-            transcripts,
-          })
-        },
-        error => {
-          console.error(error)
-
-          ReactGA.exception({
-            description: error.message,
-            fatal: false,
-          })
-        },
-      )
-  }
 }
-
-export default TranscriptsList
+const mapStateToProps = ({ firebase: { auth } }) => ({
+  auth,
+})
+export default compose(
+  connect(mapStateToProps),
+  firestoreConnect(props => [
+    {
+      collection: "transcripts",
+      orderBy: ["createdAt", "desc"],
+      where: ["userId", "==", props.auth.uid],
+    },
+  ]),
+  connect(({ firestore: { ordered } }) => ({
+    transcripts: ordered.transcripts,
+  })),
+)(TranscriptsList)

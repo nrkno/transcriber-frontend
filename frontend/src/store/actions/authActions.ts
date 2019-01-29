@@ -2,13 +2,9 @@ import { User } from "firebase"
 import { Dispatch } from "redux"
 
 export const fetchUser = () => (dispatch: Dispatch, getState, { getFirebase }) => {
-  console.log("ACtion: Fetch usert")
-
   const firebase = getFirebase()
 
   firebase.auth().onAuthStateChanged((user: User) => {
-    console.log("onAuthStateChanged")
-
     if (user) {
       dispatch({
         type: "LOGGED_IN_SUCCESS",

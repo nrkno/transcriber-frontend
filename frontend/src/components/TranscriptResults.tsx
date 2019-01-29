@@ -7,7 +7,7 @@ import { connect } from "react-redux"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
 import secondsToTime from "../secondsToTime"
-import { readResults } from "../store/actions/resultsActions"
+import { readResults, writeWord } from "../store/actions/resultsActions"
 import Player from "./Player"
 import Word from "./Word"
 
@@ -75,14 +75,14 @@ class TranscriptResults extends Component<IProps, IState> {
       this.state.editString === undefined &&
       prevState.editString &&
       prevState.editString.endsWith(" ") &&
-      this.props.results.results.results &&
+      this.props.results.results &&
       prevState.currentSelectedResultIndex !== undefined &&
       prevState.currentSelectedWordIndexEnd !== undefined
     ) {
-      const wordWithoutSpace = this.props.results.results.results[prevState.currentSelectedResultIndex].words[prevState.currentSelectedWordIndexEnd].word.trim()
+      const wordWithoutSpace = this.props.results.results[prevState.currentSelectedResultIndex].words[prevState.currentSelectedWordIndexEnd].word.trim()
 
       console.log(`wordWithoutSpace${wordWithoutSpace}X`)
-      const results = update(this.props.results.results.results, {
+      const results = update(this.props.results.results, {
         [prevState.currentSelectedResultIndex]: {
           words: {
             [prevState.currentSelectedWordIndexEnd]: {
@@ -120,7 +120,7 @@ class TranscriptResults extends Component<IProps, IState> {
 
     const { currentPlayingResultIndex: currentResultIndex, currentPlayingWordIndex: currentWordIndex } = this.state
 
-    if (this.props.transcript === undefined || this.props.results.results.results === undefined) {
+    if (this.props.transcript === undefined || this.props.results.results === undefined) {
       return
     }
 
@@ -255,7 +255,6 @@ class TranscriptResults extends Component<IProps, IState> {
     }
 
     const key = event.key
-
     console.log("event.key:", event.key)
 
     // If left or right is pressed, we reset the indeces to 0,0 and return,
@@ -274,7 +273,7 @@ class TranscriptResults extends Component<IProps, IState> {
     const currentSelectedResultIndex = this.state.currentSelectedResultIndex!
     const currentSelectedWordIndexStart = this.state.currentSelectedWordIndexStart!
     const currentSelectedWordIndexEnd = this.state.currentSelectedWordIndexEnd!
-    const results = this.props.results.results.results!
+    const results = this.props.results.results!
 
     if (currentSelectedResultIndex !== undefined && currentSelectedWordIndexStart !== undefined) {
       const currentWord = results![currentSelectedResultIndex].words[currentSelectedWordIndexEnd].word
@@ -586,6 +585,7 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   private async save() {
+    /*TODO
     const resultIndecesWithChanges = this.state.resultIndecesWithChanges!
 
     try {
@@ -614,19 +614,20 @@ class TranscriptResults extends Component<IProps, IState> {
         fatal: false,
       })
     }
+    */
   }
 
   private deleteWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, selectPreviousWord: boolean) {
-    const results = update(this.props.results.results.results, {
+    const results = update(this.props.results.results, {
       [resultIndex]: {
         words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1]] },
       },
     })
-
+    /*
     const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
       [resultIndex]: { $set: true },
     })
-
+*/
     let currentSelectedWordIndexStart = this.state.currentSelectedWordIndexStart!
 
     // Select the previous word
@@ -638,7 +639,7 @@ class TranscriptResults extends Component<IProps, IState> {
       currentSelectedWordIndexEnd: currentSelectedWordIndexStart,
       currentSelectedWordIndexStart,
       editString: undefined,
-      resultIndecesWithChanges,
+      // resultIndecesWithChanges,
       results,
     })
   }
@@ -653,7 +654,7 @@ class TranscriptResults extends Component<IProps, IState> {
 
     const textLengthWithoutSpaces = cleanText.split(" ").join("").length
 
-    const results = this.props.results.results.results!
+    const results = this.props.results.results!
     const wordStart = results[resultIndex].words[wordIndexStart]
     const wordEnd = results[resultIndex].words[wordIndexEnd]
 
@@ -697,49 +698,55 @@ class TranscriptResults extends Component<IProps, IState> {
 
     // Replace array of words in result
 
-    const newResults = update(this.props.results.results.results, {
+    const newResults = update(this.props.results.results, {
       [resultIndex]: {
         words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords]] },
       },
     })
 
+    /*TODO
     const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
       [resultIndex]: { $set: true },
     })
-
+*/
     this.setState({
       currentSelectedWordIndexEnd: wordIndexStart + newWords.length - 1,
       editString: cleanText,
-      resultIndecesWithChanges,
+      // TODO resultIndecesWithChanges,
       results: newResults,
     })
   }
   private setWord(resultIndex: number, wordIndex: number, text: string, isEditedByUser: boolean) {
+    console.log("PRØVER Å SKRIVE over ord")
+
+    this.props.writeWord(resultIndex, wordIndex, text, isEditedByUser)
+
+    /*
     console.log("setWord", resultIndex, wordIndex)
 
-    const results = update(this.props.results.results.results, {
+    const results = update(this.props.results.results, {
       [resultIndex]: {
         words: {
           [wordIndex]: {
-            confidence: { $set: isEditedByUser ? 1 : this.props.results.results.results[resultIndex].words[wordIndex].confidence },
+            confidence: { $set: isEditedByUser ? 1 : this.props.results.results[resultIndex].words[wordIndex].confidence },
             word: { $set: text },
           },
         },
       },
     })
 
-    const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
+     TODO const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
       [resultIndex]: { $set: true },
     })
 
     this.setState({
-      resultIndecesWithChanges,
+      // TODO resultIndecesWithChanges,
       results,
-    })
+    })*/
   }
 
   private splitResult(resultIndex: number, wordIndex: number) {
-    const results = this.props.results.results.results!
+    const results = this.props.results.results!
 
     // Return if we're at the last word in the result
     if (wordIndex === results[resultIndex].words.length - 1) {
@@ -812,6 +819,7 @@ const mapStateToProps = (state: State): IStateProps => {
 const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
   return {
     readResults: (transcriptId: string) => dispatch(readResults(transcriptId)),
+    writeWord: (resultIndex: number, wordIndex: number, text: string, isEditedByUser: boolean) => dispatch(writeWord(resultIndex, wordIndex, text, isEditedByUser)),
   }
 }
 

@@ -7,26 +7,16 @@ export const readResults = (transcriptId: string) => async (dispatch: Dispatch, 
   try {
     const querySnapshot = await firestore.get({ collection: `transcripts/${transcriptId}/results`, orderBy: "startTime" })
 
-    console.log(querySnapshot)
-    console.log(querySnapshot.docs)
-
     const results = new Array()
 
     querySnapshot.docs.forEach(doc => {
-      console.log("doc", doc)
-
       const result = doc.data()
-
-      console.log("id", doc.id)
-
-      console.log("result", result)
-
       const id = doc.id
-
       results.push({ id, ...result })
     })
 
     console.log("results", results)
+
     dispatch({
       payload: results,
       type: "RESULT_READ",
@@ -38,4 +28,16 @@ export const readResults = (transcriptId: string) => async (dispatch: Dispatch, 
       fatal: false,
     })
   }
+}
+
+export const writeWord = (resultIndex: number, wordIndex: number, text: string, isEditedByUser: boolean) => (dispatch: Dispatch, getState) => {
+  console.log("WRITE WORD action")
+
+  dispatch({
+    isEditedByUser,
+    resultIndex,
+    text,
+    type: "WRITE_WORD",
+    wordIndex,
+  })
 }

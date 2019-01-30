@@ -196,8 +196,6 @@ class TranscriptResults extends Component<IProps, IState> {
         {this.props.results.present &&
           this.props.results.present.results &&
           this.props.results.present.results.map((result, i) => {
-            console.log("HEI")
-
             const startTime = result.startTime
 
             const formattedStartTime = secondsToTime(startTime * 1e-9)
@@ -416,7 +414,7 @@ class TranscriptResults extends Component<IProps, IState> {
           break
 
         //
-        // Tab will rotate the word from lowercase, first letter capitalized to all caps
+        // Tab will toggle the word from lowercase, first letter capitalized
         // Only works when not in edit mode, and only on a single word
         case "Tab":
           if (this.state.editString === undefined && currentSelectedWordIndexStart === currentSelectedWordIndexEnd) {
@@ -522,6 +520,7 @@ class TranscriptResults extends Component<IProps, IState> {
 
             break
           }
+        // Undo/redo
         case "z":
           if (event.getModifierState("Meta")) {
             if (event.getModifierState("Shift")) {
@@ -556,7 +555,6 @@ class TranscriptResults extends Component<IProps, IState> {
         case "w":
         case "x":
         case "y":
-
         case "æ":
         case "ø":
         case "å":
@@ -591,7 +589,6 @@ class TranscriptResults extends Component<IProps, IState> {
         case "'":
         case "-":
         case '"':
-
         case "Backspace":
           // Change the selected word
 
@@ -607,7 +604,7 @@ class TranscriptResults extends Component<IProps, IState> {
           } else {
             editString = key
           }
-          console.log("EDIT STRING: ", editString)
+          console.log("EDIT STRING: ]", editString, "[")
           this.setWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, editString)
           break
         case "Delete":
@@ -687,71 +684,22 @@ class TranscriptResults extends Component<IProps, IState> {
     // "    This    should  become   something          else   too. ";
     // becomes
     // "This should become something else too."
-    let cleanText = text.replace(/\s+/g, " ").trim()
+    console.log("text", text)
+    const cleanText = text.replace(/\s+/g, " ").trim()
+    console.log("Clean text", cleanText)
 
-    const textLengthWithoutSpaces = cleanText.split(" ").join("").length
+    const words = cleanText.split(" ")
 
-    const results = this.props.results.present.results!
-    const wordStart = results[resultIndex].words[wordIndexStart]
-    const wordEnd = results[resultIndex].words[wordIndexEnd]
+    console.log("words", words)
 
-    if (textLengthWithoutSpaces === 0) {
-      // Delete words
-      console.log("HSOULD DELETE")
-      this.deleteWords(resultIndex, wordIndexStart, wordIndexEnd, true)
-      return
-    }
-
-    console.log("textLengthWithoutSpaces", textLengthWithoutSpaces)
-
-    const nanosecondsPerCharacter = (wordEnd.endTime - wordStart.startTime) / textLengthWithoutSpaces
-    console.log("nanosecondsPerCharacter", nanosecondsPerCharacter)
-    const newWords = Array<IWord>()
-
-    let startTime = wordStart.startTime
-    for (const t of cleanText.split(" ")) {
-      const duration = t.length * nanosecondsPerCharacter
-      const endTime = startTime + duration
-      console.log("endTime", endTime)
-      console.log("t", t)
-      newWords.push({
-        confidence: 1,
-        endTime,
-        startTime,
-        word: t,
-      })
-
-      startTime = endTime
-    }
-
-    console.log("newWords", newWords)
-
-    // If original entered string ends with a space, we add it to the last word again
-
-    if (text.endsWith(" ")) {
-      cleanText += " "
-      newWords[newWords.length - 1].word += " "
-    }
-
-    // Replace array of words in result
-
-    const newResults = update(this.props.results.present.results, {
-      [resultIndex]: {
-        words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords]] },
-      },
-    })
-
-    /*TODO
-    const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
-      [resultIndex]: { $set: true },
-    })
-*/
     this.setState({
-      currentSelectedWordIndexEnd: wordIndexStart + newWords.length - 1,
-      editString: cleanText,
+      currentSelectedWordIndexEnd: wordIndexStart + words.length - 1,
+      editString: text,
       // TODO resultIndecesWithChanges,
-      results: newResults,
+      //    results: newResults,
     })
+
+    this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, true)
   }
   private updateWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) {
     console.log("PRØVER Å SKRIVE over ord", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)

@@ -86,7 +86,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
 
                             <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("xmp")}>
                               <svg width="20" height="20" focusable="false" aria-hidden="true">
-                                <use xlinkHref="#icon-download" />
+                                <use xlinkHref="#icon-premiere" />
                               </svg>{" "}
                               xmp
                             </button>
@@ -94,12 +94,21 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
                         )
                       } else {
                         return (
-                          <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
-                            <svg width="20" height="20" focusable="false" aria-hidden="true">
-                              <use xlinkHref="#icon-download" />
-                            </svg>{" "}
-                            Lagre
-                          </button>
+                          <>
+                            <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
+                              <svg width="20" height="20" focusable="false" aria-hidden="true">
+                                <use xlinkHref="#icon-download" />
+                              </svg>{" "}
+                              Lagre (⌘S)
+                            </button>
+
+                            <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
+                              <svg width="20" height="20" focusable="false" aria-hidden="true">
+                                <use xlinkHref="#icon-undo" />
+                              </svg>{" "}
+                              Angre (⌘Z)
+                            </button>
+                          </>
                         )
                       }
                     })()}
@@ -108,7 +117,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
                       <svg width="20" height="20" focusable="false" aria-hidden="true">
                         <use xlinkHref="#icon-garbage" />
                       </svg>{" "}
-                      Slett
+                      Slett (⌘⌫)
                     </button>
                   </>
                 )

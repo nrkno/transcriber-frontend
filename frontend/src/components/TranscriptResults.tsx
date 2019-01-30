@@ -40,7 +40,20 @@ class TranscriptResults extends Component<IProps, IState> {
     console.log(prevProps)
     console.log(this.props)
 
-    // store.dispatch(ActionCreators.clearHistory())
+    if (this.props.transcript.present.id !== prevProps.transcript.present.id) {
+      this.props.readResults(this.props.transcript.present.id)
+
+      // Reset state
+
+      this.setState({
+        currentPlayingResultIndex: undefined,
+        currentPlayingWordIndex: undefined,
+        currentSelectedResultIndex: undefined,
+        currentSelectedWordIndexEnd: undefined,
+        currentSelectedWordIndexStart: undefined,
+        currentTime: 0,
+      })
+    }
 
     /*TODO
     // Check last editing words ends with a space, in that case, we remove it.

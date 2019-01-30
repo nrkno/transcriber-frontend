@@ -524,7 +524,18 @@ class TranscriptResults extends Component<IProps, IState> {
 
             break
           }
+        case "z":
+          console.log("META", event.getModifierState("Meta"))
+          console.log("Shift", event.getModifierState("Shift"))
 
+          if (event.getModifierState("Meta")) {
+            if (event.getModifierState("Shift")) {
+              this.props.onRedo()
+            } else {
+              this.props.onUndo()
+            }
+            break
+          }
         case "a":
         case "b":
         case "c":
@@ -550,16 +561,7 @@ class TranscriptResults extends Component<IProps, IState> {
         case "w":
         case "x":
         case "y":
-        case "z":
-          console.log("TRYKKA PÅ Z")
 
-          if (event.getModifierState("Meta")) {
-            console.log("NDO")
-
-            this.props.onUndo()
-
-            break
-          }
         case "æ":
         case "ø":
         case "å":

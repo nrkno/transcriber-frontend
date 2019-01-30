@@ -125,7 +125,7 @@ class TranscriptResults extends Component<IProps, IState> {
       return
     }
 
-    const { results } = this.state
+    const results = this.props.results.present.results
 
     // First, we check if the current word is still being said
 
@@ -190,8 +190,6 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public render() {
-    console.log("xxxHEI", this.props.results.present)
-    console.log("xxxHEI", this.props.results.present.results)
     return (
       <>
         <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={(key, event) => this.handleKeyPressed(key, event)} />
@@ -525,9 +523,6 @@ class TranscriptResults extends Component<IProps, IState> {
             break
           }
         case "z":
-          console.log("META", event.getModifierState("Meta"))
-          console.log("Shift", event.getModifierState("Shift"))
-
           if (event.getModifierState("Meta")) {
             if (event.getModifierState("Shift")) {
               this.props.onRedo()

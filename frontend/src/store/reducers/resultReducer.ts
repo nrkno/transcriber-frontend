@@ -4,8 +4,6 @@ import { Action } from "redux"
 const initState = {}
 
 const resultReducer = (state = initState, action: Action) => {
-  console.log("resultReducer: ", action.type)
-
   switch (action.type) {
     case "RESULT_READ":
       console.log("action.payload", action.payload)

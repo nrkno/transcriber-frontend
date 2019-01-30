@@ -2,6 +2,7 @@ import { Step, InteractionType, MicrophoneDistance, OriginalMediaType, Recording
 
 interface ITranscript {
   createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+  id?: string
   name?: string
   playbackGsUrl?: string
   process?: {
@@ -34,6 +35,7 @@ interface ISpeechContext {
 }
 
 interface IResult {
+  id: string
   startTime: number
   words: Array<IWord>
 }

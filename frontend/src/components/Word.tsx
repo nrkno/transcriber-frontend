@@ -1,5 +1,4 @@
 import * as React from "react"
-import { WordState } from "../enums"
 import { IWord } from "../interfaces"
 
 interface IProps {

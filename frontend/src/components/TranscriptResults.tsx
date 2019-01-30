@@ -1,9 +1,11 @@
+import equal from "fast-deep-equal"
 import update from "immutability-helper"
 import React, { Component } from "react"
 import ReactGA from "react-ga"
 import KeyboardEventHandler from "react-keyboard-event-handler"
 import TrackVisibility from "react-on-screen"
 import { connect } from "react-redux"
+import { Dispatch } from "redux"
 import { ActionCreators as UndoActionCreators } from "redux-undo"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
@@ -19,13 +21,26 @@ interface IState {
   currentSelectedResultIndex?: number
   currentSelectedWordIndexStart?: number
   currentSelectedWordIndexEnd?: number
-  results?: IResult[]
   resultIds?: string[]
   resultIndecesWithChanges?: boolean[]
   editString?: string
 }
 
-class TranscriptResults extends Component<IProps, IState> {
+interface IReduxStateToProps {
+  transcript: {
+    past: ITranscript[]
+    present: ITranscript
+  }
+}
+
+interface IReduxDispatchToProps {
+  onRedo: () => void
+  onUndo: () => void
+  readResults: (transcriptId: string) => void
+  updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
+}
+
+class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToProps, IState> {
   private playerRef = React.createRef<Player>()
 
   constructor(props: any) {
@@ -34,11 +49,8 @@ class TranscriptResults extends Component<IProps, IState> {
       currentTime: 0,
     }
   }
-  public componentDidUpdate(prevProps: IProps, prevState: IState) {
+  public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps, prevState: IState) {
     console.log("TRANSCRIPT RESULT componentDidUpdate")
-
-    console.log(prevProps)
-    console.log(this.props)
 
     if (this.props.transcript.present.id !== prevProps.transcript.present.id) {
       this.props.readResults(this.props.transcript.present.id)
@@ -101,11 +113,7 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   public componentDidMount() {
-    console.log(this.props.transcript.present.transcriptId)
-
     this.props.readResults(this.props.transcript.present.id)
-
-    // this.fetchResults()
   }
   public handleTimeUpdate = (currentTime: number) => {
     // Find the next current result and word
@@ -506,7 +514,7 @@ class TranscriptResults extends Component<IProps, IState> {
             break
           }
         // Saving
-        case "S":
+        case "s":
           if (event.getModifierState("Meta")) {
             this.save()
 
@@ -568,6 +576,7 @@ class TranscriptResults extends Component<IProps, IState> {
         case "P":
         case "Q":
         case "R":
+        case "S":
         case "T":
         case "U":
         case "V":
@@ -611,6 +620,80 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 
   private async save() {
+    console.log("SAVE")
+
+    // Return if no changes
+    if (this.props.transcript.past.length === 0) {
+      return
+    }
+
+    // Create an array with all result ids
+
+    const pastResults = this.props.transcript.past[0].results!
+    const presentResults = this.props.transcript.present.results!
+
+    const pastResultsIds = pastResults.map(result => result.id)
+    const presentResultsIds = presentResults.map(result => result.id)
+
+    const resultsIds = new Set([...pastResultsIds, ...presentResultsIds])
+
+    console.log("resultsIds", resultsIds)
+
+    const updateResults: IResult[] = new Array()
+    const createResults: IResult[] = new Array()
+    const deleteIds: string[] = new Array()
+
+    for (const resultId of resultsIds) {
+      if (pastResultsIds.includes(resultId) && presentResultsIds.includes(resultId)) {
+        // In both arrays, need to compare them
+
+        const pastResult = pastResults.filter(result => result.id === resultId)[0]
+        const presentResult = presentResults.filter(result => result.id === resultId)[0]
+
+        if (equal(pastResult, presentResult) === false) {
+          updateResults.push(presentResult)
+        }
+      } else if (pastResultsIds.includes(resultId)) {
+        // Only in past, need to delete
+        deleteIds.push(resultId)
+      } else {
+        const presentResult = presentResults.filter(result => result.id === resultId)[0]
+
+        createResults.push(presentResult)
+        // Only in present, need to add
+      }
+    }
+
+    console.log("updateResults", updateResults)
+    console.log("createResults", createResults)
+    console.log("deleteIds", deleteIds)
+
+    const resultsCollectionReference = database.collection(`transcripts/${this.props.transcript.present.id}/results/`)
+    console.log(resultsCollectionReference)
+    // Get a new write batch
+    const batch = database.batch()
+
+    // Set the value in update Ids
+
+    for (const result of updateResults) {
+      batch.update(resultsCollectionReference.doc(result.id), result)
+    }
+
+    for (const result of createResults) {
+      batch.set(resultsCollectionReference.doc(result.id), result)
+    }
+    for (const resultId of deleteIds) {
+      batch.delete(resultsCollectionReference.doc(resultId))
+    }
+
+    console.log("batch", batch)
+    // Commit the batch
+    await batch.commit()
+
+    // await database.doc(`transcripts/${this.props.transcriptId}/results/${resultId}`).set({ words: result.words }, { merge: true })
+
+    // Loop through latest and
+
     /*TODO
     const resultIndecesWithChanges = this.state.resultIndecesWithChanges!
 
@@ -625,7 +708,6 @@ class TranscriptResults extends Component<IProps, IState> {
           const result = results[index]
           const resultId = this.state.resultIds![index]
 
-          await database.doc(`transcripts/${this.props.transcriptId}/results/${resultId}`).set({ words: result.words }, { merge: true })
 
           // await database.doc(`transcripts/${this.props.transcriptId}/results/${resultId}`).update({ words: result.words })
         }
@@ -768,13 +850,13 @@ class TranscriptResults extends Component<IProps, IState> {
   }
 }
 
-const mapStateToProps = (state: State): IStateProps => {
+const mapStateToProps = (state: State): IReduxStateToProps => {
   return {
     transcript: state.transcript,
   }
 }
 
-const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
+const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
   return {
     onRedo: () => dispatch(UndoActionCreators.redo()),
     onUndo: () => dispatch(UndoActionCreators.undo()),

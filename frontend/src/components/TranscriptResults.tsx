@@ -50,8 +50,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps, prevState: IState) {
-    console.log("TRANSCRIPT RESULT componentDidUpdate")
-
     if (this.props.transcript.present.id !== prevProps.transcript.present.id) {
       this.props.readResults(this.props.transcript.present.id)
 

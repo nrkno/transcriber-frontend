@@ -28,8 +28,6 @@ interface IReduxDispatchToProps {
 
 class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateToProps & IReduxDispatchToProps> {
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps) {
-    console.log("TRANSCRIPT componentDidUpdate")
-
     // When the results are loaded the first, we reset the undo history
     // This is to stop users from undoing back to a state before the results were loaded
 
@@ -40,8 +38,6 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
 
   public render() {
     const transcript = this.props.transcript.present
-
-    console.log("transcript", transcript)
 
     // Loading from Firebase
     if (transcript === null) {

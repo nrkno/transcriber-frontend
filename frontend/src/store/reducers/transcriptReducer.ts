@@ -1,6 +1,7 @@
 import update from "immutability-helper"
 import { Action } from "redux"
-import { IWord } from "../../interfaces"
+import { database } from "../../firebaseApp"
+import { IResult, IWord } from "../../interfaces"
 
 const initState = {}
 
@@ -128,10 +129,8 @@ const transcriptReducer = (state = initState, action: Action) => {
   function splitResult(resultIndex: number, wordIndex: number, state: State) {
     console.log("SPLIt result", state)
 
-    const results = state.results!
-
     // Return if we're at the last word in the result
-    if (wordIndex === results[resultIndex].words.length - 1) {
+    if (wordIndex === state.results[resultIndex].words.length - 1) {
       return state
     }
 
@@ -139,48 +138,30 @@ const transcriptReducer = (state = initState, action: Action) => {
     const start = wordIndex + 1
 
     // Making a deep copy of the results, splicing off the rest of the words in the current result
-    const newResults = update(results, {
+    const results: IResult[] = update(state.results, {
       [resultIndex]: {
         words: { $splice: [[start]] },
       },
     })
 
     // Deep clone the the rest of the words, which will be moved to the next result
-    const wordsToMove: IWord[] = JSON.parse(JSON.stringify(results[resultIndex].words.slice(start)))
-    console.log("words to move", wordsToMove)
+    const words: IWord[] = JSON.parse(JSON.stringify(state.results[resultIndex].words.slice(start)))
+    console.log("words to move", words)
 
-    // Check if there's another result after the current one
-    if (resultIndex + 1 < results.length) {
-      newResults[resultIndex + 1].words.splice(0, 0, ...wordsToMove)
+    // We push a new result to the array
 
-      // Also need to update the start time of the result where we just added words
-      newResults[resultIndex + 1].startTime = wordsToMove[0].startTime
+    const result: IResult = {
+      id: database.collection("/dummypath").doc().id,
+      startTime: words[0].startTime,
+      words,
+    }
 
-      return {
-        ...state,
-        results: newResults,
-      }
-    } else {
-      // We're at the last result, create a new one
-      // We push a new result to the array
+    // Insert the new result in the correct place
+    results.splice(resultIndex + 1, 0, result)
 
-      const result: IResult = {
-        startTime: wordsToMove[0].startTime,
-        words: wordsToMove,
-      }
-
-      newResults.push(result)
-
-      // We also need to create a new id in result ids.
-
-      const resultId = database.collection("/dummypath").doc().id
-
-      const resultIds = update(this.state.resultIds, { $push: [resultId] })
-
-      return {
-        resultIds,
-        results: newResults,
-      }
+    return {
+      ...state,
+      results,
     }
   }
 }

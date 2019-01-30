@@ -2,6 +2,10 @@ import ReactGA from "react-ga"
 import { Dispatch } from "redux"
 import { ITranscript } from "../../interfaces"
 
+////////////
+// CREATE //
+////////////
+
 export const createTranscript = (transcriptId: string, transcript: ITranscript) => async (dispatch: Dispatch, getState, { getFirebase, getFirestore }) => {
   const firestore = getFirestore()
 
@@ -19,15 +23,9 @@ export const createTranscript = (transcriptId: string, transcript: ITranscript) 
   }
 }
 
-export const selectTranscript = (transcriptId: string, transcript: ITranscript) => (dispatch: Dispatch) => {
-  console.log("SELECT_TRANSCRIPT action", transcript)
-
-  dispatch({
-    transcript,
-    transcriptId,
-    type: "SELECT_TRANSCRIPT",
-  })
-}
+//////////
+// READ //
+//////////
 
 export const readResults = (transcriptId: string) => async (dispatch: Dispatch, getState, { getFirebase, getFirestore }) => {
   const firestore = getFirestore()
@@ -58,6 +56,10 @@ export const readResults = (transcriptId: string) => async (dispatch: Dispatch, 
   }
 }
 
+////////////
+// UPDATE //
+////////////
+
 export const updateWords = (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => (dispatch: Dispatch, getState) => {
   console.log("Dispatch UPDATE WORDS action", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
 
@@ -68,5 +70,29 @@ export const updateWords = (resultIndex: number, wordIndexStart: number, wordInd
     wordIndexEnd,
     wordIndexStart,
     words,
+  })
+}
+
+//////////
+// OTHER//
+//////////
+
+export const splitResults = (resultIndex: number, wordIndex: number) => (dispatch: Dispatch) => {
+  console.log("SPLIT_RESULTS action", resultIndex, wordIndex)
+
+  dispatch({
+    resultIndex,
+    type: "SPLIT_RESULTS",
+    wordIndex,
+  })
+}
+
+export const selectTranscript = (transcriptId: string, transcript: ITranscript) => (dispatch: Dispatch) => {
+  console.log("SELECT_TRANSCRIPT action", transcript)
+
+  dispatch({
+    transcript,
+    transcriptId,
+    type: "SELECT_TRANSCRIPT",
   })
 }

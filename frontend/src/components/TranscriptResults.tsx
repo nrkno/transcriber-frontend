@@ -10,7 +10,7 @@ import { ActionCreators as UndoActionCreators } from "redux-undo"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
 import secondsToTime from "../secondsToTime"
-import { readResults, updateWords } from "../store/actions/transcriptActions"
+import { readResults, splitResults, updateWords } from "../store/actions/transcriptActions"
 import Player from "./Player"
 import Word from "./Word"
 
@@ -22,7 +22,6 @@ interface IState {
   currentSelectedWordIndexStart?: number
   currentSelectedWordIndexEnd?: number
   resultIds?: string[]
-  resultIndecesWithChanges?: boolean[]
   editString?: string
 }
 
@@ -37,6 +36,7 @@ interface IReduxDispatchToProps {
   onRedo: () => void
   onUndo: () => void
   readResults: (transcriptId: string) => void
+  splitResults: (resultIndex: number, wordIndex: number) => void
   updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
 }
 
@@ -686,35 +686,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       batch.delete(resultsCollectionReference.doc(resultId))
     }
 
-    console.log("batch", batch)
-    // Commit the batch
-    await batch.commit()
-
-    // await database.doc(`transcripts/${this.props.transcriptId}/results/${resultId}`).set({ words: result.words }, { merge: true })
-
-    // Loop through latest and
-
-    /*TODO
-    const resultIndecesWithChanges = this.state.resultIndecesWithChanges!
-
     try {
-      for (const [index, hasChanges] of resultIndecesWithChanges.entries()) {
-        const results = this.props.transcript.present.results!
-
-        console.log(index)
-        console.log(hasChanges)
-
-        if (hasChanges) {
-          const result = results[index]
-          const resultId = this.state.resultIds![index]
-
-
-          // await database.doc(`transcripts/${this.props.transcriptId}/results/${resultId}`).update({ words: result.words })
-        }
-      }
-
-      // Reset change flags
-      this.setState({ resultIndecesWithChanges: new Array(resultIndecesWithChanges.length).fill(false) })
+      await batch.commit()
     } catch (error) {
       console.error(error)
       ReactGA.exception({
@@ -722,7 +695,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         fatal: false,
       })
     }
-    */
   }
 
   private deleteWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, selectPreviousWord: boolean) {
@@ -731,11 +703,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1]] },
       },
     })
-    /*
-    const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
-      [resultIndex]: { $set: true },
-    })
-*/
+
     let currentSelectedWordIndexStart = this.state.currentSelectedWordIndexStart!
 
     // Select the previous word
@@ -747,7 +715,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       currentSelectedWordIndexEnd: currentSelectedWordIndexStart,
       currentSelectedWordIndexStart,
       editString: undefined,
-      // resultIndecesWithChanges,
       results,
     })
   }
@@ -769,8 +736,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     this.setState({
       currentSelectedWordIndexEnd: wordIndexStart + words.length - 1,
       editString: text,
-      // TODO resultIndecesWithChanges,
-      //    results: newResults,
     })
 
     this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, true)
@@ -779,76 +744,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     console.log("PRØVER Å SKRIVE over ord", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
 
     this.props.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
-
-    /*TODO const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
-          [resultIndex]: { $set: true },
-        })*/
   }
 
   private splitResult(resultIndex: number, wordIndex: number) {
-    const results = this.props.transcript.present.results!
-
-    // Return if we're at the last word in the result
-    if (wordIndex === results[resultIndex].words.length - 1) {
-      return
-    }
-
-    // The split will be done from the next word
-    const start = wordIndex + 1
-
-    // Making a deep copy of the results, splicing off the rest of the words in the current result
-    const newResults = update(results, {
-      [resultIndex]: {
-        words: { $splice: [[start]] },
-      },
-    })
-
-    // Deep clone the the rest of the words, which will be moved to the next result
-    const wordsToMove: IWord[] = JSON.parse(JSON.stringify(results[resultIndex].words.slice(start)))
-    console.log("wordToMove", wordsToMove)
-
-    // Flag changes in both resultIndex and resultIndex + 1
-    const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
-      [resultIndex]: { $set: true },
-      [resultIndex + 1]: { $set: true },
-    })
-
-    // Check if there's another result after the current one
-    if (resultIndex + 1 < results.length) {
-      newResults[resultIndex + 1].words.splice(0, 0, ...wordsToMove)
-
-      // Also need to update the start time of the result where we just added words
-      newResults[resultIndex + 1].startTime = wordsToMove[0].startTime
-
-      this.setState({
-        resultIndecesWithChanges,
-        results: newResults,
-      })
-    } else {
-      // We're at the last result, create a new one
-      // We push a new result to the array
-
-      const result: IResult = {
-        startTime: wordsToMove[0].startTime,
-        words: wordsToMove,
-      }
-
-      newResults.push(result)
-
-      // We also need to create a new id in result ids.
-
-      const resultId = database.collection("/dummypath").doc().id
-
-      const resultIds = update(this.state.resultIds, { $push: [resultId] })
-
-      this.setState({
-        resultIds,
-        resultIndecesWithChanges,
-        results: newResults,
-      })
-    }
+    this.props.splitResults(resultIndex, wordIndex)
   }
 }
+
+// Redux
 
 const mapStateToProps = (state: State): IReduxStateToProps => {
   return {
@@ -861,6 +764,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
     onRedo: () => dispatch(UndoActionCreators.redo()),
     onUndo: () => dispatch(UndoActionCreators.undo()),
     readResults: (transcriptId: string) => dispatch(readResults(transcriptId)),
+    splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
     updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => dispatch(updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)),
   }
 }

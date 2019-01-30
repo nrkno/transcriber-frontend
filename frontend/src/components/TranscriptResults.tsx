@@ -450,7 +450,10 @@ class TranscriptResults extends Component<IProps, IState> {
             const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexEnd + 1]
             const wordTextLastChar = wordText.charAt(wordText.length - 1)
 
-            const words = [wordText, ""]
+            let removePuncation = false
+            let addPuncation = false
+            let nextWordToLowerCase = false
+            let nextWordToUpperCase = false
 
             //
             // Remove punctation
@@ -459,16 +462,14 @@ class TranscriptResults extends Component<IProps, IState> {
             // If last char is a punctation char, we remove it
 
             if (wordTextLastChar === "." || wordTextLastChar === "," || wordTextLastChar === "!" || wordTextLastChar === "?") {
-              words[0] = words[0].slice(0, -1)
+              removePuncation = true
 
               // Lower case next word if it exist and is not lower case
 
               if (nextWord !== undefined && (key === "." || key === "!" || key === "?") && nextWord.word[0] === nextWord.word[0].toUpperCase()) {
-                words[1] = nextWord.word.toLowerCase()
+                nextWordToLowerCase = true
               }
             }
-
-            console.log("words1", words)
 
             //
             // Add punctation
@@ -476,25 +477,43 @@ class TranscriptResults extends Component<IProps, IState> {
 
             if (wordTextLastChar !== key) {
               // Add punctation
-              words[0] = words[0] + key
+
+              addPuncation = true
 
               // Check to see if we need to lower case the next word
               if (nextWord !== undefined) {
                 if (key === "." || key === "!" || key === "?") {
                   if (nextWord.word[0] !== nextWord.word[0].toUpperCase()) {
-                    words[1] = nextWord.word[0].toUpperCase() + nextWord.word.substring(1)
+                    nextWordToUpperCase = true
+                  } else {
+                    // Next word is already uppercase, cancel the effect of nextWordToLowerCase = true from above
+                    nextWordToLowerCase = false
                   }
                 } else if (nextWord.word[0] !== nextWord.word[0].toLowerCase()) {
-                  words[1] = nextWord.word[0].toLowerCase() + nextWord.word.substring(1)
+                  nextWordToLowerCase = true
                 }
               }
             }
 
-            // Hydrate the words, remove empty strings
-            const hydratedWords = words.filter(word => word)
+            let firstWordText = wordText
+            let nextWordText = null
 
-            console.log("words2", words)
-            this.props.updateWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd + hydratedWords.length - 1, hydratedWords, false)
+            if (removePuncation) {
+              firstWordText = firstWordText.slice(0, -1)
+            }
+            if (addPuncation) {
+              firstWordText += key
+            }
+
+            if (nextWordToUpperCase) {
+              nextWordText = nextWord.word[0].toUpperCase() + nextWord.word.substring(1)
+            } else if (nextWordToLowerCase) {
+              nextWordText = nextWord.word[0].toLowerCase() + nextWord.word.substring(1)
+            }
+
+            const words = [firstWordText, nextWordText].filter(word => word)
+
+            this.props.updateWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd + words.length - 1, words, false)
 
             break
           }

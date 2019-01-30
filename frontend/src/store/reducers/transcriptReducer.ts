@@ -120,6 +120,7 @@ const transcriptReducer = (state = initState, action: Action) => {
     })*/
 
       return {
+        ...state,
         results,
       }
 

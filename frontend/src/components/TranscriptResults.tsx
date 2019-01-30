@@ -35,10 +35,18 @@ class TranscriptResults extends Component<IProps, IState> {
     }
   }
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
-    console.log("componentDidUpdate")
+    console.log("TRANSCRIPT RESULT componentDidUpdate")
 
+    console.log(prevProps)
+    console.log(this.props)
+
+    // store.dispatch(ActionCreators.clearHistory())
+
+    /*TODO
     // Check last editing words ends with a space, in that case, we remove it.
     // Edit string ends with space and we are finished editing. We remove the extra space
+
+
 
     if (
       this.state.editString === undefined &&
@@ -62,7 +70,7 @@ class TranscriptResults extends Component<IProps, IState> {
       })
 
       this.setState({ results })
-    }
+    }*/
     /*
     if (this.props.transcriptId !== prevProps.transcriptId) {
       this.fetchResults()

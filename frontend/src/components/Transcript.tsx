@@ -2,6 +2,7 @@ import * as React from "react"
 import ReactGA from "react-ga"
 import { connect } from "react-redux"
 import { RouteComponentProps } from "react-router"
+import { ActionCreators } from "redux-undo"
 import { Step, SweetProgressStatus } from "../enums"
 import { functions } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
@@ -15,7 +16,28 @@ interface IProps {
   transcriptId?: string
 }
 
-class Transcript extends React.Component<RouteComponentProps<{}> & IProps> {
+interface IReduxStateToProps {
+  transcript: {
+    present: ITranscript
+  }
+}
+
+interface IReduxDispatchToProps {
+  clearHistory: () => void
+}
+
+class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateToProps & IReduxDispatchToProps> {
+  public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps) {
+    console.log("TRANSCRIPT componentDidUpdate")
+
+    // When the results are loaded the first, we reset the undo history
+    // This is to stop users from undoing back to a state before the results were loaded
+
+    if (prevProps.transcript.present.results === undefined && this.props.transcript.present.results !== undefined) {
+      this.props.clearHistory()
+    }
+  }
+
   public render() {
     const transcript = this.props.transcript.present
 
@@ -23,7 +45,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps> {
 
     // Loading from Firebase
     if (transcript === null) {
-      return null
+      return "Loading"
     }
     // Transcription not found
     else if (transcript === undefined) {
@@ -51,19 +73,37 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps> {
               if (isDone) {
                 return (
                   <>
-                    <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
-                      <svg width="20" height="20" focusable="false" aria-hidden="true">
-                        <use xlinkHref="#icon-download" />
-                      </svg>{" "}
-                      docx
-                    </button>
+                    {(() => {
+                      if (this.props.transcript.past.length === 0) {
+                        return (
+                          <>
+                            <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
+                              <svg width="20" height="20" focusable="false" aria-hidden="true">
+                                <use xlinkHref="#icon-download" />
+                              </svg>{" "}
+                              docx
+                            </button>
 
-                    <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("xmp")}>
-                      <svg width="20" height="20" focusable="false" aria-hidden="true">
-                        <use xlinkHref="#icon-download" />
-                      </svg>{" "}
-                      xmp
-                    </button>
+                            <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("xmp")}>
+                              <svg width="20" height="20" focusable="false" aria-hidden="true">
+                                <use xlinkHref="#icon-download" />
+                              </svg>{" "}
+                              xmp
+                            </button>
+                          </>
+                        )
+                      } else {
+                        return (
+                          <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
+                            <svg width="20" height="20" focusable="false" aria-hidden="true">
+                              <use xlinkHref="#icon-download" />
+                            </svg>{" "}
+                            Lagre
+                          </button>
+                        )
+                      }
+                    })()}
+
                     <button className="org-btn" onClick={this.handleDeleteButtonClicked}>
                       <svg width="20" height="20" focusable="false" aria-hidden="true">
                         <use xlinkHref="#icon-garbage" />
@@ -73,7 +113,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps> {
                   </>
                 )
               } else {
-                return
+                return "Loading transcript"
               }
             })()}
           </section>
@@ -128,10 +168,19 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps> {
   }
 }
 
-const mapStateToProps = (state: State): IStateProps => {
+const mapStateToProps = (state: State): IReduxStateToProps => {
   return {
     transcript: state.transcript,
   }
 }
 
-export default connect(mapStateToProps)(Transcript)
+const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
+  return {
+    clearHistory: () => dispatch(ActionCreators.clearHistory()),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Transcript)

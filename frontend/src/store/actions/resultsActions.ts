@@ -30,14 +30,15 @@ export const readResults = (transcriptId: string) => async (dispatch: Dispatch, 
   }
 }
 
-export const writeWord = (resultIndex: number, wordIndex: number, text: string, isEditedByUser: boolean) => (dispatch: Dispatch, getState) => {
-  console.log("WRITE WORD action")
+export const updateWords = (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => (dispatch: Dispatch, getState) => {
+  console.log("Dispatch UPDATE WORDS action", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
 
   dispatch({
-    isEditedByUser,
+    recalculate,
     resultIndex,
-    text,
-    type: "WRITE_WORD",
-    wordIndex,
+    type: "UPDATE_WORDS",
+    wordIndexEnd,
+    wordIndexStart,
+    words,
   })
 }

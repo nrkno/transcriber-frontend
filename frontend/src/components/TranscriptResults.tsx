@@ -8,7 +8,7 @@ import { ActionCreators as UndoActionCreators } from "redux-undo"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
 import secondsToTime from "../secondsToTime"
-import { readResults, writeWord } from "../store/actions/resultsActions"
+import { readResults, updateWords } from "../store/actions/resultsActions"
 import Player from "./Player"
 import Word from "./Word"
 
@@ -424,11 +424,11 @@ class TranscriptResults extends Component<IProps, IState> {
           if (this.state.editString === undefined && currentSelectedWordIndexStart === currentSelectedWordIndexEnd) {
             // Lower case to capitalised case
             if (currentWord === currentWord.toLowerCase()) {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord[0].toUpperCase() + currentWord.substring(1), true)
+              this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, [currentWord[0].toUpperCase() + currentWord.substring(1)], false)
             }
             // Lower case
             else {
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexStart, currentWord.toLowerCase(), true)
+              this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, [currentWord.toLowerCase()], false)
             }
           }
           break
@@ -457,14 +457,14 @@ class TranscriptResults extends Component<IProps, IState> {
 
               word = word.slice(0, -1)
 
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd, word, true)
+              this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexEnd, word, true)
 
               // Lower case next word if it exist
 
               const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexEnd + 1]
 
               if (nextWord !== undefined && (key === "." || key === "!" || key === "?")) {
-                this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
+                this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
               }
             }
 
@@ -472,15 +472,15 @@ class TranscriptResults extends Component<IProps, IState> {
 
             if (lastChar !== key) {
               console.log("ADD CHAR")
-              this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd, word + key, true)
+              this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexEnd, word + key, true)
 
               const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexEnd + 1]
 
               if (nextWord !== undefined) {
                 if (key === "." || key === "!" || key === "?") {
-                  this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1), false)
+                  this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1), false)
                 } else {
-                  this.setWord(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
+                  this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
                 }
               }
             }
@@ -726,33 +726,14 @@ class TranscriptResults extends Component<IProps, IState> {
       results: newResults,
     })
   }
-  private setWord(resultIndex: number, wordIndex: number, text: string, isEditedByUser: boolean) {
-    console.log("PRØVER Å SKRIVE over ord")
+  private updateWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) {
+    console.log("PRØVER Å SKRIVE over ord", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
 
-    this.props.writeWord(resultIndex, wordIndex, text, isEditedByUser)
+    this.props.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
 
-    /*
-    console.log("setWord", resultIndex, wordIndex)
-
-    const results = update(this.props.results.present.results, {
-      [resultIndex]: {
-        words: {
-          [wordIndex]: {
-            confidence: { $set: isEditedByUser ? 1 : this.props.results.present.results[resultIndex].words[wordIndex].confidence },
-            word: { $set: text },
-          },
-        },
-      },
-    })
-
-     TODO const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
-      [resultIndex]: { $set: true },
-    })
-
-    this.setState({
-      // TODO resultIndecesWithChanges,
-      results,
-    })*/
+    /*TODO const resultIndecesWithChanges = update(this.state.resultIndecesWithChanges, {
+          [resultIndex]: { $set: true },
+        })*/
   }
 
   private splitResult(resultIndex: number, wordIndex: number) {
@@ -831,7 +812,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
     onRedo: () => dispatch(UndoActionCreators.redo()),
     onUndo: () => dispatch(UndoActionCreators.undo()),
     readResults: (transcriptId: string) => dispatch(readResults(transcriptId)),
-    writeWord: (resultIndex: number, wordIndex: number, text: string, isEditedByUser: boolean) => dispatch(writeWord(resultIndex, wordIndex, text, isEditedByUser)),
+    updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => dispatch(updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)),
   }
 }
 

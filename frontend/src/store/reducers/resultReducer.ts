@@ -14,23 +14,34 @@ const resultReducer = (state = initState, action: Action) => {
         results: action.payload,
       }
 
-    case "WRITE_WORD":
-      console.log("WRITE_WORD")
+    case "UPDATE_WORDS":
+      const { recalculate, resultIndex, wordIndexEnd, wordIndexStart, words } = action
 
-      const { isEditedByUser, resultIndex, text, wordIndex } = action
+      console.log("UPDATE_WORD reducer", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
 
-      console.log("KOMMER HIT", isEditedByUser, resultIndex, text, wordIndex)
+      const newWords = Array<IWord>()
 
-      console.log("state", state)
+      if (recalculate === false) {
+        console.log("Don't recalc")
 
+        for (const [index, word] of words.entries()) {
+          console.log(index, word)
+
+          newWords.push({
+            confidence: 1,
+            endTime: state.results[resultIndex].words[wordIndexEnd + index].endTime,
+            startTime: state.results[resultIndex].words[wordIndexStart + index].startTime,
+            word,
+          })
+        }
+      }
+
+      console.log("newWords", newWords)
+
+      // Replace array of words in correct position
       const results = update(state.results, {
         [resultIndex]: {
-          words: {
-            [wordIndex]: {
-              // TODO confidence: { $set: isEditedByUser ? 1 : state.results[resultIndex].words[wordIndex].confidence },
-              word: { $set: text },
-            },
-          },
+          words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords]] },
         },
       })
 

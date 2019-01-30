@@ -3,14 +3,13 @@ import { combineReducers } from "redux"
 import { firestoreReducer } from "redux-firestore"
 import undoable from "redux-undo"
 import authReducer from "./authReducer"
-import resultReducer from "./resultReducer"
+import transcriptReducer from "./transcriptReducer"
 
 const rootReducer = combineReducers({
   auth: authReducer,
   firebase: firebaseReducer,
   firestore: firestoreReducer,
-  results: undoable(resultReducer),
-  // results: resultReducer,
+  transcript: undoable(transcriptReducer),
 })
 
 export default rootReducer

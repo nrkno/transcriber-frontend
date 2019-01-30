@@ -4,13 +4,24 @@ import { IWord } from "../../interfaces"
 
 const initState = {}
 
-const resultReducer = (state = initState, action: Action) => {
+const transcriptReducer = (state = initState, action: Action) => {
   switch (action.type) {
-    case "RESULT_READ":
-      console.log("action.payload", action.payload)
+    case "READ_RESULTS":
+      console.log("action.payload", action.results)
 
       return {
-        results: action.payload,
+        ...state,
+        results: action.results,
+      }
+    case "SELECT_TRANSCRIPT":
+      console.log("SELECT_TRANSCRIPT reducer", state)
+
+      const transcriptId = action.transcriptId
+      const transcript = action.transcript
+
+      return {
+        id: transcriptId,
+        ...transcript,
       }
 
     case "UPDATE_WORDS":
@@ -117,4 +128,4 @@ const resultReducer = (state = initState, action: Action) => {
   }
 }
 
-export default resultReducer
+export default transcriptReducer

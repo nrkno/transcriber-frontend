@@ -1,11 +1,14 @@
 import React, { Component } from "react"
 import { connect } from "react-redux"
 import { RouteComponentProps } from "react-router"
+import { ITranscript } from "../interfaces"
+import { selectTranscript } from "../store/actions/transcriptActions"
 import CreateTranscript from "./CreateTranscript"
 import Transcript from "./Transcript"
 import TranscriptsList from "./TranscriptsList"
 
 interface IStateProps {
+  transcript: ITranscript
   user: firebase.User
 }
 
@@ -48,6 +51,10 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
 
   public handleTranscriptIdSelected = async (transcriptId: string) => {
     this.props.history.push(`/transcripts/${transcriptId}`)
+
+    const transcript = this.props.transcripts[transcriptId]
+
+    this.props.selectTranscript(transcriptId, transcript)
   }
 
   private transcriptCreated = (transcriptId: string) => {
@@ -61,7 +68,17 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
 const mapStateToProps = (state: State): IStateProps => {
   return {
     user: state.firebase.auth,
+    transcripts: state.firestore.data.transcripts,
   }
 }
 
-export default connect(mapStateToProps)(Transcripts)
+const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
+  return {
+    selectTranscript: (transcriptId: string, transcript: ITranscript) => dispatch(selectTranscript(transcriptId, transcript)),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Transcripts)

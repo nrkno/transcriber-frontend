@@ -1,8 +1,9 @@
 import * as React from "react"
 import ReactGA from "react-ga"
+import { connect } from "react-redux"
 import { RouteComponentProps } from "react-router"
 import { Step, SweetProgressStatus } from "../enums"
-import { database, functions } from "../firebaseApp"
+import { functions } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 import Process from "./Process"
 import TranscriptionProgress from "./TranscriptionProgress"
@@ -14,38 +15,11 @@ interface IProps {
   transcriptId?: string
 }
 
-interface IState {
-  transcript?: ITranscript | null
-}
-
-class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IState> {
-  private unsubscribe: () => void
-
-  constructor(props: any) {
-    super(props)
-    this.state = {
-      transcript: null,
-    }
-  }
-
-  public componentDidUpdate(prevProps: IProps) {
-    if (this.props.transcriptId && this.props.transcriptId !== prevProps.transcriptId) {
-      this.fetchTranscript(this.props.transcriptId)
-    }
-  }
-
-  public componentWillUnmount() {
-    this.unsubscribe()
-  }
-
-  public componentDidMount() {
-    if (this.props.transcriptId) {
-      this.fetchTranscript(this.props.transcriptId)
-    }
-  }
-
+class Transcript extends React.Component<RouteComponentProps<{}> & IProps> {
   public render() {
-    const transcript = this.state.transcript
+    const transcript = this.props.transcript.present
+
+    console.log("transcript", transcript)
 
     // Loading from Firebase
     if (transcript === null) {
@@ -108,7 +82,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IStat
             if (isDone) {
               return (
                 <div className="results">
-                  <TranscriptResults transcript={transcript} transcriptId={this.props.transcriptId} />
+                  <TranscriptResults />
                 </div>
               )
             } else {
@@ -118,29 +92,6 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IStat
         </main>
       )
     }
-  }
-  private fetchTranscript(transcriptId: string) {
-    this.unsubscribe = database.doc(`transcripts/${transcriptId}`).onSnapshot(
-      documentSnapshot => {
-        const transcript = documentSnapshot.data() as ITranscript
-
-        this.setState({
-          transcript,
-        })
-      },
-      error => {
-        console.error(error)
-
-        ReactGA.exception({
-          description: error.message,
-          fatal: false,
-        })
-
-        this.setState({
-          transcript: undefined,
-        })
-      },
-    )
   }
 
   private handleExportTranscriptButtonClicked = (type: string) => {
@@ -177,4 +128,10 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IProps, IStat
   }
 }
 
-export default Transcript
+const mapStateToProps = (state: State): IStateProps => {
+  return {
+    transcript: state.transcript,
+  }
+}
+
+export default connect(mapStateToProps)(Transcript)

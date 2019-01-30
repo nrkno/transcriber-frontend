@@ -6,7 +6,6 @@ import { firestoreConnect } from "react-redux-firebase"
 import { compose } from "redux"
 import "../css/TranscriptsList.css"
 import { Step } from "../enums"
-import { ITranscript } from "../interfaces"
 import UploadButton from "./UploadButton"
 
 interface IProps {
@@ -16,23 +15,7 @@ interface IProps {
   userId: string
 }
 
-interface IState {
-  transcripts?: ITranscript[]
-  transcriptIds?: string[]
-}
-
-class TranscriptsList extends Component<IProps, IState> {
-  private unsubscribe: () => void
-
-  constructor(props: IProps) {
-    super(props)
-    this.state = {}
-  }
-
-  public componentDidMount() {
-    // this.fetchTranscripts(this.props.userId)
-  }
-
+class TranscriptsList extends Component<IProps> {
   public render() {
     return (
       <div className="trans-list org-color-shade org-shadow-l org-color-base">
@@ -126,10 +109,6 @@ class TranscriptsList extends Component<IProps, IState> {
         <UploadButton fileSelected={this.props.handleFileSelected} userId={this.props.userId} />
       </div>
     )
-  }
-
-  public componentWillUnmount() {
-    this.unsubscribe()
   }
 
   private handleRowClick = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {

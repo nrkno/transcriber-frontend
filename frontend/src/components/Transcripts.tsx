@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { connect } from "react-redux"
 import { RouteComponentProps } from "react-router"
+import { Dispatch } from "redux"
 import { ITranscript } from "../interfaces"
 import { selectTranscript } from "../store/actions/transcriptActions"
 import CreateTranscript from "./CreateTranscript"
@@ -8,7 +9,7 @@ import Transcript from "./Transcript"
 import TranscriptsList from "./TranscriptsList"
 
 interface IStateProps {
-  transcript: ITranscript
+  transcripts: ITranscript[]
   user: firebase.User
 }
 
@@ -67,8 +68,8 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
 
 const mapStateToProps = (state: State): IStateProps => {
   return {
-    user: state.firebase.auth,
     transcripts: state.firestore.data.transcripts,
+    user: state.firebase.auth,
   }
 }
 

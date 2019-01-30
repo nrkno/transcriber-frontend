@@ -447,44 +447,54 @@ class TranscriptResults extends Component<IProps, IState> {
         case "?":
           if (this.state.editString === undefined) {
             const wordText = results![currentSelectedResultIndex].words[currentSelectedWordIndexEnd].word
-            const nextWordText = results[currentSelectedResultIndex].words[currentSelectedWordIndexEnd + 1].word
+            const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexEnd + 1]
             const wordTextLastChar = wordText.charAt(wordText.length - 1)
 
-            const words = new Array<string>()
+            const words = [wordText, ""]
+
+            //
+            // Remove punctation
+            //
 
             // If last char is a punctation char, we remove it
 
             if (wordTextLastChar === "." || wordTextLastChar === "," || wordTextLastChar === "!" || wordTextLastChar === "?") {
-              words.push(wordText.slice(0, -1))
-
-              // this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexEnd, word, true)
+              words[0] = words[0].slice(0, -1)
 
               // Lower case next word if it exist and is not lower case
 
-              if (nextWordText !== undefined && (key === "." || key === "!" || key === "?") && nextWordText[0] === nextWordText[0].toUpperCase()) {
-                words.push(nextWordText.toLowerCase())
-
-                // this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
+              if (nextWord !== undefined && (key === "." || key === "!" || key === "?") && nextWord.word[0] === nextWord.word[0].toUpperCase()) {
+                words[1] = nextWord.word.toLowerCase()
               }
             }
 
+            console.log("words1", words)
+
+            //
             // Add punctation
+            //
 
             if (wordTextLastChar !== key) {
-              if (words.length > 0) {
-                words[0] = wordText + key
-              } else {
-                words.push(wordText + key)
-              }
+              // Add punctation
+              words[0] = words[0] + key
 
-              if (nextWordText !== undefined) {
+              // Check to see if we need to lower case the next word
+              if (nextWord !== undefined) {
                 if (key === "." || key === "!" || key === "?") {
-                  this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toUpperCase() + nextWord.word.substring(1), false)
-                } else {
-                  this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexEnd + 1, nextWord.word[0].toLowerCase() + nextWord.word.substring(1), false)
+                  if (nextWord.word[0] !== nextWord.word[0].toUpperCase()) {
+                    words[1] = nextWord.word[0].toUpperCase() + nextWord.word.substring(1)
+                  }
+                } else if (nextWord.word[0] !== nextWord.word[0].toLowerCase()) {
+                  words[1] = nextWord.word[0].toLowerCase() + nextWord.word.substring(1)
                 }
               }
             }
+
+            // Hydrate the words, remove empty strings
+            const hydratedWords = words.filter(word => word)
+
+            console.log("words2", words)
+            this.props.updateWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd + hydratedWords.length - 1, hydratedWords, false)
 
             break
           }

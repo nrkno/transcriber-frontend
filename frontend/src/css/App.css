@@ -67,6 +67,291 @@ header div.user a {
   text-decoration: none;
 }
 
+/* Heat map */
+
+.confidence-0 {
+  border-bottom: 2px solid #000000;
+}
+.confidence-1 {
+  border-bottom: 2px solid #080000;
+}
+.confidence-2 {
+  border-bottom: 2px solid #0f0000;
+}
+.confidence-3 {
+  border-bottom: 2px solid #170000;
+}
+.confidence-4 {
+  border-bottom: 2px solid #1f0000;
+}
+.confidence-5 {
+  border-bottom: 2px solid #260000;
+}
+.confidence-6 {
+  border-bottom: 2px solid #2e0000;
+}
+.confidence-7 {
+  border-bottom: 2px solid #360000;
+}
+.confidence-8 {
+  border-bottom: 2px solid #3d0000;
+}
+.confidence-9 {
+  border-bottom: 2px solid #450000;
+}
+.confidence-10 {
+  border-bottom: 2px solid #4d0000;
+}
+.confidence-11 {
+  border-bottom: 2px solid #540000;
+}
+.confidence-12 {
+  border-bottom: 2px solid #5c0000;
+}
+.confidence-13 {
+  border-bottom: 2px solid #640000;
+}
+.confidence-14 {
+  border-bottom: 2px solid #6b0000;
+}
+.confidence-15 {
+  border-bottom: 2px solid #730000;
+}
+.confidence-16 {
+  border-bottom: 2px solid #7b0000;
+}
+.confidence-17 {
+  border-bottom: 2px solid #820000;
+}
+.confidence-18 {
+  border-bottom: 2px solid #8a0000;
+}
+.confidence-19 {
+  border-bottom: 2px solid #920000;
+}
+.confidence-20 {
+  border-bottom: 2px solid #990000;
+}
+.confidence-21 {
+  border-bottom: 2px solid #a10000;
+}
+.confidence-22 {
+  border-bottom: 2px solid #a90000;
+}
+.confidence-23 {
+  border-bottom: 2px solid #b00000;
+}
+.confidence-24 {
+  border-bottom: 2px solid #b80000;
+}
+.confidence-25 {
+  border-bottom: 2px solid #c00000;
+}
+.confidence-26 {
+  border-bottom: 2px solid #c70000;
+}
+.confidence-27 {
+  border-bottom: 2px solid #cf0000;
+}
+.confidence-28 {
+  border-bottom: 2px solid #d70000;
+}
+.confidence-29 {
+  border-bottom: 2px solid #de0000;
+}
+.confidence-30 {
+  border-bottom: 2px solid #e60000;
+}
+.confidence-31 {
+  border-bottom: 2px solid #e70700;
+}
+.confidence-32 {
+  border-bottom: 2px solid #e80e00;
+}
+.confidence-33 {
+  border-bottom: 2px solid #e91500;
+}
+.confidence-34 {
+  border-bottom: 2px solid #e91c00;
+}
+.confidence-35 {
+  border-bottom: 2px solid #ea2300;
+}
+.confidence-36 {
+  border-bottom: 2px solid #eb2a00;
+}
+.confidence-37 {
+  border-bottom: 2px solid #ec3100;
+}
+.confidence-38 {
+  border-bottom: 2px solid #ed3800;
+}
+.confidence-39 {
+  border-bottom: 2px solid #ee3f00;
+}
+.confidence-40 {
+  border-bottom: 2px solid #ee4600;
+}
+.confidence-41 {
+  border-bottom: 2px solid #ef4d00;
+}
+.confidence-42 {
+  border-bottom: 2px solid #f05400;
+}
+.confidence-43 {
+  border-bottom: 2px solid #f15b00;
+}
+.confidence-44 {
+  border-bottom: 2px solid #f26200;
+}
+.confidence-45 {
+  border-bottom: 2px solid #f36900;
+}
+.confidence-46 {
+  border-bottom: 2px solid #f37000;
+}
+.confidence-47 {
+  border-bottom: 2px solid #f47700;
+}
+.confidence-48 {
+  border-bottom: 2px solid #f57e00;
+}
+.confidence-49 {
+  border-bottom: 2px solid #f68500;
+}
+.confidence-50 {
+  border-bottom: 2px solid #f78c00;
+}
+.confidence-51 {
+  border-bottom: 2px solid #f89300;
+}
+.confidence-52 {
+  border-bottom: 2px solid #f89a00;
+}
+.confidence-53 {
+  border-bottom: 2px solid #f9a100;
+}
+.confidence-54 {
+  border-bottom: 2px solid #faa800;
+}
+.confidence-55 {
+  border-bottom: 2px solid #fbaf00;
+}
+.confidence-56 {
+  border-bottom: 2px solid #fcb600;
+}
+.confidence-57 {
+  border-bottom: 2px solid #fdbd00;
+}
+.confidence-58 {
+  border-bottom: 2px solid #fdc400;
+}
+.confidence-59 {
+  border-bottom: 2px solid #fecb00;
+}
+.confidence-60 {
+  border-bottom: 2px solid #ffd200;
+}
+.confidence-61 {
+  border-bottom: 2px solid #ffd306;
+}
+.confidence-62 {
+  border-bottom: 2px solid #ffd40d;
+}
+.confidence-63 {
+  border-bottom: 2px solid #ffd513;
+}
+.confidence-64 {
+  border-bottom: 2px solid #ffd71a;
+}
+.confidence-65 {
+  border-bottom: 2px solid #ffd820;
+}
+.confidence-66 {
+  border-bottom: 2px solid #ffd926;
+}
+.confidence-67 {
+  border-bottom: 2px solid #ffda2d;
+}
+.confidence-68 {
+  border-bottom: 2px solid #ffdb33;
+}
+.confidence-69 {
+  border-bottom: 2px solid #ffdc39;
+}
+.confidence-70 {
+  border-bottom: 2px solid #ffdd40;
+}
+.confidence-71 {
+  border-bottom: 2px solid #ffde46;
+}
+.confidence-72 {
+  border-bottom: 2px solid #ffe04d;
+}
+.confidence-73 {
+  border-bottom: 2px solid #ffe153;
+}
+.confidence-74 {
+  border-bottom: 2px solid #ffe259;
+}
+.confidence-75 {
+  border-bottom: 2px solid #ffe360;
+}
+.confidence-76 {
+  border-bottom: 2px solid #ffe466;
+}
+.confidence-77 {
+  border-bottom: 2px solid #ffe56c;
+}
+.confidence-78 {
+  border-bottom: 2px solid #ffe673;
+}
+.confidence-79 {
+  border-bottom: 2px solid #ffe779;
+}
+.confidence-80 {
+  border-bottom: 2px solid #ffe980;
+}
+.confidence-81 {
+  border-bottom: 2px solid #ffea86;
+}
+.confidence-82 {
+  border-bottom: 2px solid #ffeb8c;
+}
+.confidence-83 {
+  border-bottom: 2px solid #ffec93;
+}
+.confidence-84 {
+  border-bottom: 2px solid #ffed99;
+}
+.confidence-85 {
+  border-bottom: 2px solid #ffee9f;
+}
+.confidence-86 {
+  border-bottom: 2px solid #ffefa6;
+}
+.confidence-87 {
+  border-bottom: 2px solid #fff0ac;
+}
+.confidence-88 {
+  border-bottom: 2px solid #fff2b3;
+}
+.confidence-89 {
+  border-bottom: 2px solid #fff3b9;
+}
+.confidence-90 {
+  border-bottom: 2px solid #fff4bf;
+}
+.confidence-91 {
+  border-bottom: 2px solid #fff5c6;
+}
+.confidence-92 {
+  border-bottom: 2px solid #fff6cc;
+}
+.confidence-93 {
+  border-bottom: 2px solid #fff7d2;
+}
+
 /* Transcripts */
 
 hr {

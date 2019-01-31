@@ -160,7 +160,7 @@ class TranscriptResults extends Component<IProps, IState> {
                       if (isVisible) {
                         return result.words.map((word, j) => {
                           const isCurrentWord = this.state.currentResultIndex === i && this.state.currentWordIndex === j
-                          return <Word key={`word-${i}-${j}`} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
+                          return <Word key={`word-${i}-${j}`} confidence={Math.round(word.confidence * 100)} word={word} isCurrentWord={isCurrentWord} setCurrentWord={this.setCurrentWord} resultIndex={i} wordIndex={j} />
                         })
                       } else {
                         return result.words.map(word => {

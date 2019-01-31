@@ -41,6 +41,7 @@ interface IResult {
 }
 
 interface IWord {
+  confidence: number
   word: string
   endTime: number
   startTime: number

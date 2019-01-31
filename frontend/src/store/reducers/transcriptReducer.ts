@@ -144,8 +144,6 @@ const transcriptReducer = (state = initState, action: Action) => {
     }
   }
   function splitResult(resultIndex: number, wordIndex: number, state: State) {
-    console.log("SPLIt result", state)
-
     // Return if we're at the last word in the result
     if (wordIndex === state.results[resultIndex].words.length - 1) {
       return state
@@ -163,7 +161,6 @@ const transcriptReducer = (state = initState, action: Action) => {
 
     // Deep clone the the rest of the words, which will be moved to the next result
     const words: IWord[] = JSON.parse(JSON.stringify(state.results[resultIndex].words.slice(start)))
-    console.log("words to move", words)
 
     // We push a new result to the array
 

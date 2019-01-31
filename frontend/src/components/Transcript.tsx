@@ -62,6 +62,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
       // Check current step
 
       const isDone = transcript && transcript.process && transcript.process.step === Step.Done ? true : false
+      console.log("R", this.props.transcript.results)
 
       return (
         <main id="transcript">
@@ -73,7 +74,25 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
                 return (
                   <>
                     {(() => {
-                      if (this.props.transcript.past.length === 0) {
+                      if (this.props.transcript.present.results && this.props.transcript.past.length > 0) {
+                        return (
+                          <>
+                            <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
+                              <svg width="20" height="20" focusable="false" aria-hidden="true">
+                                <use xlinkHref="#icon-download" />
+                              </svg>{" "}
+                              Lagre (⌘S)
+                            </button>
+
+                            <button className="org-btn">
+                              <svg width="20" height="20" focusable="false" aria-hidden="true">
+                                <use xlinkHref="#icon-undo" />
+                              </svg>{" "}
+                              Angre (⌘Z)
+                            </button>
+                          </>
+                        )
+                      } else {
                         return (
                           <>
                             <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
@@ -95,24 +114,6 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
                                 <use xlinkHref="#icon-premiere" />
                               </svg>{" "}
                               xmp
-                            </button>
-                          </>
-                        )
-                      } else {
-                        return (
-                          <>
-                            <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
-                              <svg width="20" height="20" focusable="false" aria-hidden="true">
-                                <use xlinkHref="#icon-download" />
-                              </svg>{" "}
-                              Lagre (⌘S)
-                            </button>
-
-                            <button className="org-btn">
-                              <svg width="20" height="20" focusable="false" aria-hidden="true">
-                                <use xlinkHref="#icon-undo" />
-                              </svg>{" "}
-                              Angre (⌘Z)
                             </button>
                           </>
                         )

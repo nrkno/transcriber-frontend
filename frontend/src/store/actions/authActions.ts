@@ -1,9 +1,7 @@
 import { User } from "firebase"
 import { Dispatch } from "redux"
 
-export const fetchUser = () => (dispatch: Dispatch, getState, { getFirebase }) => {
-  const firebase = getFirebase()
-
+export const fetchUser = () => (dispatch: Dispatch, getState) => {
   firebase.auth().onAuthStateChanged((user: User) => {
     if (user) {
       dispatch({
@@ -17,10 +15,8 @@ export const fetchUser = () => (dispatch: Dispatch, getState, { getFirebase }) =
   })
 }
 
-export const logOut = () => async (dispatch: Dispatch, getState, { getFirebase }) => {
+export const logOut = () => async (dispatch: Dispatch, getState) => {
   console.log("Action: LOG OUT user")
-
-  const firebase = getFirebase()
 
   try {
     await firebase.auth().signOut()

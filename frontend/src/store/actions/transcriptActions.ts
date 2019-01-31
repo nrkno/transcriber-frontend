@@ -6,9 +6,7 @@ import { ITranscript } from "../../interfaces"
 // CREATE //
 ////////////
 
-export const createTranscript = (transcriptId: string, transcript: ITranscript) => async (dispatch: Dispatch, getState, { getFirebase, getFirestore }) => {
-  const firestore = getFirestore()
-
+export const createTranscript = (transcriptId: string, transcript: ITranscript) => async (dispatch: Dispatch, getState) => {
   try {
     await firestore.doc(`transcripts/${transcriptId}`).set(transcript)
 
@@ -27,9 +25,7 @@ export const createTranscript = (transcriptId: string, transcript: ITranscript) 
 // READ //
 //////////
 
-export const readResults = (transcriptId: string) => async (dispatch: Dispatch, getState, { getFirebase, getFirestore }) => {
-  const firestore = getFirestore()
-
+export const readResults = (transcriptId: string) => async (dispatch: Dispatch, getState) => {
   try {
     const querySnapshot = await firestore.get({ collection: `transcripts/${transcriptId}/results`, orderBy: "startTime" })
 

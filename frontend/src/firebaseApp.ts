@@ -1,3 +1,6 @@
+/*
+
+
 // This import loads the firebase namespace along with all its type information.
 import firebase from "firebase/app"
 
@@ -24,3 +27,6 @@ const storage = firebase.storage()
 
 export { auth, database, functions, storage }
 export default firebase
+
+
+*/

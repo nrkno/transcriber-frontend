@@ -51,7 +51,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps, prevState: IState) {
+    console.log("T result componentDidUpdate", prevProps.transcript.present.id, this.props.transcript.present.id)
+
     if (this.props.transcript.present.id !== prevProps.transcript.present.id) {
+      console.log("read")
       this.props.readResults(this.props.transcript.present.id)
 
       // Reset state

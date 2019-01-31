@@ -16,6 +16,19 @@ interface IProps {
 }
 
 class TranscriptsList extends Component<IProps> {
+  public componentDidUpdate(prevProps) {
+    console.log(prevProps)
+    console.log(this.props)
+
+    if (prevProps.transcripts === undefined && this.props.transcripts !== undefined) {
+      // Transcripts are loaded for the first time, select from URL
+
+      console.log("SHOUDL SELELC TAJSLASJd")
+
+      this.props.handleTranscriptIdSelected(this.props.selectedTranscriptId)
+    }
+  }
+
   public render() {
     return (
       <div className="trans-list org-color-shade org-shadow-l org-color-base">
@@ -114,7 +127,9 @@ class TranscriptsList extends Component<IProps> {
   private handleRowClick = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
     const transcriptId = event.currentTarget.dataset.transcriptId
 
-    this.props.handleTranscriptIdSelected(transcriptId)
+    if (transcriptId !== this.props.selectedTranscriptId) {
+      this.props.handleTranscriptIdSelected(transcriptId)
+    }
   }
 }
 const mapStateToProps = ({ firebase: { auth } }) => ({

@@ -11,15 +11,11 @@ const transcriptReducer = (state = initState, action: Action) => {
     // READ //
     //////////
     case "READ_RESULTS":
-      console.log("action.payload", action.results)
-
       return {
         ...state,
         results: action.results,
       }
     case "SELECT_TRANSCRIPT":
-      console.log("SELECT_TRANSCRIPT reducer", state)
-
       const transcriptId = action.transcriptId
       const transcript = action.transcript
 
@@ -118,14 +114,35 @@ const transcriptReducer = (state = initState, action: Action) => {
       }
 
     case "SPLIT_RESULTS":
-      console.log("SPLIT_RESULTS reducer", state)
-
       return splitResult(action.resultIndex, action.wordIndex, state)
+
+    case "JOIN_RESULTS":
+      console.log("JOIN_RESULTS reducer", state)
+
+      return joinResults(action.resultIndex, action.wordIndex, state)
 
     default:
       return state
   }
 
+  function joinResults(resultIndex: number, wordIndex: number, state: State) {
+    // Can't join the first result, or if selected word is not the first one
+    if (resultIndex === 0 || wordIndex !== 0) {
+      return state
+    }
+
+    const results: IResult[] = update(state.results, {
+      [resultIndex - 1]: {
+        words: { $push: state.results[resultIndex].words }, // Push words from selected result to previous result
+      },
+      $splice: [[resultIndex, 1]], // Removes selected result
+    })
+
+    return {
+      ...state,
+      results,
+    }
+  }
   function splitResult(resultIndex: number, wordIndex: number, state: State) {
     console.log("SPLIt result", state)
 

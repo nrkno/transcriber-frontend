@@ -10,7 +10,7 @@ import { ActionCreators as UndoActionCreators } from "redux-undo"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
 import secondsToTime from "../secondsToTime"
-import { readResults, splitResults, updateWords } from "../store/actions/transcriptActions"
+import { joinResults, readResults, splitResults, updateWords } from "../store/actions/transcriptActions"
 import Player from "./Player"
 import Word from "./Word"
 
@@ -33,6 +33,7 @@ interface IReduxStateToProps {
 }
 
 interface IReduxDispatchToProps {
+  joinResults: (resultIndex: number, wordIndex: number) => void
   onRedo: () => void
   onUndo: () => void
   readResults: (transcriptId: string) => void
@@ -594,7 +595,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           let editString = this.state.editString
 
           if (key === "Backspace") {
-            if (editString === undefined) {
+            if (event.getModifierState("Meta")) {
+              this.props.joinResults(currentSelectedResultIndex, currentSelectedWordIndexStart)
+              return
+            } else if (editString === undefined) {
               editString = currentWord
             }
             editString = editString.slice(0, -1)
@@ -759,6 +763,7 @@ const mapStateToProps = (state: State): IReduxStateToProps => {
 
 const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
   return {
+    joinResults: (resultIndex: number, wordIndex: number) => dispatch(joinResults(resultIndex, wordIndex)),
     onRedo: () => dispatch(UndoActionCreators.redo()),
     onUndo: () => dispatch(UndoActionCreators.undo()),
     readResults: (transcriptId: string) => dispatch(readResults(transcriptId)),

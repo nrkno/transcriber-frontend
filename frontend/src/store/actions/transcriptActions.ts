@@ -77,6 +77,16 @@ export const updateWords = (resultIndex: number, wordIndexStart: number, wordInd
 // OTHER//
 //////////
 
+export const joinResults = (resultIndex: number, wordIndex: number) => (dispatch: Dispatch) => {
+  console.log("JOIN_RESULTS action", resultIndex, wordIndex)
+
+  dispatch({
+    resultIndex,
+    type: "JOIN_RESULTS",
+    wordIndex,
+  })
+}
+
 export const splitResults = (resultIndex: number, wordIndex: number) => (dispatch: Dispatch) => {
   console.log("SPLIT_RESULTS action", resultIndex, wordIndex)
 

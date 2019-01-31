@@ -75,9 +75,9 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
                           <>
                             <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
                               <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                                <g fill="none" fill-rule="evenodd">
+                                <g fill="none" fillRule="evenodd">
                                   <path d="M17 0H3a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V3a3 3 0 0 0-3-3z" fill="#252627" />
-                                  <text font-family="Roboto-Medium, Roboto" font-size="15" font-weight="400" fill="#FFF" transform="translate(0 -2)">
+                                  <text fontFamily="Roboto-Medium, Roboto" fontSize="15" fontWeight="400" fill="#FFF" transform="translate(0 -2)">
                                     <tspan x="4.4" y="16">
                                       w
                                     </tspan>

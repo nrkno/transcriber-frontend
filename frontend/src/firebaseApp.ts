@@ -20,8 +20,6 @@ firebase.initializeApp(config)
 const auth = firebase.auth()
 const database = firebase.firestore()
 const functions = firebase.app().functions("europe-west1")
-const settings = { timestampsInSnapshots: true }
-database.settings(settings)
 const storage = firebase.storage()
 
 export { auth, database, functions, storage }

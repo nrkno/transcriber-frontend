@@ -12,8 +12,7 @@ service cloud.firestore {
       }
    
       match /results/{resultId} {
-      	allow list: if isSignedIn() && transcriptUserId() == request.auth.uid;
-        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      	allow list, update, create, delete: if isSignedIn() && transcriptUserId() == request.auth.uid;
       }
    		
       allow get: if isSignedIn() && resource.data.userId == request.auth.uid;

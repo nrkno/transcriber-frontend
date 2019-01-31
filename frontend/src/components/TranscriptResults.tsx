@@ -669,10 +669,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       }
     }
 
-    console.log("updateResults", updateResults)
-    console.log("createResults", createResults)
-    console.log("deleteIds", deleteIds)
-
     const resultsCollectionReference = database.collection(`transcripts/${this.props.transcript.present.id}/results/`)
     console.log(resultsCollectionReference)
     // Get a new write batch

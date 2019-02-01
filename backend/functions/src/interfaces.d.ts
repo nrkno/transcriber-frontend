@@ -22,8 +22,10 @@ interface IProcess {
 }
 
 interface IMetadata {
+  audioChannelCount?: number
   audioDuration?: number
   audioTopic?: string
+  enableSeparateRecognitionPerChannel: boolean
   fileExtension?: string
   industryNaicsCodeOfAudio?: number
   interactionType?: InteractionType
@@ -41,6 +43,8 @@ interface ISpeechContext {
 }
 
 interface IResult {
+  channelTag?: number
+  languageCode?: string
   startTime: number
   words: Array<IWord>
 }
@@ -68,6 +72,8 @@ interface IRecognitionAudio {
 
 interface ISpeechRecognitionResult {
   alternatives: Array<ISpeechRecognitionAlternative>
+  channelTag?: number
+  languageCode?: string
 }
 
 interface ISpeechRecognitionAlternative {
@@ -93,7 +99,7 @@ interface IRecognitionConfig {
   audioChannelCount?: number
   diarizationSpeakerCount?: number
   enableAutomaticPunctuation?: boolean
-  enableSeparateRecognitionPerChannel?: boolean
+  enableSeparateRecognitionPerChannel: boolean
   enableSpeakerDiarization?: boolean
   enableWordConfidence?: boolean
   enableWordTimeOffsets?: boolean

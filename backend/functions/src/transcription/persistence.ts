@@ -4,13 +4,16 @@
  */
 
 import database from "../database"
-import { IResult, ISpeechRecognitionAlternative, IWord } from "../interfaces"
+import { IResult, ISpeechRecognitionResult, IWord } from "../interfaces"
 
 export async function saveResult(speechRecognitionResults: any, transcriptId: string) {
   for (const index of speechRecognitionResults.keys()) {
-    const recognitionResult = speechRecognitionResults[index].alternatives[0] as ISpeechRecognitionAlternative
+    const recognitionResult = speechRecognitionResults[index] as ISpeechRecognitionResult
+    const alternative = recognitionResult.alternatives[0]
 
-    const words = recognitionResult.words.map(wordInfo => {
+    console.log(speechRecognitionResults[index])
+
+    const words = alternative.words.map(wordInfo => {
       let startTime = 0
       if (wordInfo.startTime) {
         if (wordInfo.startTime.seconds) {
@@ -42,6 +45,8 @@ export async function saveResult(speechRecognitionResults: any, transcriptId: st
 
     // Transform startTime and endTime's seconds and nanos
     const result: IResult = {
+      channelTag: recognitionResult.channelTag,
+      languageCode: recognitionResult.languageCode,
       startTime: words[0].startTime,
       words,
     }

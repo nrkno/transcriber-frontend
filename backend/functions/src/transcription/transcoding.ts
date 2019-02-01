@@ -20,7 +20,43 @@ interface IDurationAndGsUrl {
 }
 
 /**
- * Utility method to convert audio to mono channel using FFMPEG.
+ * Utility method to convert audio to FLAC using FFMPEG.
+ *
+ * Command line equivalent:
+ * ffmpeg -i input -y -ac 1 -vn -f flac output
+ *
+ */
+async function reencodeToFlac(tempFilePath: string, targetTempFilePath: string, transcriptId: string) {
+  return new Promise((resolve, reject) => {
+    ffmpeg(tempFilePath)
+      .setFfmpegPath(ffmpeg_static.path)
+      .noVideo()
+      .format("flac")
+      /*DEBUG
+      .on("start", commandLine => {
+        console.log("flac: Spawned Ffmpeg with command: " + commandLine)
+      })*/
+      .on("error", err => {
+        reject(err)
+      })
+      .on("end", () => {
+        resolve()
+      })
+      .on("codecData", async data => {
+        // Saving duration to database
+        audioDuration = hoursMinutesSecondsToSeconds(data.duration)
+        try {
+          await database.setDuration(transcriptId, audioDuration)
+        } catch (error) {
+          console.log(transcriptId, "Error in transcoding on('codecData')", error)
+        }
+      })
+      .save(targetTempFilePath)
+  })
+}
+
+/**
+ * Utility method to convert audio to FLAC mono using FFMPEG.
  *
  * Command line equivalent:
  * ffmpeg -i input -y -ac 1 -vn -f flac output
@@ -88,7 +124,7 @@ async function reencodeToM4a(input: string, output: string) {
  * When an audio is uploaded in the Storage bucket we generate a mono channel audio automatically using
  * node-fluent-ffmpeg.
  */
-export async function transcode(transcriptId: string, userId: string): Promise<IDurationAndGsUrl> {
+export async function transcode(transcriptId: string, userId: string, enableSeparateRecognitionPerChannel: boolean): Promise<IDurationAndGsUrl> {
   // -----------------------------------
   // 1. Check that we have an audio file
   // -----------------------------------
@@ -137,7 +173,12 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
   const transcribeFileName = `${transcriptId}-transcribed.flac`
   const transcribeTempFilePath = path.join(os.tmpdir(), transcribeFileName)
 
-  await reencodeToFlacMono(tempFilePath, transcribeTempFilePath, transcriptId)
+  // Currently, non multi channel records must be reencoded to mono
+  if (enableSeparateRecognitionPerChannel) {
+    await reencodeToFlac(tempFilePath, transcribeTempFilePath, transcriptId)
+  } else {
+    await reencodeToFlacMono(tempFilePath, transcribeTempFilePath, transcriptId)
+  }
 
   const targetStorageFilePath = path.join(mediaPath, transcribeFileName)
 

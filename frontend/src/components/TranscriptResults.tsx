@@ -152,6 +152,7 @@ class TranscriptResults extends Component<IProps, IState> {
             return (
               <React.Fragment key={i}>
                 <div key={`startTime-${i}`} className="startTime">
+                  {result.channelTag > 0 ? result.channelTag + " " : ""}
                   {i > 0 ? formattedStartTime : ""}
                 </div>
                 <div key={`result-${i}`} className="result">

@@ -28,7 +28,9 @@ class CreateTranscript extends React.Component<IProps, IState> {
       isSubmitting: false,
       transcript: {
         metadata: {
+          audioChannelCount: 2,
           audioTopic: "",
+          enableSeparateRecognitionPerChannel: false,
           industryNaicsCodeOfAudio: "",
           interactionType: InteractionType.Unspecified,
           languageCodes: ["nb-NO", "", "", ""],
@@ -72,6 +74,52 @@ class CreateTranscript extends React.Component<IProps, IState> {
                 </select>
               </label>
               <label className="org-label">
+                <input
+                  type="checkbox"
+                  className="org-switch"
+                  name="enableSeparateRecognitionPerChannel"
+                  value="enableSeparateRecognitionPerChannel"
+                  checked={this.state.transcript.metadata.enableSeparateRecognitionPerChannel}
+                  onChange={this.handleEnableSeparateRecognitionPerChannelChange}
+                />{" "}
+                Flerkanalsopptak med én stemme per kanal
+                <br />
+              </label>
+
+              {(() => {
+                if (this.state.transcript.metadata.enableSeparateRecognitionPerChannel) {
+                  return (
+                    <fieldset className="org-unset">
+                      <label className="org-label">Antall kanaler: </label>
+                      <br />
+                      <label className="org-btn">
+                        <input type="radio" name="audioChannelCount" value={2} checked={this.state.transcript.metadata.audioChannelCount === 2} onChange={this.handleAudioChannelCountChange} />2
+                      </label>
+                      <label className="org-btn">
+                        <input type="radio" name="audioChannelCount" value={3} checked={this.state.transcript.metadata.audioChannelCount === 3} onChange={this.handleAudioChannelCountChange} />3
+                      </label>
+                      <label className="org-btn">
+                        <input type="radio" name="audioChannelCount" value={4} checked={this.state.transcript.metadata.audioChannelCount === 4} onChange={this.handleAudioChannelCountChange} />4
+                      </label>
+                      <label className="org-btn">
+                        <input type="radio" name="audioChannelCount" value={5} checked={this.state.transcript.metadata.audioChannelCount === 5} onChange={this.handleAudioChannelCountChange} />5
+                      </label>
+                      <label className="org-btn">
+                        <input type="radio" name="audioChannelCount" value={6} checked={this.state.transcript.metadata.audioChannelCount === 6} onChange={this.handleAudioChannelCountChange} />6
+                      </label>
+                      <label className="org-btn">
+                        <input type="radio" name="audioChannelCount" value={7} checked={this.state.transcript.metadata.audioChannelCount === 7} onChange={this.handleAudioChannelCountChange} />7
+                      </label>
+                      <label className="org-btn">
+                        <input type="radio" name="audioChannelCount" value={8} checked={this.state.transcript.metadata.audioChannelCount === 8} onChange={this.handleAudioChannelCountChange} />8
+                      </label>
+                    </fieldset>
+                  )
+                } else {
+                  return
+                }
+              })()}
+              <label className="org-label">
                 Type
                 <select value={this.state.transcript.metadata.interactionType} onChange={this.handleInteractionTypeChange}>
                   <option value={InteractionType.Unspecified}>Ukjent eller annen type</option>
@@ -83,7 +131,6 @@ class CreateTranscript extends React.Component<IProps, IState> {
                   <option value={InteractionType.Dictation}>Diksjon - Opplesning av dokumenter som tekstmeldinger, e-post eller rapporter.</option>
                 </select>
               </label>
-
               <label className="org-label">
                 NAICS-kode
                 <small>
@@ -91,7 +138,6 @@ class CreateTranscript extends React.Component<IProps, IState> {
                 </small>
                 <input value={this.state.transcript.metadata.industryNaicsCodeOfAudio} type="text" onChange={this.handleIndustryNaicsCodeOfAudioChange} />
               </label>
-
               <label className="org-label">
                 Mikrofonavstand
                 <select value={this.state.transcript.metadata.microphoneDistance} onChange={this.handleMicrophoneDistanceChange}>
@@ -121,25 +167,21 @@ class CreateTranscript extends React.Component<IProps, IState> {
                   <option value={RecordingDeviceType.OtherIndoorDevice}>Innendørs - Opptaket ble gjort innendørs</option>
                 </select>
               </label>
-
               <label className="org-label">
                 Navn på opptaksutstyr
                 <small>Eksempel: iPhone X, Polycom SoundStation IP 6000, POTS, VOIP eller Cardioid Microphone</small>
                 <input value={this.state.transcript.metadata.recordingDeviceName} type="text" onChange={this.handleRecordingDeviceNameChange} />
               </label>
-
               <label className="org-label">
                 Emne
                 <small>Hva handler lydfilen om?</small>
                 <textarea value={this.state.transcript.metadata.audioTopic} onChange={this.handleAudioTopicChange} />
               </label>
-
               <label className="org-label">
                 Kontekst
                 <small>Gi "hint" til talegjenkjenningen for å favorisere bestemte ord og uttrykk i resultatene, i form av en kommaseparert liste.</small>
                 <textarea value={this.state.transcript.metadata.speechContexts[0].phrases} onChange={this.handleSpeechContextChange} />
               </label>
-
               <button className="org-btn org-btn--primary" disabled={this.submitButtonIsDisabled()} type="submit">
                 {(() => {
                   if (this.state.isSubmitting === true && this.state.fileUploaded === false && this.state.transcript.process) {
@@ -174,6 +216,7 @@ class CreateTranscript extends React.Component<IProps, IState> {
       // Metadata
 
       const metadata: IMetadata = {
+        enableSeparateRecognitionPerChannel: transcript.metadata.enableSeparateRecognitionPerChannel,
         fileExtension: transcript.metadata.fileExtension,
         interactionType: transcript.metadata.interactionType,
         languageCodes: this.selectedLanguageCodes(),
@@ -181,6 +224,10 @@ class CreateTranscript extends React.Component<IProps, IState> {
         originalMediaType: transcript.metadata.originalMediaType,
         originalMimeType: file.type,
         recordingDeviceType: transcript.metadata.recordingDeviceType,
+      }
+
+      if (transcript.metadata.enableSeparateRecognitionPerChannel) {
+        metadata.audioChannelCount = transcript.metadata.audioChannelCount
       }
 
       // Add non empty fields
@@ -280,6 +327,21 @@ class CreateTranscript extends React.Component<IProps, IState> {
         this.setState({ fileUploaded: true })
       },
     )
+  }
+
+  private handleAudioChannelCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const transcript = this.state.transcript
+
+    transcript.metadata.audioChannelCount = parseInt(event.target.value)
+    this.setState({ transcript })
+  }
+
+  private handleEnableSeparateRecognitionPerChannelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const transcript = this.state.transcript
+
+    transcript.metadata.enableSeparateRecognitionPerChannel = !transcript.metadata.enableSeparateRecognitionPerChannel
+
+    this.setState({ transcript })
   }
 
   private handleLanguageChange = (index: number, event: React.ChangeEvent<HTMLSelectElement>) => {

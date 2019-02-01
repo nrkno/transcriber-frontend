@@ -5,7 +5,7 @@
 
 import speech from "@google-cloud/speech"
 import database from "../database"
-import { ILongRunningRegonize, IRecognitionMetadata, ISpeechRecognitionResult, ITranscript } from "../interfaces"
+import { ILongRunningRegonize, IRecognitionConfig, IRecognitionMetadata, ISpeechRecognitionResult, ITranscript } from "../interfaces"
 
 const client = new speech.v1p1beta1.SpeechClient()
 
@@ -60,17 +60,24 @@ export async function transcribe(transcriptId: string, transcript: ITranscript, 
     recordingDeviceType: transcript.metadata.recordingDeviceType, // The kind of device used to capture the audio, including smartphones, PC microphones, vehicles, etc.
   }
 
+  const config: IRecognitionConfig = {
+    enableAutomaticPunctuation,
+    enableSeparateRecognitionPerChannel: transcript.metadata.enableSeparateRecognitionPerChannel,
+    enableWordConfidence: true,
+    enableWordTimeOffsets: true,
+    languageCode,
+    metadata: recognitionMetadata,
+    speechContexts: transcript.metadata.speechContexts,
+    useEnhanced: true,
+  }
+
+  if (transcript.metadata.enableSeparateRecognitionPerChannel) {
+    config.audioChannelCount = transcript.metadata.audioChannelCount
+  }
+
   const recognitionRequest: ILongRunningRegonize = {
     audio: { uri },
-    config: {
-      enableAutomaticPunctuation,
-      enableWordConfidence: true,
-      enableWordTimeOffsets: true,
-      languageCode,
-      metadata: recognitionMetadata,
-      speechContexts: transcript.metadata.speechContexts,
-      useEnhanced: true,
-    },
+    config,
   }
 
   if (transcript.metadata.languageCodes.length > 0) {

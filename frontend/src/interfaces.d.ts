@@ -15,8 +15,10 @@ interface ITranscript {
 }
 
 interface IMetadata {
+  audioChannelCount?: number
   audioDuration?: number
   audioTopic?: string
+  enableSeparateRecognitionPerChannel: boolean
   fileExtension?: string
   industryNaicsCodeOfAudio?: number | string
   interactionType: InteractionType
@@ -34,6 +36,8 @@ interface ISpeechContext {
 }
 
 interface IResult {
+  channelTag: number
+  languageCode: string
   startTime: number
   confidence: number
   transcript: string

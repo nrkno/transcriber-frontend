@@ -97,7 +97,7 @@ async function transcription(documentSnapshot: FirebaseFirestore.DocumentSnapsho
     // -----------------
 
     await database.setStep(transcriptId, Step.Transcoding)
-    const { audioDuration, gsUri } = await transcode(transcriptId, transcript.userId)
+    const { audioDuration, gsUri } = await transcode(transcriptId, transcript.userId, transcript.metadata.enableSeparateRecognitionPerChannel)
     visitor.set("cm3", Math.round(audioDuration))
 
     const transcodedDate = Date.now()

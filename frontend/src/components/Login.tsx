@@ -25,11 +25,11 @@ class Login extends Component<any, IState> {
           <div>
             <label className="org-label">
               E-postadresse
-              <textarea value={this.state.email} onChange={this.handleChangeEmail} />
+              <input type="text" value={this.state.email} onChange={this.handleChangeEmail} />
             </label>
             <label className="org-label">
               Password
-              <textarea value={this.state.password} onChange={this.handleChangePassword} />
+              <input type="text" value={this.state.password} onChange={this.handleChangePassword} />
             </label>
             <button className="org-btn org-btn--primary" disabled={this.submitButtonIsDisabled()} type="submit">
               Logg inn
@@ -44,12 +44,12 @@ class Login extends Component<any, IState> {
     return this.state.email === "" || this.state.password === ""
   }
 
-  private handleChangeEmail = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  private handleChangeEmail = (event: React.ChangeEvent<HTMLInputElement>) => {
     const email = event.target.value
     this.setState({ email })
   }
 
-  private handleChangePassword = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  private handleChangePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
     const password = event.target.value
     this.setState({ password })
   }

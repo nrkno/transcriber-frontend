@@ -7,6 +7,7 @@ import GAListener from "./GAListener"
 import Index from "./Index"
 import Login from "./Login"
 import Transcripts from "./Transcripts"
+import User from "./User"
 
 ReactGA.initialize(process.env.GOOGLE_ANALYTICS_PROPERTY_ID, {
   debug: false /* process.env.NODE_ENV === "development"*/,
@@ -57,12 +58,12 @@ class App extends React.Component<any, IState> {
                 <Link to="/"> Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</Link>
               </h1>
 
-              <Login user={this.state.user} logout={this.logout} />
+              <User user={this.state.user} logout={this.logout} />
             </header>
             <Switch>
-              <Redirect from="/login" to="/" />
               <Route exact={true} path="/" render={() => (this.state.user ? <Redirect to="/transcripts" /> : <Index />)} />
               <Route path="/transcripts/:id?" render={props => <Transcripts {...props} user={this.state.user} />} />
+              <Route path="/login" component={Login} />} />
             </Switch>
           </div>
         </GAListener>

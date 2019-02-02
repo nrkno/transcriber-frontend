@@ -16,13 +16,11 @@ import Word from "./Word"
 
 interface IState {
   currentTime: number
-  currentPlayingResultIndex?: number
-  currentPlayingWordIndex?: number
-  currentSelectedResultIndex?: number
-  currentSelectedWordIndexStart?: number
-  currentSelectedWordIndexEnd?: number
-  resultIds?: string[]
+  markerResultIndex?: number
+  markerWordIndexStart?: number
+  markerWordIndexEnd?: number
   editString?: string
+  editingForward: boolean
 }
 
 interface IReduxStateToProps {
@@ -48,6 +46,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     super(props)
     this.state = {
       currentTime: 0,
+      editingForward: true,
     }
   }
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps, prevState: IState) {
@@ -58,12 +57,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       // Reset state
 
       this.setState({
-        currentPlayingResultIndex: undefined,
-        currentPlayingWordIndex: undefined,
-        currentSelectedResultIndex: undefined,
-        currentSelectedWordIndexEnd: undefined,
-        currentSelectedWordIndexStart: undefined,
         currentTime: 0,
+        markerResultIndex: undefined,
+        markerWordIndexEnd: undefined,
+        markerWordIndexStart: undefined,
       })
     }
 
@@ -78,16 +75,16 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       prevState.editString &&
       prevState.editString.endsWith(" ") &&
       this.props.transcript.present.results &&
-      prevState.currentSelectedResultIndex !== undefined &&
-      prevState.currentSelectedWordIndexEnd !== undefined
+      prevState.markerResultIndex !== undefined &&
+      prevState.markerWordIndexEnd !== undefined
     ) {
-      const wordWithoutSpace = this.props.transcript.present.results[prevState.currentSelectedResultIndex].words[prevState.currentSelectedWordIndexEnd].word.trim()
+      const wordWithoutSpace = this.props.transcript.present.results[prevState.markerResultIndex].words[prevState.markerWordIndexEnd].word.trim()
 
       console.log(`wordWithoutSpace${wordWithoutSpace}X`)
       const results = update(this.props.transcript.present.results, {
-        [prevState.currentSelectedResultIndex]: {
+        [prevState.markerResultIndex]: {
           words: {
-            [prevState.currentSelectedWordIndexEnd]: {
+            [prevState.markerWordIndexEnd]: {
               word: { $set: wordWithoutSpace },
             },
           },
@@ -103,7 +100,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       // Reset state
 
       this.setState({
-        currentPlayingResultIndex: undefined,
+        markerResultIndex: undefined,
         currentPlayingWordIndex: undefined,
         currentTime: 0,
         results: undefined,
@@ -118,7 +115,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   public handleTimeUpdate = (currentTime: number) => {
     // Find the next current result and word
 
-    const { currentPlayingResultIndex: currentResultIndex, currentPlayingWordIndex: currentWordIndex } = this.state
+    const { markerResultIndex, markerWordIndexStart } = this.state
 
     if (this.props.transcript === undefined || this.props.transcript.present.results === undefined) {
       return
@@ -128,8 +125,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
     // First, we check if the current word is still being said
 
-    if (currentResultIndex !== undefined && currentWordIndex !== undefined) {
-      const currentWord = results[currentResultIndex].words[currentWordIndex]
+    if (markerResultIndex !== undefined && markerWordIndexStart !== undefined) {
+      const currentWord = results[markerResultIndex].words[markerWordIndexStart]
 
       if (currentTime < currentWord.endTime * 1e-9) {
         return
@@ -141,11 +138,11 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     let nextWordIndex = 0
     let nextResultIndex = 0
 
-    if (currentResultIndex !== undefined && currentWordIndex !== undefined) {
-      nextWordIndex = currentWordIndex ? currentWordIndex + 1 : 0
-      nextResultIndex = currentResultIndex
+    if (markerResultIndex !== undefined && markerWordIndexStart !== undefined) {
+      nextWordIndex = markerWordIndexStart ? markerWordIndexStart + 1 : 0
+      nextResultIndex = markerResultIndex
 
-      if (nextWordIndex === results[currentResultIndex].words.length) {
+      if (nextWordIndex === results[markerResultIndex].words.length) {
         // This was the last word, reset word index and move to next result
 
         nextWordIndex = 0
@@ -172,7 +169,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           continue
         }
 
-        this.setState({ currentTime, currentPlayingResultIndex: i, currentPlayingWordIndex: j })
+        this.setState({
+          currentTime,
+          markerResultIndex: i,
+          markerWordIndexEnd: j,
+          markerWordIndexStart: j,
+        })
 
         return
       }
@@ -183,8 +185,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     this.playerRef.current!.setTime(word.startTime * 1e-9)
 
     this.setState({
-      currentPlayingResultIndex: resultIndex,
-      currentPlayingWordIndex: wordIndex,
+      editString: undefined,
+      markerResultIndex: resultIndex,
+      markerWordIndexEnd: wordIndex,
+      markerWordIndexStart: wordIndex,
     })
   }
 
@@ -210,18 +214,17 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                     {({ isVisible }) => {
                       if (isVisible) {
                         return result.words.map((word, j) => {
-                          const isPlaying = this.state.currentPlayingResultIndex === i && this.state.currentPlayingWordIndex === j
-                          const isSelecting = this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j <= this.state.currentSelectedWordIndexEnd
-                          const isEditing = isSelecting && j === this.state.currentSelectedWordIndexEnd && this.state.editString
-                          const shouldSelectSpace = this.state.currentSelectedResultIndex === i && this.state.currentSelectedWordIndexStart <= j && j < this.state.currentSelectedWordIndexEnd
+                          const isMarked = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j <= this.state.markerWordIndexEnd
+                          const isEditing = isMarked && j === this.state.markerWordIndexEnd && this.state.editString !== undefined
+                          const shouldSelectSpace = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j < this.state.markerWordIndexEnd
+
                           return (
                             <Word
                               key={`word-${i}-${j}`}
                               confidence={Math.round(word.confidence * 100)}
                               word={word}
-                              isPlaying={isPlaying}
-                              isSelecting={isSelecting}
                               isEditing={isEditing}
+                              isMarked={isMarked}
                               shouldSelectSpace={shouldSelectSpace}
                               setCurrentWord={this.setCurrentPlayingWord}
                               resultIndex={i}
@@ -256,29 +259,28 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
     // If left or right is pressed, we reset the indeces to 0,0 and return,
     // so that the first word is highlighted
-    if ((key === "ArrowLeft" || key === "ArrowRight") && this.state.currentSelectedResultIndex === undefined && this.state.currentSelectedWordIndexStart === undefined) {
+    if ((key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown") && this.state.markerResultIndex === undefined && this.state.markerWordIndexStart === undefined) {
       this.setState({
-        currentSelectedResultIndex: 0,
-        currentSelectedWordIndexEnd: 0,
-        currentSelectedWordIndexStart: 0,
+        markerResultIndex: 0,
+        markerWordIndexEnd: 0,
+        markerWordIndexStart: 0,
       })
       return
     }
 
-    const currentPlayingResultIndex = this.state.currentPlayingResultIndex!
-    const currentPlayingWordIndex = this.state.currentPlayingWordIndex!
-    const currentSelectedResultIndex = this.state.currentSelectedResultIndex!
-    const currentSelectedWordIndexStart = this.state.currentSelectedWordIndexStart!
-    const currentSelectedWordIndexEnd = this.state.currentSelectedWordIndexEnd!
+    const markerResultIndex = this.state.markerResultIndex!
+    const markerWordIndexStart = this.state.markerWordIndexStart!
+    const markerWordIndexEnd = this.state.markerWordIndexEnd!
+    const editingForward = this.state.editingForward
     const results = this.props.transcript.present.results!
 
-    if (currentSelectedResultIndex !== undefined && currentSelectedWordIndexStart !== undefined) {
-      const currentWord = results![currentSelectedResultIndex].words[currentSelectedWordIndexEnd].word
+    if (markerResultIndex !== undefined && markerWordIndexStart !== undefined) {
+      const currentWord = results![markerResultIndex].words[markerWordIndexEnd].word
 
       switch (event.key) {
         case "Enter":
           if (event.getModifierState("Meta")) {
-            this.splitResult(currentSelectedResultIndex, currentSelectedWordIndexStart)
+            this.splitResult(markerResultIndex, markerWordIndexStart)
           } else {
             console.log("Enter")
             // Go in and out of edit mode
@@ -296,33 +298,39 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           break
         case "ArrowLeft":
         case "Left":
-          if (event.getModifierState("Meta")) {
-            // Move playing marker to selected marker
-
-            const markedWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexStart]
-            this.setCurrentPlayingWord(markedWord, currentSelectedResultIndex, currentSelectedWordIndexStart)
+          if (event.getModifierState("Shift")) {
+            // Decrease selection
+            if (editingForward && markerWordIndexStart < markerWordIndexEnd && markerWordIndexEnd > 0) {
+              this.setState({
+                editString: undefined,
+                markerWordIndexEnd: markerWordIndexEnd - 1,
+              })
+              // Increase selection
+            } else if (markerWordIndexStart > 0) {
+              this.setState({
+                editString: undefined,
+                editingForward: false,
+                markerWordIndexStart: markerWordIndexStart - 1,
+              })
+            }
           } else {
-            // Move selected marker
+            // Move marker
 
-            if (currentSelectedWordIndexStart - 1 >= 0) {
-              // Select previous word
-              const previousWordIndex = currentSelectedWordIndexStart - 1
-              this.setState({
-                currentSelectedWordIndexEnd: previousWordIndex,
-                currentSelectedWordIndexStart: previousWordIndex,
-                editString: undefined,
-              })
-            } else if (currentSelectedResultIndex - 1 >= 0) {
-              // Select last word in previous result
+            if (markerWordIndexStart > 0) {
+              // Mark previous word in current result
+              const currentResultIndex = markerResultIndex
+              const previousWordIndex = markerWordIndexStart - 1
+              const previousWord = results[markerResultIndex].words[previousWordIndex]
 
-              console.log(results[currentSelectedResultIndex - 1].words.length - 1)
-              this.setState({
-                currentSelectedResultIndex: currentSelectedResultIndex - 1,
-                currentSelectedWordIndexEnd: results[currentSelectedResultIndex - 1].words.length - 1,
-                currentSelectedWordIndexStart: results[currentSelectedResultIndex - 1].words.length - 1,
-                editString: undefined,
-              })
-              console.log(this.state)
+              this.setCurrentPlayingWord(previousWord, currentResultIndex, previousWordIndex)
+            } else if (markerResultIndex > 0) {
+              // Mark last word in previous result
+
+              const previousResultIndex = markerResultIndex - 1
+              const previousWordIndex = results[markerResultIndex - 1].words.length - 1
+              const previousWord = results[previousResultIndex].words[previousWordIndex]
+
+              this.setCurrentPlayingWord(previousWord, previousResultIndex, previousWordIndex)
             }
           }
 
@@ -330,40 +338,39 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
         case "ArrowRight":
         case "Right":
-          if (event.getModifierState("Meta")) {
-            // Move selected marker to playing marker
-
-            this.setState({
-              currentSelectedResultIndex: currentPlayingResultIndex,
-              currentSelectedWordIndexEnd: currentPlayingWordIndex,
-              currentSelectedWordIndexStart: currentPlayingWordIndex,
-              editString: undefined,
-            })
+          if (event.getModifierState("Shift")) {
+            if (editingForward === false && markerWordIndexStart < markerWordIndexEnd) {
+              this.setState({
+                editString: undefined,
+                markerWordIndexStart: markerWordIndexStart + 1,
+              })
+            }
+            // Increase selection
+            else if (markerWordIndexEnd + 1 < results[markerResultIndex].words.length) {
+              this.setState({
+                editString: undefined,
+                editingForward: true,
+                markerWordIndexEnd: markerWordIndexEnd + 1,
+              })
+              // Decrease selection
+            }
           } else {
-            const largestSelectedIndex = Math.max(currentSelectedWordIndexStart, currentSelectedWordIndexEnd)
-            // If shift key is pressed, check if there is another word after currentSelectedWordIndexEnd
-            if (event.getModifierState("Shift") && currentSelectedWordIndexEnd + 1 < results[currentSelectedResultIndex].words.length) {
-              this.setState({
-                currentSelectedWordIndexEnd: currentSelectedWordIndexEnd + 1,
-                editString: undefined,
-              })
-            } else if (largestSelectedIndex + 1 < results[currentSelectedResultIndex].words.length) {
-              // Select next word
+            const largestSelectedIndex = Math.max(markerWordIndexStart, markerWordIndexEnd)
+            // If shift key is pressed, check if there is another word after markerWordIndexEnd
+            if (largestSelectedIndex + 1 < results[markerResultIndex].words.length) {
+              // Mark next word in current result
+
+              const currentResultIndex = markerResultIndex
               const nextWordIndex = largestSelectedIndex + 1
-              this.setState({
-                currentSelectedWordIndexEnd: nextWordIndex,
-                currentSelectedWordIndexStart: nextWordIndex,
-                editString: undefined,
-              })
-            } else if (currentSelectedResultIndex + 1 < results.length) {
-              console.log("Hiii")
-              // Select first word in next result
-              this.setState({
-                currentSelectedResultIndex: currentSelectedResultIndex + 1,
-                currentSelectedWordIndexEnd: 0,
-                currentSelectedWordIndexStart: 0,
-                editString: undefined,
-              })
+              const nextWord = results[currentResultIndex].words[nextWordIndex]
+              this.setCurrentPlayingWord(nextWord, currentResultIndex, nextWordIndex)
+              // Mark first word in next result
+            } else if (markerResultIndex + 1 < results.length) {
+              const nextResultIndex = markerResultIndex + 1
+              const firstWordIndex = 0
+              const firstWord = results[nextResultIndex].words[firstWordIndex]
+
+              this.setCurrentPlayingWord(firstWord, nextResultIndex, firstWordIndex)
             }
           }
 
@@ -372,20 +379,18 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "ArrowUp":
         case "Up":
           // Jump to first word in current result
-          if (currentSelectedWordIndexStart > 0) {
-            this.setState({
-              currentSelectedWordIndexEnd: 0,
-              currentSelectedWordIndexStart: 0,
-              editString: undefined,
-            })
+          if (markerWordIndexStart > 0) {
+            const currentResultIndex = markerResultIndex
+            const firstWordIndex = 0
+            const firstWord = results[currentResultIndex].words[firstWordIndex]
+            this.setCurrentPlayingWord(firstWord, currentResultIndex, firstWordIndex)
+
             // Jump to previous result
-          } else if (currentSelectedResultIndex > 0) {
-            this.setState({
-              currentSelectedResultIndex: currentSelectedResultIndex - 1,
-              currentSelectedWordIndexEnd: 0,
-              currentSelectedWordIndexStart: 0,
-              editString: undefined,
-            })
+          } else if (markerResultIndex > 0) {
+            const previousResultIndex = markerResultIndex - 1
+            const firstWordIndex = 0
+            const firstWord = results[previousResultIndex].words[firstWordIndex]
+            this.setCurrentPlayingWord(firstWord, previousResultIndex, firstWordIndex)
           }
 
           break
@@ -393,22 +398,21 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "ArrowDown":
         case "Down":
           // Jump to next result if it exists
-          if (currentSelectedResultIndex < results.length - 1) {
-            this.setState({
-              currentSelectedResultIndex: currentSelectedResultIndex + 1,
-              currentSelectedWordIndexEnd: 0,
-              currentSelectedWordIndexStart: 0,
-              editString: undefined,
-            })
+
+          if (markerResultIndex < results.length - 1) {
+            const nextResultIndex = markerResultIndex + 1
+            const nextWordIndex = 0
+            const nextWord = results[nextResultIndex].words[nextWordIndex]
+
+            this.setCurrentPlayingWord(nextWord, nextResultIndex, nextWordIndex)
           }
-          // Jump to last word
+          // Jump to last word in last result
           else {
-            const indexOfLastWord = results[currentSelectedResultIndex].words.length - 1
-            this.setState({
-              currentSelectedWordIndexEnd: indexOfLastWord,
-              currentSelectedWordIndexStart: indexOfLastWord,
-              editString: undefined,
-            })
+            const resultIndex = markerResultIndex
+            const lastWordIndex = results[markerResultIndex].words.length - 1
+            const lastWord = results[resultIndex].words[lastWordIndex]
+
+            this.setCurrentPlayingWord(lastWord, resultIndex, lastWordIndex)
           }
 
           break
@@ -417,14 +421,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         // Tab will toggle the word from lowercase, first letter capitalized
         // Only works when not in edit mode, and only on a single word
         case "Tab":
-          if (this.state.editString === undefined && currentSelectedWordIndexStart === currentSelectedWordIndexEnd) {
+          if (this.state.editString === undefined && markerWordIndexStart === markerWordIndexEnd) {
             // Lower case to capitalised case
             if (currentWord === currentWord.toLowerCase()) {
-              this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, [currentWord[0].toUpperCase() + currentWord.substring(1)], false)
+              this.updateWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, [currentWord[0].toUpperCase() + currentWord.substring(1)], false)
             }
             // Lower case
             else {
-              this.updateWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, [currentWord.toLowerCase()], false)
+              this.updateWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, [currentWord.toLowerCase()], false)
             }
           }
           break
@@ -442,8 +446,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "!":
         case "?":
           if (this.state.editString === undefined) {
-            const wordText = results![currentSelectedResultIndex].words[currentSelectedWordIndexEnd].word
-            const nextWord = results[currentSelectedResultIndex].words[currentSelectedWordIndexEnd + 1]
+            const wordText = results![markerResultIndex].words[markerWordIndexEnd].word
+            const nextWord = results[markerResultIndex].words[markerWordIndexEnd + 1]
             const wordTextLastChar = wordText.charAt(wordText.length - 1)
 
             let removePuncation = false
@@ -509,7 +513,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
             const words = [firstWordText, nextWordText].filter(word => word)
 
-            this.props.updateWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd + words.length - 1, words, false)
+            this.props.updateWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd + words.length - 1, words, false)
 
             break
           }
@@ -597,7 +601,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
           if (key === "Backspace") {
             if (event.getModifierState("Meta")) {
-              this.props.joinResults(currentSelectedResultIndex, currentSelectedWordIndexStart)
+              this.props.joinResults(markerResultIndex, markerWordIndexStart)
               return
             } else if (editString === undefined) {
               editString = currentWord
@@ -608,11 +612,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           } else {
             editString = key
           }
-          console.log("EDIT STRING: ]", editString, "[")
-          this.setWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, editString)
+          this.setWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, editString)
           break
         case "Delete":
-          this.deleteWords(currentSelectedResultIndex, currentSelectedWordIndexStart, currentSelectedWordIndexEnd, false)
+          this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, false)
           break
       }
 
@@ -623,8 +626,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   }
 
   private async save() {
-    console.log("SAVE")
-
     // Return if no changes
     if (this.props.transcript.past.length === 0) {
       return
@@ -639,8 +640,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     const presentResultsIds = presentResults.map(result => result.id)
 
     const resultsIds = new Set([...pastResultsIds, ...presentResultsIds])
-
-    console.log("resultsIds", resultsIds)
 
     const updateResults: IResult[] = new Array()
     const createResults: IResult[] = new Array()
@@ -703,17 +702,17 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       },
     })
 
-    let currentSelectedWordIndexStart = this.state.currentSelectedWordIndexStart!
+    let markerWordIndexStart = this.state.markerWordIndexStart!
 
     // Select the previous word
     if (selectPreviousWord && wordIndexStart > 0) {
-      currentSelectedWordIndexStart--
+      markerWordIndexStart--
     }
 
     this.setState({
-      currentSelectedWordIndexEnd: currentSelectedWordIndexStart,
-      currentSelectedWordIndexStart,
       editString: undefined,
+      markerWordIndexEnd: markerWordIndexStart,
+      markerWordIndexStart,
       results,
     })
   }
@@ -733,8 +732,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     console.log("words", words)
 
     this.setState({
-      currentSelectedWordIndexEnd: wordIndexStart + words.length - 1,
       editString: text,
+      markerWordIndexEnd: wordIndexStart + words.length - 1,
     })
 
     this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, true)

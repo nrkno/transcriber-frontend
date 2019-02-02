@@ -3,9 +3,8 @@ import { IWord } from "../interfaces"
 
 interface IProps {
   confidence: number
-  isPlaying: boolean
-  isSelecting: boolean
   isEditing: boolean
+  isMarked: boolean
   word: IWord
   shouldSelectSpace: boolean
   resultIndex: number
@@ -16,11 +15,8 @@ interface IProps {
 class Word extends React.Component<IProps, {}> {
   public render() {
     let classNames = ""
-    if (this.props.isPlaying) {
-      classNames += "playing"
-    }
-    if (this.props.isSelecting) {
-      classNames += " selecting"
+    if (this.props.isMarked) {
+      classNames += "marker"
     }
 
     return (

@@ -404,16 +404,8 @@ main#transcripts {
 
 /* Transcript */
 
-.selecting {
-  background: #7cc988;
-}
-
-.playing {
+.marker {
   background: #0bb5ff;
-}
-
-.playing.selecting {
-  border-top: 1px solid #7cc988;
 }
 
 .results {

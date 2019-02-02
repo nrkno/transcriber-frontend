@@ -86,8 +86,6 @@ class Player extends React.Component<IProps, IState> {
   public setTime = (time: number) => {
     this.audioRef.current!.currentTime = time
 
-    this.play()
-
     ReactGA.event({
       action: "word selected",
       category: "player",

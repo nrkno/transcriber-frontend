@@ -180,7 +180,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       }
     }
   }
-
   public setCurrentPlayingWord = (word: IWord, resultIndex: number, wordIndex: number) => {
     this.playerRef.current!.setTime(word.startTime * 1e-9)
 
@@ -217,21 +216,55 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                           const isMarked = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j <= this.state.markerWordIndexEnd
                           const isEditing = isMarked && j === this.state.markerWordIndexEnd && this.state.editString !== undefined
                           const shouldSelectSpace = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j < this.state.markerWordIndexEnd
-                          const text = word.word
-                          return (
-                            <Word
-                              key={`word-${i}-${j}`}
-                              confidence={Math.round(word.confidence * 100)}
-                              word={word}
-                              isEditing={isEditing}
-                              isMarked={isMarked}
-                              resultIndex={i}
-                              shouldSelectSpace={shouldSelectSpace}
-                              setCurrentWord={this.setCurrentPlayingWord}
-                              text={text}
-                              wordIndex={j}
-                            />
-                          )
+
+                          if (isEditing) {
+                            const editStrings = this.state.editString.trim().split(" ")
+                            const lastWord = editStrings[editStrings.length - 1]
+
+                            return (
+                              <>
+                                <Word
+                                  key={`word-${i}-${j}`}
+                                  confidence={Math.round(word.confidence * 100)}
+                                  word={word}
+                                  isEditing={false}
+                                  isMarked={isMarked}
+                                  resultIndex={i}
+                                  shouldSelectSpace={true}
+                                  setCurrentWord={this.setCurrentPlayingWord}
+                                  text={word.word}
+                                  wordIndex={j}
+                                />
+                                <Word
+                                  key={`word-${i}-${j}-editing`}
+                                  confidence={100}
+                                  word={word}
+                                  isEditing={isEditing}
+                                  isMarked={isMarked}
+                                  resultIndex={i}
+                                  shouldSelectSpace={false}
+                                  setCurrentWord={this.setCurrentPlayingWord}
+                                  text={lastWord}
+                                  wordIndex={j}
+                                />
+                              </>
+                            )
+                          } else {
+                            return (
+                              <Word
+                                key={`word-${i}-${j}`}
+                                confidence={Math.round(word.confidence * 100)}
+                                word={word}
+                                isEditing={false}
+                                isMarked={isMarked}
+                                resultIndex={i}
+                                shouldSelectSpace={shouldSelectSpace}
+                                setCurrentWord={this.setCurrentPlayingWord}
+                                text={word.word}
+                                wordIndex={j}
+                              />
+                            )
+                          }
                         })
                       } else {
                         return result.words.map(word => {
@@ -248,6 +281,26 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         <Player ref={this.playerRef} playbackGsUrl={this.props.transcript.present.playbackGsUrl} handleTimeUpdate={this.handleTimeUpdate} />
       </>
     )
+  }
+
+  private commitEditString(stopEditing: boolean) {
+    if (this.state.editString !== undefined) {
+      console.log("COMMIUT: ", this.state.editString)
+
+      /*const words = ""
+
+      for (let i = this.state.markerWordIndexStart; i < this.state.markerWordIndexEnd + 1; i++) {
+        console.log("INNEHER", i)
+
+        words += this.props.transcript.present.results[this.state.markerResultIndex].words[i].word + " "
+      }
+
+      words += this.state.editString
+
+      console.log("WORDS IS NOW ", words)
+*/
+      this.setWords(this.state.markerResultIndex, this.state.markerWordIndexStart, this.state.markerWordIndexEnd, this.state.editString, stopEditing)
+    }
   }
 
   private handleKeyPressed(keyX: string, event: KeyboardEvent) {
@@ -284,12 +337,13 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             this.splitResult(markerResultIndex, markerWordIndexStart)
           } else {
             console.log("Enter")
-            // Go in and out of edit mode
+            // Go out of edit mode
+
             if (this.state.editString) {
-              this.setState({
-                editString: undefined,
-              })
-            } else {
+              this.commitEditString(true)
+            }
+            // Go into edit mode
+            else {
               this.setState({
                 editString: currentWord,
               })
@@ -356,6 +410,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
               // Decrease selection
             }
           } else {
+            this.commitEditString(true)
+
             const largestSelectedIndex = Math.max(markerWordIndexStart, markerWordIndexEnd)
             // If shift key is pressed, check if there is another word after markerWordIndexEnd
             if (largestSelectedIndex + 1 < results[markerResultIndex].words.length) {
@@ -438,6 +494,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           if (this.state.editString === undefined) {
             this.playerRef.current!.togglePlay()
             break
+          } else {
+            this.commitEditString(false)
           }
 
         // Punctation
@@ -613,7 +671,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           } else {
             editString = key
           }
-          this.setWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, editString)
+          this.setState({ editString })
+
           break
         case "Delete":
           this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, false)
@@ -718,7 +777,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     })
   }
 
-  private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, text: string) {
+  private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, text: string, stopEditing: boolean) {
     // Replaces a consecutive set of whitespace characters by a single white space.
     // White spaces in the beginning and end are removed too
     // "    This    should  become   something          else   too. ";
@@ -733,7 +792,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     console.log("words", words)
 
     this.setState({
-      editString: text,
+      editString: stopEditing ? undefined : text,
       markerWordIndexEnd: wordIndexStart + words.length - 1,
     })
 

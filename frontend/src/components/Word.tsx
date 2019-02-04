@@ -5,9 +5,10 @@ interface IProps {
   confidence: number
   isEditing: boolean
   isMarked: boolean
-  word: IWord
-  shouldSelectSpace: boolean
   resultIndex: number
+  shouldSelectSpace: boolean
+  text: string
+  word: IWord
   wordIndex: number
   setCurrentWord(word: IWord, resultIndex: number, wordIndex: number): void
 }
@@ -22,7 +23,7 @@ class Word extends React.Component<IProps, {}> {
     return (
       <>
         <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${classNames}`}>
-          {this.props.word.word}
+          {this.props.text}
           {(() => {
             if (this.props.isEditing) {
               return <span className="typewriter" />

@@ -217,7 +217,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                           const isMarked = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j <= this.state.markerWordIndexEnd
                           const isEditing = isMarked && j === this.state.markerWordIndexEnd && this.state.editString !== undefined
                           const shouldSelectSpace = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j < this.state.markerWordIndexEnd
-
+                          const text = word.word
                           return (
                             <Word
                               key={`word-${i}-${j}`}
@@ -225,9 +225,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                               word={word}
                               isEditing={isEditing}
                               isMarked={isMarked}
+                              resultIndex={i}
                               shouldSelectSpace={shouldSelectSpace}
                               setCurrentWord={this.setCurrentPlayingWord}
-                              resultIndex={i}
+                              text={text}
                               wordIndex={j}
                             />
                           )

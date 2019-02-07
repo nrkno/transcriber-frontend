@@ -3,7 +3,7 @@ import { IWord } from "../interfaces"
 
 interface IProps {
   confidence: number
-  isEditing: boolean
+  showTypewriter: boolean
   isMarked: boolean
   resultIndex: number
   shouldSelectSpace: boolean
@@ -25,7 +25,7 @@ class Word extends React.Component<IProps, {}> {
         <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${classNames}`}>
           {this.props.text}
           {(() => {
-            if (this.props.isEditing) {
+            if (this.props.showTypewriter) {
               return <span className="typewriter" />
             } else {
               return

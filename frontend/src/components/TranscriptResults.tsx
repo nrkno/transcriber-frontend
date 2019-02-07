@@ -19,7 +19,7 @@ interface IState {
   markerResultIndex?: number
   markerWordIndexStart?: number
   markerWordIndexEnd?: number
-  editString?: string
+  edits?: [string]
   editingForward: boolean
 }
 
@@ -184,7 +184,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     this.playerRef.current!.setTime(word.startTime * 1e-9)
 
     this.setState({
-      editString: undefined,
+      edits: undefined,
       markerResultIndex: resultIndex,
       markerWordIndexEnd: wordIndex,
       markerWordIndexStart: wordIndex,
@@ -214,48 +214,47 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                       if (isVisible) {
                         return result.words.map((word, j) => {
                           const isMarked = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j <= this.state.markerWordIndexEnd
-                          const isEditing = isMarked && j === this.state.markerWordIndexEnd && this.state.editString !== undefined
-                          const shouldSelectSpace = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j < this.state.markerWordIndexEnd
+                          const isEditing = isMarked && this.state.edits !== undefined
 
                           if (isEditing) {
-                            const editStrings = this.state.editString.trim().split(" ")
-                            const lastWord = editStrings[editStrings.length - 1]
+                            console.log("isEditing j:", j)
+                            console.log("Length of edits: ", this.state.edits.length)
 
-                            return (
-                              <>
+                            // Only show the last word
+                            if (j < this.state.markerWordIndexEnd) {
+                              console.log("returning")
+
+                              return
+                            }
+
+                            const lastWord = this.state.edits[this.state.edits.length - 1]
+                            console.log("komer hit og last word", lastWord)
+                            console.log("edits inni her", this.state.edits)
+                            return this.state.edits.map((edit, k) => {
+                              const isLastWord = this.state.edits.length - 1 === k
+                              return (
                                 <Word
-                                  key={`word-${i}-${j}`}
+                                  key={`word-${i}-${j}-${k}`}
                                   confidence={Math.round(word.confidence * 100)}
-                                  word={word}
-                                  isEditing={false}
+                                  showTypewriter={isLastWord}
                                   isMarked={isMarked}
                                   resultIndex={i}
-                                  shouldSelectSpace={true}
+                                  shouldSelectSpace={!isLastWord}
                                   setCurrentWord={this.setCurrentPlayingWord}
-                                  text={word.word}
+                                  text={edit}
                                   wordIndex={j}
                                 />
-                                <Word
-                                  key={`word-${i}-${j}-editing`}
-                                  confidence={100}
-                                  word={word}
-                                  isEditing={isEditing}
-                                  isMarked={isMarked}
-                                  resultIndex={i}
-                                  shouldSelectSpace={false}
-                                  setCurrentWord={this.setCurrentPlayingWord}
-                                  text={lastWord}
-                                  wordIndex={j}
-                                />
-                              </>
-                            )
+                              )
+                            })
                           } else {
+                            const shouldSelectSpace = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j < this.state.markerWordIndexEnd
+
                             return (
                               <Word
                                 key={`word-${i}-${j}`}
                                 confidence={Math.round(word.confidence * 100)}
                                 word={word}
-                                isEditing={false}
+                                showTypewriter={false}
                                 isMarked={isMarked}
                                 resultIndex={i}
                                 shouldSelectSpace={shouldSelectSpace}
@@ -283,23 +282,13 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     )
   }
 
-  private commitEditString(stopEditing: boolean) {
-    if (this.state.editString !== undefined) {
-      console.log("COMMIUT: ", this.state.editString)
+  private commitEdits(stopEditing: boolean) {
+    const edits = this.state.edits
 
-      /*const words = ""
+    console.log("edits: ", edits)
 
-      for (let i = this.state.markerWordIndexStart; i < this.state.markerWordIndexEnd + 1; i++) {
-        console.log("INNEHER", i)
-
-        words += this.props.transcript.present.results[this.state.markerResultIndex].words[i].word + " "
-      }
-
-      words += this.state.editString
-
-      console.log("WORDS IS NOW ", words)
-*/
-      this.setWords(this.state.markerResultIndex, this.state.markerWordIndexStart, this.state.markerWordIndexEnd, this.state.editString, stopEditing)
+    if (edits !== undefined) {
+      this.setWords(this.state.markerResultIndex, this.state.markerWordIndexStart, this.state.markerWordIndexEnd, edits, stopEditing)
     }
   }
 
@@ -339,13 +328,13 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             console.log("Enter")
             // Go out of edit mode
 
-            if (this.state.editString) {
-              this.commitEditString(true)
+            if (this.state.edits !== undefined) {
+              this.commitEdits(true)
             }
             // Go into edit mode
             else {
               this.setState({
-                editString: currentWord,
+                edits: [currentWord],
               })
             }
           }
@@ -396,21 +385,21 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           if (event.getModifierState("Shift")) {
             if (editingForward === false && markerWordIndexStart < markerWordIndexEnd) {
               this.setState({
-                editString: undefined,
+                edits: undefined,
                 markerWordIndexStart: markerWordIndexStart + 1,
               })
             }
             // Increase selection
             else if (markerWordIndexEnd + 1 < results[markerResultIndex].words.length) {
               this.setState({
-                editString: undefined,
+                edits: undefined,
                 editingForward: true,
                 markerWordIndexEnd: markerWordIndexEnd + 1,
               })
               // Decrease selection
             }
           } else {
-            this.commitEditString(true)
+            this.commitEdits(true)
 
             const largestSelectedIndex = Math.max(markerWordIndexStart, markerWordIndexEnd)
             // If shift key is pressed, check if there is another word after markerWordIndexEnd
@@ -478,7 +467,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         // Tab will toggle the word from lowercase, first letter capitalized
         // Only works when not in edit mode, and only on a single word
         case "Tab":
-          if (this.state.editString === undefined && markerWordIndexStart === markerWordIndexEnd) {
+          if (this.state.edits === undefined && markerWordIndexStart === markerWordIndexEnd) {
             // Lower case to capitalised case
             if (currentWord === currentWord.toLowerCase()) {
               this.updateWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, [currentWord[0].toUpperCase() + currentWord.substring(1)], false)
@@ -491,12 +480,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           break
 
         case " ":
-          if (this.state.editString === undefined) {
+          if (this.state.edits === undefined) {
             this.playerRef.current!.togglePlay()
-            break
           } else {
-            this.commitEditString(false)
+            this.commitEdits(false)
           }
+          break
 
         // Punctation
         // When we're not in edit mode,
@@ -504,7 +493,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case ",":
         case "!":
         case "?":
-          if (this.state.editString === undefined) {
+          if (this.state.edits === undefined) {
             const wordText = results![markerResultIndex].words[markerWordIndexEnd].word
             const nextWord = results[markerResultIndex].words[markerWordIndexEnd + 1]
             const wordTextLastChar = wordText.charAt(wordText.length - 1)
@@ -656,7 +645,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "Backspace":
           // Change the selected word
 
-          let editString = this.state.editString
+          let edits = this.state.edits
 
           if (key === "Backspace") {
             if (event.getModifierState("Meta")) {
@@ -666,12 +655,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
               editString = currentWord
             }
             editString = editString.slice(0, -1)
-          } else if (this.state.editString) {
-            editString += key
+          } else if (edits !== undefined) {
+            edits[edits.length - 1] += key
           } else {
-            editString = key
+            edits = [key]
           }
-          this.setState({ editString })
+          this.setState({ edits })
 
           break
         case "Delete":
@@ -777,26 +766,32 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     })
   }
 
-  private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, text: string, stopEditing: boolean) {
+  private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, texts: [string], stopEditing: boolean) {
     // Replaces a consecutive set of whitespace characters by a single white space.
     // White spaces in the beginning and end are removed too
     // "    This    should  become   something          else   too. ";
     // becomes
     // "This should become something else too."
-    console.log("text", text)
+    /*console.log("text", text)
     const cleanText = text.replace(/\s+/g, " ").trim()
     console.log("Clean text", cleanText)
 
     const words = cleanText.split(" ")
 
     console.log("words", words)
+*/
+
+    console.log("Set words texts: ", texts)
+
+    this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, texts, true)
+
+    const edits = update(texts, { $push: [""] })
+    console.log("edits", edits)
 
     this.setState({
-      editString: stopEditing ? undefined : text,
-      markerWordIndexEnd: wordIndexStart + words.length - 1,
+      edits: stopEditing ? undefined : edits,
+      markerWordIndexEnd: wordIndexStart + texts.length - 1,
     })
-
-    this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, true)
   }
   private updateWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) {
     console.log("PRØVER Å SKRIVE over ord", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)

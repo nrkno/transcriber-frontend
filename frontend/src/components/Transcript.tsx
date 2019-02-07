@@ -31,10 +31,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
     // When the results are loaded the first, we reset the undo history
     // This is to stop users from undoing back to a state before the results were loaded
 
-    console.log("HEI")
-
     if (prevProps.transcript.present.results === undefined && this.props.transcript.present.results !== undefined) {
-      console.log("clear HIsssss")
       this.props.clearHistory()
     }
   }
@@ -62,7 +59,6 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
       // Check current step
 
       const isDone = transcript && transcript.process && transcript.process.step === Step.Done ? true : false
-      console.log("R", this.props.transcript.results)
 
       return (
         <main id="transcript">

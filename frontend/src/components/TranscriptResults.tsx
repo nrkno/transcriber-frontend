@@ -767,20 +767,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   }
 
   private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, texts: [string], stopEditing: boolean) {
-    // Replaces a consecutive set of whitespace characters by a single white space.
-    // White spaces in the beginning and end are removed too
-    // "    This    should  become   something          else   too. ";
-    // becomes
-    // "This should become something else too."
-    /*console.log("text", text)
-    const cleanText = text.replace(/\s+/g, " ").trim()
-    console.log("Clean text", cleanText)
-
-    const words = cleanText.split(" ")
-
-    console.log("words", words)
-*/
-
     console.log("Set words texts: ", texts)
 
     this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, texts, true)

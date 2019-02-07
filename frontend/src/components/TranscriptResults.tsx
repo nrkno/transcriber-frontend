@@ -63,50 +63,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         markerWordIndexStart: undefined,
       })
     }
-
-    /*TODO
-    // Check last editing words ends with a space, in that case, we remove it.
-    // Edit string ends with space and we are finished editing. We remove the extra space
-
-
-
-    if (
-      this.state.editString === undefined &&
-      prevState.editString &&
-      prevState.editString.endsWith(" ") &&
-      this.props.transcript.present.results &&
-      prevState.markerResultIndex !== undefined &&
-      prevState.markerWordIndexEnd !== undefined
-    ) {
-      const wordWithoutSpace = this.props.transcript.present.results[prevState.markerResultIndex].words[prevState.markerWordIndexEnd].word.trim()
-
-      console.log(`wordWithoutSpace${wordWithoutSpace}X`)
-      const results = update(this.props.transcript.present.results, {
-        [prevState.markerResultIndex]: {
-          words: {
-            [prevState.markerWordIndexEnd]: {
-              word: { $set: wordWithoutSpace },
-            },
-          },
-        },
-      })
-
-      this.setState({ results })
-    }*/
-    /*
-    if (this.props.transcriptId !== prevProps.transcriptId) {
-      this.fetchResults()
-
-      // Reset state
-
-      this.setState({
-        markerResultIndex: undefined,
-        currentPlayingWordIndex: undefined,
-        currentTime: 0,
-        results: undefined,
-      })
-    }
-    */
   }
 
   public componentDidMount() {

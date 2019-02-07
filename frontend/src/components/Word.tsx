@@ -15,14 +15,9 @@ interface IProps {
 
 class Word extends React.Component<IProps, {}> {
   public render() {
-    let classNames = ""
-    if (this.props.isMarked) {
-      classNames += "marker"
-    }
-
     return (
       <>
-        <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${classNames}`}>
+        <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${this.props.isMarked ? "marker" : ""}`}>
           {this.props.text}
           {(() => {
             if (this.props.showTypewriter) {
@@ -35,7 +30,7 @@ class Word extends React.Component<IProps, {}> {
 
         {(() => {
           if (this.props.shouldSelectSpace) {
-            return <span className={classNames}> </span>
+            return <span className={this.props.isMarked ? "marker" : ""}> </span>
           } else {
             return " "
           }

@@ -83,21 +83,6 @@ const transcriptReducer = (state = initState, action: Action) => {
 
           startTime = endTime
         }
-
-        // If original entered string ends with a space, we add it to the last word again
-        /*TODO
-        if (text.endsWith(" ")) {
-          cleanText += " "
-          newWords[newWords.length - 1].word += " "
-        }
-*/
-        // Replace array of words in result
-
-        /*this.setState({
-          currentSelectedWordIndexEnd: wordIndexStart + newWords.length - 1,
-          editString: cleanText, 
-          results: newResults,
-        })*/
       }
 
       // Replace array of words in correct position
@@ -110,7 +95,10 @@ const transcriptReducer = (state = initState, action: Action) => {
 
       return {
         ...state,
+        // resultIndex,
         results,
+        // wordIndexEnd,
+        // wordIndexStart,
       }
 
     case "SPLIT_RESULTS":

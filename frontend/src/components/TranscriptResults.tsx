@@ -10,6 +10,7 @@ import { ActionCreators as UndoActionCreators } from "redux-undo"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
 import secondsToTime from "../secondsToTime"
+import { updateMarkers } from "../store/actions/markersActions"
 import { joinResults, readResults, splitResults, updateWords } from "../store/actions/transcriptActions"
 import Player from "./Player"
 import Word from "./Word"
@@ -24,6 +25,27 @@ interface IState {
 }
 
 interface IReduxStateToProps {
+  markers: {
+    future: [
+      {
+        markerResultIndex: number
+        markerWordIndexStart: number
+        markerWordIndexEnd: number
+      }
+    ]
+    past: [
+      {
+        markerResultIndex: number
+        markerWordIndexStart: number
+        markerWordIndexEnd: number
+      }
+    ]
+    present: {
+      markerResultIndex: number
+      markerWordIndexStart: number
+      markerWordIndexEnd: number
+    }
+  }
   transcript: {
     past: ITranscript[]
     present: ITranscript
@@ -36,6 +58,7 @@ interface IReduxDispatchToProps {
   onUndo: () => void
   readResults: (transcriptId: string) => void
   splitResults: (resultIndex: number, wordIndex: number) => void
+  updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
   updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
 }
 
@@ -62,6 +85,20 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         markerWordIndexEnd: undefined,
         markerWordIndexStart: undefined,
       })
+    }
+    // Check if markers have been updated
+    else if (prevProps.markers && prevProps.markers.present) {
+      const markers = prevProps.markers.present
+
+      if (this.state.markerResultIndex !== markers.markerResultIndex || this.state.markerWordIndexStart !== markers.markerWordIndexStart || this.state.markerWordIndexEnd !== markers.markerWordIndexEnd) {
+        // TODO
+      }
+    }
+
+    console.log("PREV PROPS", prevProps)
+
+    if (this.props.markers && this.props.markers.future) {
+      console.log("MAERKERS   ", this.props.markers)
     }
   }
 
@@ -739,6 +776,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     console.log("PRØVER Å SKRIVE over ord", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
 
     this.props.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
+    this.props.updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)
   }
 
   private splitResult(resultIndex: number, wordIndex: number) {
@@ -750,6 +788,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
 const mapStateToProps = (state: State): IReduxStateToProps => {
   return {
+    markers: state.markers,
     transcript: state.transcript,
   }
 }
@@ -761,6 +800,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
     onUndo: () => dispatch(UndoActionCreators.undo()),
     readResults: (transcriptId: string) => dispatch(readResults(transcriptId)),
     splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
+    updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)),
     updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => dispatch(updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)),
   }
 }

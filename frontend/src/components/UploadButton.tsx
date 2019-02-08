@@ -16,7 +16,7 @@ class UploadButton extends Component<IProps, IState> {
     const style = { alignContent: "center", borderColor: "rgb(102, 102, 102)", borderRadius: "5px", borderStyle: "dashed", borderWidth: "2px", display: "grid", height: "100px", justifyContent: "center", position: "relative", width: "100%" }
 
     return (
-      <Dropzone accept="audio/*,video/mp4" onDrop={this.handleFileDrop}>
+      <Dropzone accept="audio/*,video/*,application/mxf" onDrop={this.handleFileDrop}>
         {({ getRootProps, getInputProps, isDragActive }) => {
           return (
             <div {...getRootProps()} style={style}>

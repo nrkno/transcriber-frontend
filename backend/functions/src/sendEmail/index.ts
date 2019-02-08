@@ -8,12 +8,9 @@ async function sendEmail(mailData: MailData) {
   const name: string = functions.config().sendgrid.name
   const email: string = functions.config().sendgrid.email
 
-  if (apiKey === undefined) {
-    throw new Error("Sendgrid API key missing from config")
-  } else if (name === undefined) {
-    throw new Error("Sendgrid name missing from config")
-  } else if (email === undefined) {
-    throw new Error("Sendgrid email missing from config")
+  if (apiKey === undefined || name === undefined || email === undefined) {
+    console.warn("Sendgrid not set up correctly, skipping e-mail")
+    return
   }
 
   sendgridMail.setApiKey(apiKey)

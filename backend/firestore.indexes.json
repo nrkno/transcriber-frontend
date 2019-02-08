@@ -1,18 +1,19 @@
 {
   "indexes": [
     {
-      "collectionId": "transcripts",
-      "state": "READY",
+      "collectionGroup": "transcripts",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "userId",
-          "mode": "ASCENDING"
+          "order": "ASCENDING"
         },
         {
           "fieldPath": "createdAt",
-          "mode": "DESCENDING"
+          "order": "DESCENDING"
         }
       ]
     }
-  ]
+  ],
+  "fieldOverrides": []
 }

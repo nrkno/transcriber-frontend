@@ -17,8 +17,6 @@ if (!admin.apps.length) {
 }
 
 const db = admin.firestore()
-const settings = { timestampsInSnapshots: true }
-db.settings(settings)
 
 const database = (() => {
   const updateTranscript = async (id: string, transcript: ITranscript): Promise<FirebaseFirestore.WriteResult> => {

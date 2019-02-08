@@ -320,6 +320,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       const currentWord = results![markerResultIndex].words[markerWordIndexEnd].word
 
       switch (event.key) {
+        case "Escape": {
+          this.setState({
+            edits: undefined,
+          })
+          break
+        }
         case "Enter":
           if (event.getModifierState("Meta")) {
             this.splitResult(markerResultIndex, markerWordIndexStart)
@@ -345,18 +351,20 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             // Decrease selection
             if (editingForward && markerWordIndexStart < markerWordIndexEnd && markerWordIndexEnd > 0) {
               this.setState({
-                editString: undefined,
+                edits: undefined,
                 markerWordIndexEnd: markerWordIndexEnd - 1,
               })
               // Increase selection
             } else if (markerWordIndexStart > 0) {
               this.setState({
-                editString: undefined,
                 editingForward: false,
+                edits: undefined,
                 markerWordIndexStart: markerWordIndexStart - 1,
               })
             }
           } else {
+            this.commitEdits(true)
+
             // Move marker
 
             if (markerWordIndexStart > 0) {
@@ -391,14 +399,16 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             // Increase selection
             else if (markerWordIndexEnd + 1 < results[markerResultIndex].words.length) {
               this.setState({
-                edits: undefined,
                 editingForward: true,
+                edits: undefined,
                 markerWordIndexEnd: markerWordIndexEnd + 1,
               })
               // Decrease selection
             }
           } else {
             this.commitEdits(true)
+
+            // Move marker
 
             const largestSelectedIndex = Math.max(markerWordIndexStart, markerWordIndexEnd)
             // If shift key is pressed, check if there is another word after markerWordIndexEnd
@@ -565,22 +575,27 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             break
           }
         // Saving
-        case "s":
+        /*case "s":
           if (event.getModifierState("Meta")) {
             this.save()
 
             break
-          }
+          }*/
         // Undo/redo
         case "z":
           if (event.getModifierState("Meta")) {
             if (event.getModifierState("Shift")) {
               this.props.onRedo()
+            } else if (this.state.edits) {
+              this.setState({ edits: undefined })
             } else {
               this.props.onUndo()
             }
             break
           }
+        case "Delete":
+          this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, false)
+          break
         case "a":
         case "b":
         case "c":
@@ -644,26 +659,27 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "Backspace":
           // Change the selected word
 
-          let edits = this.state.edits
+          let edits = update(this.state.edits, {}) // Copy edits from state
 
           if (key === "Backspace") {
             if (event.getModifierState("Meta")) {
               this.props.joinResults(markerResultIndex, markerWordIndexStart)
               return
-            } else if (editString === undefined) {
-              editString = currentWord
+            } else if (edits === undefined) {
+              edits = [currentWord]
             }
-            editString = editString.slice(0, -1)
-          } else if (edits !== undefined) {
+            edits[edits.length - 1] = edits[edits.length - 1].slice(0, -1)
+          }
+          // Add character to last word
+          else if (edits !== undefined) {
             edits[edits.length - 1] += key
-          } else {
+          }
+          // Replace marked word with entered character
+          else {
             edits = [key]
           }
           this.setState({ edits })
 
-          break
-        case "Delete":
-          this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, false)
           break
       }
 

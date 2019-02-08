@@ -17,13 +17,8 @@ interface IProps {
 
 class TranscriptsList extends Component<IProps> {
   public componentDidUpdate(prevProps) {
-    console.log(prevProps)
-    console.log(this.props)
-
     if (prevProps.transcripts === undefined && this.props.transcripts !== undefined) {
       // Transcripts are loaded for the first time, select from URL
-
-      console.log("SHOUDL SELELC TAJSLASJd")
 
       this.props.handleTranscriptIdSelected(this.props.selectedTranscriptId)
     }

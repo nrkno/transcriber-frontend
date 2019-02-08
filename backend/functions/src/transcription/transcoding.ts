@@ -102,8 +102,8 @@ export async function transcode(transcriptId: string, userId: string): Promise<I
   const contentType = fileMetadata.contentType
 
   // Exit if this is triggered on a file that is not audio.
-  if (contentType === undefined || (!contentType.startsWith("audio/") && contentType !== "video/mp4")) {
-    throw Error("Uploaded file is not an audio file")
+  if (contentType === undefined || (!contentType.startsWith("audio/") && !contentType.startsWith("video/") && contentType !== "application/mxf")) {
+    throw Error("Uploaded file is not an audio or video file")
   }
 
   // ------------------------------

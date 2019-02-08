@@ -28,22 +28,22 @@ interface IReduxStateToProps {
   markers: {
     future: [
       {
-        markerResultIndex: number
-        markerWordIndexStart: number
-        markerWordIndexEnd: number
+        resultIndex: number
+        wordIndexStart: number
+        wordIndexEnd: number
       }
     ]
     past: [
       {
-        markerResultIndex: number
-        markerWordIndexStart: number
-        markerWordIndexEnd: number
+        resultIndex: number
+        wordIndexStart: number
+        wordIndexEnd: number
       }
     ]
     present: {
-      markerResultIndex: number
-      markerWordIndexStart: number
-      markerWordIndexEnd: number
+      resultIndex?: number
+      wordIndexStart?: number
+      wordIndexEnd?: number
     }
   }
   transcript: {
@@ -87,18 +87,24 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       })
     }
     // Check if markers have been updated
-    else if (prevProps.markers && prevProps.markers.present) {
+    else if (prevProps.markers && prevProps.markers.past.length > this.props.markers.past.length) {
+      console.log("HIE")
+      console.log("prevProps", prevProps.markers.present)
+      console.log("present", this.props.markers.present)
       const markers = prevProps.markers.present
+      console.log("MARKERS ", markers)
 
-      if (this.state.markerResultIndex !== markers.markerResultIndex || this.state.markerWordIndexStart !== markers.markerWordIndexStart || this.state.markerWordIndexEnd !== markers.markerWordIndexEnd) {
+      if (this.state.markerResultIndex !== markers.resultIndex || this.state.markerWordIndexStart !== markers.wordIndexStart || this.state.markerWordIndexEnd !== markers.wordIndexEnd) {
         // TODO
+
+        console.log("Setter state", markers.resultIndex, markers.wordIndexEnd, markers.wordIndexStart)
+
+        this.setState({
+          markerResultIndex: markers.resultIndex,
+          markerWordIndexEnd: markers.wordIndexEnd,
+          markerWordIndexStart: markers.wordIndexStart,
+        })
       }
-    }
-
-    console.log("PREV PROPS", prevProps)
-
-    if (this.props.markers && this.props.markers.future) {
-      console.log("MAERKERS   ", this.props.markers)
     }
   }
 

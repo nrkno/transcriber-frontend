@@ -27,6 +27,10 @@ const transcriptReducer = (state = initState, action: Action) => {
     ////////////
     // UPDATE //
     ////////////
+
+    case "UPDATE_SPEAKER":
+      return updateSpeaker(action.resultIndex, action.speaker)
+
     case "UPDATE_WORDS":
       const { recalculate, resultIndex, wordIndexEnd, wordIndexStart, words } = action
 
@@ -95,10 +99,7 @@ const transcriptReducer = (state = initState, action: Action) => {
 
       return {
         ...state,
-        // resultIndex,
         results,
-        // wordIndexEnd,
-        // wordIndexStart,
       }
 
     case "SPLIT_RESULTS":
@@ -111,6 +112,33 @@ const transcriptReducer = (state = initState, action: Action) => {
 
     default:
       return state
+  }
+
+  function updateSpeaker(resultIndex: number, speaker: number) {
+    let results
+
+    if (state.results[resultIndex].speaker === speaker || speaker === 0) {
+      // Remove speaker
+
+      results = update(state.results, {
+        [resultIndex]: {
+          speaker: { $set: null },
+        },
+      })
+    } else {
+      // Add speaker
+
+      results = update(state.results, {
+        [resultIndex]: {
+          speaker: { $set: speaker },
+        },
+      })
+    }
+
+    return {
+      ...state,
+      results,
+    }
   }
 
   function joinResults(resultIndex: number, wordIndex: number, state: State) {

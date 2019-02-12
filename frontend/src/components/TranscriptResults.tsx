@@ -11,7 +11,7 @@ import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
 import secondsToTime from "../secondsToTime"
 import { updateMarkers } from "../store/actions/markersActions"
-import { joinResults, readResults, splitResults, updateWords } from "../store/actions/transcriptActions"
+import { joinResults, readResults, splitResults, updateSpeaker, updateWords } from "../store/actions/transcriptActions"
 import Player from "./Player"
 import Word from "./Word"
 
@@ -59,6 +59,7 @@ interface IReduxDispatchToProps {
   readResults: (transcriptId: string) => void
   splitResults: (resultIndex: number, wordIndex: number) => void
   updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
+  updateSpeaker: (resultIndex: number, speaker: number) => void
   updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
 }
 
@@ -201,10 +202,19 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             const startTime = result.startTime
 
             const formattedStartTime = secondsToTime(startTime * 1e-9)
-
+            const speaker = result.speaker
             return (
               <React.Fragment key={i}>
                 <div key={`startTime-${i}`} className="startTime">
+                  {speaker ? (
+                    <>
+                      <button onClick={(resultIndex, speaker, event) => this.handleChangeSpeakerName(resultIndex, speaker, event)}>{this.props.transcript.present.speakers[result.speaker - 1]}</button>
+                      <br />
+                    </>
+                  ) : (
+                    ""
+                  )}
+
                   {i > 0 ? formattedStartTime : ""}
                 </div>
                 <div key={`result-${i}`} className="result">
@@ -216,9 +226,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                           const isEditing = isMarked && this.state.edits !== undefined
 
                           if (isEditing) {
-                            console.log("isEditing j:", j)
-                            console.log("Length of edits: ", this.state.edits.length)
-
                             // Only show the last word
                             if (j < this.state.markerWordIndexEnd) {
                               console.log("returning")
@@ -227,8 +234,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                             }
 
                             const lastWord = this.state.edits[this.state.edits.length - 1]
-                            console.log("komer hit og last word", lastWord)
-                            console.log("edits inni her", this.state.edits)
                             return this.state.edits.map((edit, k) => {
                               const isLastWord = this.state.edits.length - 1 === k
                               return (
@@ -289,6 +294,15 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     if (edits !== undefined) {
       this.setWords(this.state.markerResultIndex, this.state.markerWordIndexStart, this.state.markerWordIndexEnd, edits, stopEditing)
     }
+  }
+
+  private handleChangeSpeakerName(resultIndex: number, speaker: number, event: React.FormEvent<HTMLButtonElement>) {
+    /*if (event.defaultPrevented) {
+      return // Do nothing if the event was already processed
+    }
+*/
+    console.log(resultIndex)
+    console.log(speaker)
   }
 
   private handleKeyPressed(keyX: string, event: KeyboardEvent) {
@@ -596,6 +610,21 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "Delete":
           this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, false)
           break
+
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9":
+        case "0":
+          if (event.getModifierState("Control")) {
+            this.props.updateSpeaker(markerResultIndex, parseInt(event.key, 10))
+            break
+          }
         case "a":
         case "b":
         case "c":
@@ -823,6 +852,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
     readResults: (transcriptId: string) => dispatch(readResults(transcriptId)),
     splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
     updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)),
+    updateSpeaker: (resultIndex: number, speaker: number) => dispatch(updateSpeaker(resultIndex, speaker)),
     updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => dispatch(updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)),
   }
 }

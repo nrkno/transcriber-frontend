@@ -10,6 +10,7 @@ interface ITranscript {
     percent?: number
     step?: Step
   }
+  speakers: Array<string>
   metadata: IMetadata
   results?: Array<IResult>
   userId?: string
@@ -36,6 +37,7 @@ interface ISpeechContext {
 
 interface IResult {
   id: string
+  speaker: number
   startTime: number
   words: Array<IWord>
 }

@@ -35,7 +35,7 @@
     "@types/dotenv": "^6.1.0",
     "@types/ffmpeg-static": "^2.0.0",
     "@types/fluent-ffmpeg": "^2.1.9",
-    "@types/jest": "^24.0.0",
+    "@types/jest": "^24.0.4",
     "@types/serialize-error": "^2.1.0",
     "@types/universal-analytics": "^0.4.2",
     "@types/xmlbuilder": "0.0.34",

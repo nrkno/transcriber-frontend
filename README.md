@@ -1,4 +1,16 @@
-# Set up
+# Transcriber
+
+Transcriber is a web app using Google speech-to-text API for transcribing audio files. Transcoding, transcription and database is handled by Cloud functions and Firebase, while React JS is used for the web frontend.
+
+## Tech overview
+
+* [React JS](https://reactjs.org)
+* [Google Cloud Storage](https://cloud.google.com/storage/)
+* [Cloud Functions for Firebase](https://firebase.google.com/docs/functions/)
+* [Cloud Speech-to-text](https://cloud.google.com/speech-to-text/)
+* [Cloud Firestore](https://firebase.google.com/docs/firestore/)
+
+## Set up
 
 - Follow the steps in setting up the backend.
 - Rename `.env.sample` to `.env`
@@ -11,17 +23,17 @@
 npm run dev
 ```
 
-# Google Analytics
+## Google Analytics
 
 To track events to [Google Analytics](https://analytics.google.com/analytics/web), enter your `GOOGLE_ANALYTICS_PROPERTY_ID` in the `.env` file. The following events are tracked:
 
-## All pages
+### All pages
 
 | category       | action                 | label |
 | -------------- | ---------------------- | ----- |
 | authentication | log out button pressed |       |
 
-## Create transcript
+### Create transcript
 
 | category   | action        | label         |
 | ---------- | ------------- | ------------- |
@@ -29,7 +41,7 @@ To track events to [Google Analytics](https://analytics.google.com/analytics/web
 | transcript | aborted       |               |
 |            |               |               |
 
-## Transcript page
+### Transcript page
 
 | category   | action                | label  |
 | ---------- | --------------------- | ------ |
@@ -40,7 +52,7 @@ To track events to [Google Analytics](https://analytics.google.com/analytics/web
 | player     | pause button pressed  |        |
 | player     | volume changed        |        |
 
-# Browsers targeted
+## Browsers targeted
 
 ```sh
 npx browserslist ">0.25% in my stats, not IE > 0"

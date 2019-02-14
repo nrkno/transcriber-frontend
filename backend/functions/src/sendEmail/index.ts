@@ -4,20 +4,18 @@ import sendgridMail from "@sendgrid/mail"
 import * as functions from "firebase-functions"
 
 async function sendEmail(mailData: MailData) {
-  const apiKey: string = functions.config().sendgrid.apikey
-  const name: string = functions.config().sendgrid.name
-  const email: string = functions.config().sendgrid.email
+  const sendgrid = functions.config().sendgrid
 
-  if (apiKey === undefined || name === undefined || email === undefined) {
-    console.warn("Sendgrid not set up correctly, skipping e-mail")
+  if (sendgrid === undefined || sendgrid.apiKey === undefined || sendgrid.name === undefined || sendgrid.email === undefined) {
+    console.warn("Sendgrid not set up, skipping e-mail")
     return
   }
 
-  sendgridMail.setApiKey(apiKey)
+  sendgridMail.setApiKey(sendgrid.apiKey)
 
   const from: EmailData = {
-    email,
-    name,
+    email: sendgrid.email,
+    name: sendgrid.name,
   }
 
   mailData.from = from

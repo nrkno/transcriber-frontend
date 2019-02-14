@@ -1,23 +1,57 @@
-# Transcriber
+# Set up
 
-Transcriber is a web app using Google speech-to-text API for transcribing audio files. Transcoding, transcription and database is handled by Cloud functions and Firebase, while React JS is used for the web frontend.
+- Follow the steps in setting up the backend.
+- Rename `.env.sample` to `.env`
+- In the Firebase Console, Choose "Add Firebase to your web project" copy the values of `apiKey`, `databaseURL`, and the name of your uploads bucket and paste them in to `.env`.
+- Run `npm install` to install dependencies.
 
-## Tech overview
+## Development
 
-* [React JS](https://reactjs.org)
-* [Google Cloud Storage](https://cloud.google.com/storage/)
-* [Cloud Functions for Firebase](https://firebase.google.com/docs/functions/)
-* [Cloud Speech-to-text](https://cloud.google.com/speech-to-text/)
-* [Cloud Firestore](https://firebase.google.com/docs/firestore/)
+```sh
+npm run dev
+```
 
-# Backend
+# Google Analytics
 
-See [README](backend).
+To track events to [Google Analytics](https://analytics.google.com/analytics/web), enter your `GOOGLE_ANALYTICS_PROPERTY_ID` in the `.env` file. The following events are tracked:
 
-# Frontend
+## All pages
 
-See [README](frontend).
+| category       | action                 | label |
+| -------------- | ---------------------- | ----- |
+| authentication | log out button pressed |       |
 
-## License
+## Create transcript
 
-Transcriber is MIT licensed.
+| category   | action        | label         |
+| ---------- | ------------- | ------------- |
+| transcript | upload failed | [file format] |
+| transcript | aborted       |               |
+|            |               |               |
+
+## Transcript page
+
+| category   | action                | label  |
+| ---------- | --------------------- | ------ |
+| transcript | not found             |        |
+| transcript | export button pressed | [type] |
+| transcript | delete button pressed |        |
+| player     | play button pressed   |        |
+| player     | pause button pressed  |        |
+| player     | volume changed        |        |
+
+# Browsers targeted
+
+```sh
+npx browserslist ">0.25% in my stats, not IE > 0"
+
+chrome 69
+chrome 68
+chrome 67
+edge 17
+edge 16
+firefox 61
+ios_saf 11.3-11.4
+safari 11.1
+safari 11
+```

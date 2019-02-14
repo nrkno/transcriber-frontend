@@ -1,8 +1,0 @@
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /media/{userId}/{media} {
-      allow read: if request.auth.uid == userId;
-      allow write: if request.auth.uid == userId && (request.resource.contentType.matches('audio/.*') || request.resource.contentType.matches('video/.*') || request.resource.contentType.matches('application/mxf'));
-    }
-  }
-}

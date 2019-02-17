@@ -622,7 +622,18 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "9":
         case "0":
           if (event.getModifierState("Control")) {
-            this.props.updateSpeaker(markerResultIndex, parseInt(event.key, 10))
+            // Check that the speaker exists, otherwise, ask for their name
+
+            if (this.props.transcript.present.speakers && this.props.transcript.present.speakers[key] !== undefined) {
+              this.props.updateSpeaker(markerResultIndex, parseInt(event.key, 10))
+            } else {
+              const speakerName = window.prompt(`Navn på person ${key}:`)
+
+              if (speakerName) {
+                console.log(speakerName)
+              }
+            }
+
             break
           }
         case "a":

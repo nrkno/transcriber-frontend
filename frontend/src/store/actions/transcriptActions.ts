@@ -73,11 +73,19 @@ export const updateWords = (resultIndex: number, wordIndexStart: number, wordInd
   })
 }
 
-export const updateSpeaker = (resultIndex: number, speaker: number) => (dispatch: Dispatch, getState) => {
+export const updateSpeaker = (resultIndex: number, speaker: number) => (dispatch: Dispatch) => {
   dispatch({
     resultIndex,
     speaker,
     type: "UPDATE_SPEAKER",
+  })
+}
+
+export const updateSpeakerName = (speaker: number, name: string) => (dispatch: Dispatch) => {
+  dispatch({
+    name,
+    speaker,
+    type: "UPDATE_SPEAKER_NAME",
   })
 }
 

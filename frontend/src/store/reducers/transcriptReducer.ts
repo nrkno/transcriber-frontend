@@ -31,6 +31,9 @@ const transcriptReducer = (state = initState, action: Action) => {
     case "UPDATE_SPEAKER":
       return updateSpeaker(action.resultIndex, action.speaker)
 
+    case "UPDATE_SPEAKER_NAME":
+      return updateSpeakerName(action.speaker, action.name)
+
     case "UPDATE_WORDS":
       const { recalculate, resultIndex, wordIndexEnd, wordIndexStart, words } = action
 
@@ -139,6 +142,10 @@ const transcriptReducer = (state = initState, action: Action) => {
       ...state,
       results,
     }
+  }
+
+  function updateSpeakerName(speaker: number, name: string) {
+    return
   }
 
   function joinResults(resultIndex: number, wordIndex: number, state: State) {

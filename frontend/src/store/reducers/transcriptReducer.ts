@@ -1,9 +1,9 @@
 import update from "immutability-helper"
 import { Action } from "redux"
 import { database } from "../../firebaseApp"
-import { IResult, IWord } from "../../interfaces"
+import { IResult, ITranscript, IWord } from "../../interfaces"
 
-const initState = {}
+const initState: ITranscript = {}
 
 const transcriptReducer = (state = initState, action: Action) => {
   switch (action.type) {
@@ -118,6 +118,7 @@ const transcriptReducer = (state = initState, action: Action) => {
   }
 
   function updateSpeaker(resultIndex: number, speaker: number) {
+    console.log("UPdate speaker", resultIndex, speaker)
     let results
 
     if (state.results[resultIndex].speaker === speaker || speaker === 0) {
@@ -138,6 +139,8 @@ const transcriptReducer = (state = initState, action: Action) => {
       })
     }
 
+    console.log("new resulrts", results)
+
     return {
       ...state,
       results,
@@ -145,7 +148,20 @@ const transcriptReducer = (state = initState, action: Action) => {
   }
 
   function updateSpeakerName(speaker: number, name: string) {
-    return
+    let speakerNames
+
+    if (state.speakerNames) {
+      speakerNames = update(state.speakerNames, {
+        [speaker]: { $set: name },
+      })
+    } else {
+      speakerNames = { [speaker]: name }
+    }
+
+    return {
+      ...state,
+      speakerNames,
+    }
   }
 
   function joinResults(resultIndex: number, wordIndex: number, state: State) {

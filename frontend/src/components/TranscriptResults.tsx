@@ -11,7 +11,7 @@ import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
 import secondsToTime from "../secondsToTime"
 import { updateMarkers } from "../store/actions/markersActions"
-import { joinResults, readResults, splitResults, updateSpeaker, updateWords } from "../store/actions/transcriptActions"
+import { joinResults, readResults, splitResults, updateSpeaker, updateSpeakerName, updateWords } from "../store/actions/transcriptActions"
 import Player from "./Player"
 import Word from "./Word"
 
@@ -60,6 +60,7 @@ interface IReduxDispatchToProps {
   splitResults: (resultIndex: number, wordIndex: number) => void
   updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
   updateSpeaker: (resultIndex: number, speaker: number) => void
+  updateSpeakerName: (speaker: number, name: string) => void
   updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
 }
 
@@ -89,11 +90,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
     // Check if markers have been updated
     else if (prevProps.markers && prevProps.markers.past.length > this.props.markers.past.length) {
-      console.log("HIE")
-      console.log("prevProps", prevProps.markers.present)
-      console.log("present", this.props.markers.present)
       const markers = prevProps.markers.present
-      console.log("MARKERS ", markers)
 
       if (this.state.markerResultIndex !== markers.resultIndex || this.state.markerWordIndexStart !== markers.wordIndexStart || this.state.markerWordIndexEnd !== markers.wordIndexEnd) {
         // TODO
@@ -208,7 +205,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                 <div key={`startTime-${i}`} className="startTime">
                   {speaker ? (
                     <>
-                      <button onClick={(resultIndex, speaker, event) => this.handleChangeSpeakerName(resultIndex, speaker, event)}>{this.props.transcript.present.speakers[result.speaker - 1]}</button>
+                      <div onClick={(resultIndex, speaker, event) => this.handleChangeSpeakerName(resultIndex, speaker, event)}>{this.props.transcript.present.speakerNames[result.speaker]}</div>
                       <br />
                     </>
                   ) : (
@@ -624,13 +621,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           if (event.getModifierState("Control")) {
             // Check that the speaker exists, otherwise, ask for their name
 
-            if (this.props.transcript.present.speakers && this.props.transcript.present.speakers[key] !== undefined) {
+            if (this.props.transcript.present.speakerNames && this.props.transcript.present.speakerNames[parseInt(key, 10)] !== undefined) {
               this.props.updateSpeaker(markerResultIndex, parseInt(event.key, 10))
             } else {
               const speakerName = window.prompt(`Navn på person ${key}:`)
 
               if (speakerName) {
                 console.log(speakerName)
+                this.props.updateSpeakerName(parseInt(key, 10), speakerName)
               }
             }
 
@@ -864,6 +862,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
     splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
     updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)),
     updateSpeaker: (resultIndex: number, speaker: number) => dispatch(updateSpeaker(resultIndex, speaker)),
+    updateSpeakerName: (speaker: number, name: string) => dispatch(updateSpeakerName(speaker, name)),
     updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => dispatch(updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)),
   }
 }

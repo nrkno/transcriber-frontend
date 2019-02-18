@@ -41,8 +41,6 @@ export const readResults = (transcriptId: string) => async (dispatch: Dispatch, 
       results.push({ id, ...result })
     })
 
-    console.log("results", results)
-
     dispatch({
       results,
       type: "READ_RESULTS",
@@ -81,9 +79,10 @@ export const updateSpeaker = (resultIndex: number, speaker: number) => (dispatch
   })
 }
 
-export const updateSpeakerName = (speaker: number, name: string) => (dispatch: Dispatch) => {
+export const updateSpeakerName = (speaker: number, name: string, resultIndex?: number) => (dispatch: Dispatch) => {
   dispatch({
     name,
+    resultIndex,
     speaker,
     type: "UPDATE_SPEAKER_NAME",
   })
@@ -114,8 +113,6 @@ export const splitResults = (resultIndex: number, wordIndex: number) => (dispatc
 }
 
 export const selectTranscript = (transcriptId: string, transcript: ITranscript) => (dispatch: Dispatch) => {
-  console.log("SELECT_TRANSCRIPT action", transcript)
-
   dispatch({
     transcript,
     transcriptId,

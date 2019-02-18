@@ -60,7 +60,7 @@ interface IReduxDispatchToProps {
   splitResults: (resultIndex: number, wordIndex: number) => void
   updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
   updateSpeaker: (resultIndex: number, speaker: number) => void
-  updateSpeakerName: (speaker: number, name: string) => void
+  updateSpeakerName: (speaker: number, name: string, resultIndex?: number) => void
   updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
 }
 
@@ -832,7 +832,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
       if (speakerName) {
         console.log(speakerName)
-        this.props.updateSpeakerName(parseInt(key, 10), speakerName)
+        this.props.updateSpeakerName(parseInt(key, 10), speakerName, markerResultIndex)
       }
     }
   }
@@ -867,7 +867,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
     splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
     updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)),
     updateSpeaker: (resultIndex: number, speaker: number) => dispatch(updateSpeaker(resultIndex, speaker)),
-    updateSpeakerName: (speaker: number, name: string) => dispatch(updateSpeakerName(speaker, name)),
+    updateSpeakerName: (speaker: number, name: string, resultIndex: number) => dispatch(updateSpeakerName(speaker, name, resultIndex)),
     updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => dispatch(updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)),
   }
 }

@@ -32,7 +32,7 @@ const transcriptReducer = (state = initState, action: Action) => {
       return updateSpeaker(action.resultIndex, action.speaker)
 
     case "UPDATE_SPEAKER_NAME":
-      return updateSpeakerName(action.speaker, action.name)
+      return updateSpeakerName(action.speaker, action.name, action.resultIndex)
 
     case "UPDATE_WORDS":
       const { recalculate, resultIndex, wordIndexEnd, wordIndexStart, words } = action
@@ -118,7 +118,7 @@ const transcriptReducer = (state = initState, action: Action) => {
   }
 
   function updateSpeaker(resultIndex: number, speaker: number) {
-    console.log("UPdate speaker", resultIndex, speaker)
+    console.log("Update speaker", resultIndex, speaker)
     let results
 
     if (state.results[resultIndex].speaker === speaker || speaker === 0) {
@@ -139,17 +139,16 @@ const transcriptReducer = (state = initState, action: Action) => {
       })
     }
 
-    console.log("new resulrts", results)
-
     return {
       ...state,
       results,
     }
   }
 
-  function updateSpeakerName(speaker: number, name: string) {
+  function updateSpeakerName(speaker: number, name: string, resultIndex?: number) {
     let speakerNames
 
+    // Setting speaker names
     if (state.speakerNames) {
       speakerNames = update(state.speakerNames, {
         [speaker]: { $set: name },
@@ -158,8 +157,18 @@ const transcriptReducer = (state = initState, action: Action) => {
       speakerNames = { [speaker]: name }
     }
 
+    let results
+    if (resultIndex !== undefined) {
+      results = update(state.results, {
+        [resultIndex]: {
+          speaker: { $set: speaker },
+        },
+      })
+    }
+
     return {
       ...state,
+      results,
       speakerNames,
     }
   }

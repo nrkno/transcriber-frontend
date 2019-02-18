@@ -70,10 +70,15 @@ header div.user a {
 /* Speakers */
 
 .speaker {
-  color: white;
-  padding: 5px;
-  border-radius: 5px;
+  border-radius: 0.8em;
+  color: #ffffff;
+  display: inline-block;
+  font-weight: bold;
+  line-height: 1.6em;
+  margin-right: 5px;
   margin-left: 5px;
+  text-align: center;
+  width: 1.6em;
 }
 
 .speaker-1 {

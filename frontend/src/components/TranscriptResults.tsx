@@ -212,7 +212,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                       </span>
                     </>
                   ) : (
-                    ""
+                    <span>&nbsp;</span>
                   )}
                 </div>
                 <div key={`result-${i}`} className="result">
@@ -620,19 +620,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "9":
         case "0":
           if (event.getModifierState("Control")) {
-            // Check that the speaker exists, otherwise, ask for their name
-
-            if (this.props.transcript.present.speakerNames && this.props.transcript.present.speakerNames[parseInt(key, 10)] !== undefined) {
-              this.props.updateSpeaker(markerResultIndex, parseInt(event.key, 10))
-            } else {
-              const speakerName = window.prompt(`Navn på person ${key}:`)
-
-              if (speakerName) {
-                console.log(speakerName)
-                this.props.updateSpeakerName(parseInt(key, 10), speakerName)
-              }
-            }
-
+            this.handleSetSpeaker(key, markerResultIndex)
             break
           }
         case "a":
@@ -833,6 +821,22 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       markerWordIndexEnd: wordIndexStart + texts.length - 1,
     })
   }
+
+  private handleSetSpeaker(key: string, markerResultIndex: number) {
+    // Check that the speaker exists, otherwise, ask for their name
+
+    if (this.props.transcript.present.speakerNames && this.props.transcript.present.speakerNames[parseInt(key, 10)] !== undefined) {
+      this.props.updateSpeaker(markerResultIndex, parseInt(key, 10))
+    } else {
+      const speakerName = window.prompt(`Navn på person ${key}:`)
+
+      if (speakerName) {
+        console.log(speakerName)
+        this.props.updateSpeakerName(parseInt(key, 10), speakerName)
+      }
+    }
+  }
+
   private updateWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) {
     console.log("PRØVER Å SKRIVE over ord", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
 

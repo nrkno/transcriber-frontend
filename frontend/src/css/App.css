@@ -67,6 +67,31 @@ header div.user a {
   text-decoration: none;
 }
 
+/* Speakers */
+
+.speaker {
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  margin-left: 5px;
+}
+
+.speaker-1 {
+  background-color: rgb(29, 158, 218);
+}
+.speaker-2 {
+  background-color: rgb(230, 92, 33);
+}
+.speaker-3 {
+  background-color: rgb(165, 102, 163);
+}
+.speaker-4 {
+  background-color: rgb(4, 76, 151);
+}
+.speaker-5 {
+  background-color: rgb(70, 168, 61);
+}
+
 /* Heat map */
 
 .confidence-0 {

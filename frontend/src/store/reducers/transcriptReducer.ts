@@ -41,11 +41,44 @@ const transcriptReducer = (state = initState, action: Action) => {
     case "JOIN_RESULTS":
       return joinResults(action.resultIndex, action.wordIndex)
 
+    ////////////
+    // DELETE //
+    ////////////
+
+    case "DELETE_WORDS":
+      return deleteWords(action.resultIndex, action.wordIndexStart, action.wordIndexEnd)
+
     default:
       return state
   }
 
   function readResults(results: IResult[]) {
+    return {
+      ...state,
+      results,
+    }
+  }
+
+  function deleteWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number) {
+    const newWords = Array<IWord>()
+
+    for (let i = wordIndexStart; i <= wordIndexEnd; i++) {
+      const word = state.results[resultIndex].words[i]
+
+      newWords.push({
+        ...word,
+        deleted: true,
+      })
+    }
+
+    // Replace array of words in correct position
+
+    const results = update(state.results, {
+      [resultIndex]: {
+        words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords]] },
+      },
+    })
+
     return {
       ...state,
       results,

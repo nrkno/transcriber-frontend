@@ -11,7 +11,7 @@ import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
 import secondsToTime from "../secondsToTime"
 import { updateMarkers } from "../store/actions/markersActions"
-import { joinResults, readResults, splitResults, updateSpeaker, updateSpeakerName, updateWords } from "../store/actions/transcriptActions"
+import { deleteWords, joinResults, readResults, splitResults, updateSpeaker, updateSpeakerName, updateWords } from "../store/actions/transcriptActions"
 import Player from "./Player"
 import Word from "./Word"
 
@@ -58,6 +58,7 @@ interface IReduxDispatchToProps {
   onUndo: () => void
   readResults: (transcriptId: string) => void
   splitResults: (resultIndex: number, wordIndex: number) => void
+  deleteWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
   updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
   updateSpeaker: (resultIndex: number, speaker: number) => void
   updateSpeakerName: (speaker: number, name: string, resultIndex?: number) => void
@@ -231,7 +232,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                               return
                             }
 
-                            const lastWord = this.state.edits[this.state.edits.length - 1]
                             return this.state.edits.map((edit, k) => {
                               const isLastWord = this.state.edits.length - 1 === k
                               return (
@@ -251,6 +251,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                           } else {
                             const shouldSelectSpace = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j < this.state.markerWordIndexEnd
 
+                            const isNextWordDeleted = j + 1 < result.words.length && result.words[j + 1].deleted !== undefined && result.words[j + 1].deleted === true
+
                             return (
                               <Word
                                 key={`word-${i}-${j}`}
@@ -258,6 +260,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                                 word={word}
                                 showTypewriter={false}
                                 isMarked={isMarked}
+                                isNextWordDeleted={isNextWordDeleted}
                                 resultIndex={i}
                                 shouldSelectSpace={shouldSelectSpace}
                                 setCurrentWord={this.setCurrentPlayingWord}
@@ -787,24 +790,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   }
 
   private deleteWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, selectPreviousWord: boolean) {
-    const results = update(this.props.transcript.present.results, {
-      [resultIndex]: {
-        words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1]] },
-      },
-    })
-
-    let markerWordIndexStart = this.state.markerWordIndexStart!
-
-    // Select the previous word
-    if (selectPreviousWord && wordIndexStart > 0) {
-      markerWordIndexStart--
-    }
-
-    this.setState({
-      markerWordIndexEnd: markerWordIndexStart,
-      markerWordIndexStart,
-      results,
-    })
+    this.props.deleteWords(resultIndex, wordIndexStart, wordIndexEnd)
   }
 
   private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, texts: [string], stopEditing: boolean) {
@@ -863,6 +849,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
     onRedo: () => dispatch(UndoActionCreators.redo()),
     onUndo: () => dispatch(UndoActionCreators.undo()),
     readResults: (transcriptId: string) => dispatch(readResults(transcriptId)),
+    deleteWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(deleteWords(resultIndex, wordIndexStart, wordIndexEnd)),
     splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
     updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)),
     updateSpeaker: (resultIndex: number, speaker: number) => dispatch(updateSpeaker(resultIndex, speaker)),

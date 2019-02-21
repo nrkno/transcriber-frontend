@@ -5,10 +5,11 @@ interface IProps {
   confidence: number
   showTypewriter: boolean
   isMarked: boolean
+  isNextWordDeleted: boolean
   resultIndex: number
   shouldSelectSpace: boolean
   text: string
-  word: IWord
+  word?: IWord
   wordIndex: number
   setCurrentWord(word: IWord, resultIndex: number, wordIndex: number): void
 }
@@ -21,6 +22,7 @@ class Word extends React.Component<IProps, {}> {
           {this.props.word && this.props.word.deleted && this.props.word.deleted === true ? <s>{this.props.text}</s> : this.props.text}
 
           {(() => {
+            // Type writer
             if (this.props.showTypewriter) {
               return <span className="typewriter" />
             } else {
@@ -28,10 +30,17 @@ class Word extends React.Component<IProps, {}> {
             }
           })()}
         </span>
-
         {(() => {
+          // Space
+          const strikeThrough = this.props.word && this.props.word.deleted && this.props.word.deleted === true && this.props.isNextWordDeleted === true
           if (this.props.shouldSelectSpace) {
-            return <span className={this.props.isMarked ? "marker" : ""}> </span>
+            if (strikeThrough) {
+              return <s className={this.props.isMarked ? "marker" : ""}> </s>
+            } else {
+              return <span className={this.props.isMarked ? "marker" : ""}> </span>
+            }
+          } else if (strikeThrough) {
+            return <s> </s>
           } else {
             return " "
           }
@@ -41,7 +50,9 @@ class Word extends React.Component<IProps, {}> {
   }
 
   private handleWordClick = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
-    this.props.setCurrentWord(this.props.word, this.props.resultIndex, this.props.wordIndex)
+    if (this.props.word) {
+      this.props.setCurrentWord(this.props.word, this.props.resultIndex, this.props.wordIndex)
+    }
   }
 }
 

@@ -46,6 +46,7 @@ interface IResult {
 
 interface IWord {
   confidence: number
+  deleted: boolean
   word: string
   endTime: number
   startTime: number

@@ -204,7 +204,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             return (
               <React.Fragment key={i}>
                 <div key={`startTime-${i}`} className="startTime">
-                  {i > 0 ? formattedStartTime : ""}
+                  {formattedStartTime}
                   {speaker ? (
                     <>
                       <span className={`speaker speaker-${speaker}`} onClick={(resultIndex, speaker, event) => this.handleChangeSpeakerName(resultIndex, speaker, event)}>
@@ -801,7 +801,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
 
     this.setState({
-      editString: undefined,
       markerWordIndexEnd: markerWordIndexStart,
       markerWordIndexStart,
       results,

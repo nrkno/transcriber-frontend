@@ -18,7 +18,8 @@ class Word extends React.Component<IProps, {}> {
     return (
       <>
         <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${this.props.isMarked ? "marker" : ""}`}>
-          {this.props.text}
+          {this.props.word && this.props.word.deleted && this.props.word.deleted === true ? <s>{this.props.text}</s> : this.props.text}
+
           {(() => {
             if (this.props.showTypewriter) {
               return <span className="typewriter" />

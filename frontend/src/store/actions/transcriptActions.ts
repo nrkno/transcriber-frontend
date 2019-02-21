@@ -89,6 +89,19 @@ export const updateSpeakerName = (speaker: number, name: string, resultIndex?: n
 }
 
 //////////
+// DELETE//
+//////////
+
+export const deleteWord = (resultIndex: number, wordIndex: number) => (dispatch: Dispatch) => {
+  dispatch({
+    name,
+    resultIndex,
+    type: "DELETE_WORD",
+    wordIndex,
+  })
+}
+
+//////////
 // OTHER//
 //////////
 

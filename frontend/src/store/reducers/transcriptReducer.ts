@@ -35,86 +35,86 @@ const transcriptReducer = (state = initState, action: Action) => {
       return updateSpeakerName(action.speaker, action.name, action.resultIndex)
 
     case "UPDATE_WORDS":
-      const { recalculate, resultIndex, wordIndexEnd, wordIndexStart, words } = action
-
-      const newWords = Array<IWord>()
-
-      if (recalculate === false) {
-        //////////////////////
-        // No recalculation //
-        //////////////////////
-
-        for (const [index, word] of words.entries()) {
-          console.log(index, word)
-
-          newWords.push({
-            confidence: 1,
-            endTime: state.results[resultIndex].words[wordIndexEnd + index].endTime,
-            startTime: state.results[resultIndex].words[wordIndexStart + index].startTime,
-            word,
-          })
-        }
-      } else {
-        ///////////////////
-        // Recalculation //
-        ///////////////////
-
-        const textLengthWithoutSpaces = words.join("").length
-
-        const wordStart = state.results[resultIndex].words[wordIndexStart]
-        const wordEnd = state.results[resultIndex].words[wordIndexEnd]
-
-        if (textLengthWithoutSpaces === 0) {
-          // Delete words
-          console.log("TODO: HSOULD DELETE")
-          this.deleteWords(resultIndex, wordIndexStart, wordIndexEnd, true)
-          return
-        }
-
-        console.log("textLengthWithoutSpaces", textLengthWithoutSpaces)
-
-        const nanosecondsPerCharacter = (wordEnd.endTime - wordStart.startTime) / textLengthWithoutSpaces
-        console.log("nanosecondsPerCharacter", nanosecondsPerCharacter)
-
-        let startTime = wordStart.startTime
-        for (const word of words) {
-          const duration = word.length * nanosecondsPerCharacter
-          const endTime = startTime + duration
-
-          newWords.push({
-            confidence: 1,
-            endTime,
-            startTime,
-            word,
-          })
-
-          startTime = endTime
-        }
-      }
-
-      // Replace array of words in correct position
-
-      const results = update(state.results, {
-        [resultIndex]: {
-          words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords]] },
-        },
-      })
-
-      return {
-        ...state,
-        results,
-      }
+      return updateWords(action.resultIndex, action.wordIndexStart, action.wordIndexEnd, action.words, action.recalculate)
 
     case "SPLIT_RESULTS":
       return splitResult(action.resultIndex, action.wordIndex, state)
 
     case "JOIN_RESULTS":
-      console.log("JOIN_RESULTS reducer", state)
-
       return joinResults(action.resultIndex, action.wordIndex, state)
 
     default:
       return state
+  }
+
+  function updateWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: IWord[], recalculate: boolean) {
+    const newWords = Array<IWord>()
+
+    if (recalculate === false) {
+      //////////////////////
+      // No recalculation //
+      //////////////////////
+
+      for (const [index, word] of words.entries()) {
+        console.log(index, word)
+
+        newWords.push({
+          confidence: 1,
+          endTime: state.results[resultIndex].words[wordIndexEnd + index].endTime,
+          startTime: state.results[resultIndex].words[wordIndexStart + index].startTime,
+          word,
+        })
+      }
+    } else {
+      ///////////////////
+      // Recalculation //
+      ///////////////////
+
+      const textLengthWithoutSpaces = words.join("").length
+
+      const wordStart = state.results[resultIndex].words[wordIndexStart]
+      const wordEnd = state.results[resultIndex].words[wordIndexEnd]
+
+      if (textLengthWithoutSpaces === 0) {
+        // Delete words
+        console.log("TODO: HSOULD DELETE")
+        this.deleteWords(resultIndex, wordIndexStart, wordIndexEnd, true)
+        return
+      }
+
+      console.log("textLengthWithoutSpaces", textLengthWithoutSpaces)
+
+      const nanosecondsPerCharacter = (wordEnd.endTime - wordStart.startTime) / textLengthWithoutSpaces
+      console.log("nanosecondsPerCharacter", nanosecondsPerCharacter)
+
+      let startTime = wordStart.startTime
+      for (const word of words) {
+        const duration = word.length * nanosecondsPerCharacter
+        const endTime = startTime + duration
+
+        newWords.push({
+          confidence: 1,
+          endTime,
+          startTime,
+          word,
+        })
+
+        startTime = endTime
+      }
+    }
+
+    // Replace array of words in correct position
+
+    const results = update(state.results, {
+      [resultIndex]: {
+        words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords]] },
+      },
+    })
+
+    return {
+      ...state,
+      results,
+    }
   }
 
   function updateSpeaker(resultIndex: number, speaker: number) {

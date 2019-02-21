@@ -693,7 +693,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
           if (key === "Backspace") {
             if (event.getModifierState("Meta")) {
-              this.props.joinResults(markerResultIndex, markerWordIndexStart)
+              this.joinResults(markerResultIndex, markerWordIndexStart)
               return
             } else if (edits === undefined) {
               edits = [currentWord]
@@ -823,14 +823,42 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   }
 
   private updateWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) {
-    console.log("PRØVER Å SKRIVE over ord", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
-
     this.props.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
     this.props.updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)
   }
 
+  private joinResults(resultIndex: number, wordIndex: number) {
+    // Calculating where the marker will be in the joined result
+
+    if (resultIndex > 0) {
+      const result = this.props.transcript.present.results[resultIndex - 1]
+
+      // Saving marker in undo history
+      this.props.updateMarkers(this.state.markerResultIndex, 0, 0)
+
+      // Setting new marker state
+      this.setState({
+        markerResultIndex: resultIndex - 1,
+        markerWordIndexEnd: result.words.length,
+        markerWordIndexStart: result.words.length,
+      })
+    }
+
+    this.props.joinResults(resultIndex, wordIndex)
+  }
+
   private splitResult(resultIndex: number, wordIndex: number) {
     this.props.splitResults(resultIndex, wordIndex)
+
+    // Saving marker in undo history
+    this.props.updateMarkers(resultIndex, wordIndex, wordIndex)
+
+    // Setting marker to the next result
+    this.setState({
+      markerResultIndex: resultIndex + 1,
+      markerWordIndexEnd: 0,
+      markerWordIndexStart: 0,
+    })
   }
 }
 

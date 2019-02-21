@@ -85,7 +85,7 @@ const transcriptReducer = (state = initState, action: Action) => {
     }
   }
 
-  function updateWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: IWord[], recalculate: boolean) {
+  function updateWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) {
     const newWords = Array<IWord>()
 
     if (recalculate === false) {
@@ -115,14 +115,10 @@ const transcriptReducer = (state = initState, action: Action) => {
 
       if (textLengthWithoutSpaces === 0) {
         // Delete words
-        console.log("TODO: HSOULD DELETE")
         return deleteWords(resultIndex, wordIndexStart, wordIndexEnd)
       }
 
-      console.log("textLengthWithoutSpaces", textLengthWithoutSpaces)
-
       const nanosecondsPerCharacter = (wordEnd.endTime - wordStart.startTime) / textLengthWithoutSpaces
-      console.log("nanosecondsPerCharacter", nanosecondsPerCharacter)
 
       let startTime = wordStart.startTime
       for (const word of words) {

@@ -116,8 +116,7 @@ const transcriptReducer = (state = initState, action: Action) => {
       if (textLengthWithoutSpaces === 0) {
         // Delete words
         console.log("TODO: HSOULD DELETE")
-        this.deleteWords(resultIndex, wordIndexStart, wordIndexEnd, true)
-        return
+        return deleteWords(resultIndex, wordIndexStart, wordIndexEnd)
       }
 
       console.log("textLengthWithoutSpaces", textLengthWithoutSpaces)

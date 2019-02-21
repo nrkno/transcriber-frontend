@@ -11,10 +11,8 @@ const transcriptReducer = (state = initState, action: Action) => {
     // READ //
     //////////
     case "READ_RESULTS":
-      return {
-        ...state,
-        results: action.results,
-      }
+      return readResults(action.results)
+
     case "SELECT_TRANSCRIPT":
       const transcriptId = action.transcriptId
       const transcript = action.transcript
@@ -38,13 +36,20 @@ const transcriptReducer = (state = initState, action: Action) => {
       return updateWords(action.resultIndex, action.wordIndexStart, action.wordIndexEnd, action.words, action.recalculate)
 
     case "SPLIT_RESULTS":
-      return splitResult(action.resultIndex, action.wordIndex, state)
+      return splitResult(action.resultIndex, action.wordIndex)
 
     case "JOIN_RESULTS":
-      return joinResults(action.resultIndex, action.wordIndex, state)
+      return joinResults(action.resultIndex, action.wordIndex)
 
     default:
       return state
+  }
+
+  function readResults(results: IResult[]) {
+    return {
+      ...state,
+      results,
+    }
   }
 
   function updateWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: IWord[], recalculate: boolean) {
@@ -173,7 +178,7 @@ const transcriptReducer = (state = initState, action: Action) => {
     }
   }
 
-  function joinResults(resultIndex: number, wordIndex: number, state: State) {
+  function joinResults(resultIndex: number, wordIndex: number) {
     // Can't join the first result, or if selected word is not the first one
     if (resultIndex === 0 || wordIndex !== 0) {
       return state
@@ -191,7 +196,7 @@ const transcriptReducer = (state = initState, action: Action) => {
       results,
     }
   }
-  function splitResult(resultIndex: number, wordIndex: number, state: State) {
+  function splitResult(resultIndex: number, wordIndex: number) {
     // Return if we're at the last word in the result
     if (wordIndex === state.results[resultIndex].words.length - 1) {
       return state

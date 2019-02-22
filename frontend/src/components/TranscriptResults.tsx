@@ -77,33 +77,44 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   }
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps, prevState: IState) {
     if (this.props.transcript.present.id !== prevProps.transcript.present.id) {
-      console.log("read")
       this.props.readResults(this.props.transcript.present.id)
 
       // Reset state
-
       this.setState({
         currentTime: 0,
         markerResultIndex: undefined,
         markerWordIndexEnd: undefined,
         markerWordIndexStart: undefined,
       })
+      return
     }
     // Check if markers have been updated
-    else if (prevProps.markers && prevProps.markers.past.length > this.props.markers.past.length) {
-      const markers = prevProps.markers.present
+    else if (prevProps.markers) {
+      let markers
 
-      if (this.state.markerResultIndex !== markers.resultIndex || this.state.markerWordIndexStart !== markers.wordIndexStart || this.state.markerWordIndexEnd !== markers.wordIndexEnd) {
-        // TODO
+      if (prevProps.markers.past.length > this.props.markers.past.length) {
+        markers = prevProps.markers.present
+      } else if (prevProps.markers.future.length > this.props.markers.future.length) {
+        markers = this.props.markers.present
+      }
 
-        console.log("Setter state", markers.resultIndex, markers.wordIndexEnd, markers.wordIndexStart)
-
+      // Set state if the current marker is different from the saved one
+      if (markers !== undefined && (this.state.markerResultIndex !== markers.resultIndex || this.state.markerWordIndexStart !== markers.wordIndexStart || this.state.markerWordIndexEnd !== markers.wordIndexEnd)) {
         this.setState({
           markerResultIndex: markers.resultIndex,
           markerWordIndexEnd: markers.wordIndexEnd,
           markerWordIndexStart: markers.wordIndexStart,
         })
       }
+    }
+
+    // Checking if length of past has change, meaning we need to save
+
+    if (prevProps.transcript.past.length !== this.props.transcript.past.length) {
+      console.log("😊😊😊😊😊SKAL SAVE  ")
+
+      console.log("PREV", prevProps.transcript.past.length)
+      console.log("DENNE", this.props.transcript.past.length)
     }
   }
 
@@ -589,13 +600,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
             break
           }
-        // Saving
-        /*case "s":
-          if (event.getModifierState("Meta")) {
-            this.save()
 
-            break
-          }*/
         // Undo/redo
         case "z":
           if (event.getModifierState("Meta")) {
@@ -609,7 +614,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             break
           }
         case "Delete":
-          this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, false)
+          this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
           break
 
         case "1":
@@ -789,17 +794,17 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
 
-  private deleteWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, selectPreviousWord: boolean) {
+  private deleteWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number) {
     this.props.deleteWords(resultIndex, wordIndexStart, wordIndexEnd)
+
+    // Saving marker in undo history
+    this.props.updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)
   }
 
   private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, texts: [string], stopEditing: boolean) {
-    console.log("Set words texts: ", texts)
-
     this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, texts, true)
 
     const edits = update(texts, { $push: [""] })
-    console.log("edits", edits)
 
     this.setState({
       edits: stopEditing ? undefined : edits,

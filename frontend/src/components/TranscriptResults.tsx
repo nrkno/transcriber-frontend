@@ -109,13 +109,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       }
     }
 
-    if (prevProps.transcript.past.length !== this.props.transcript.past.length) {
-      console.log("prevProps.transcript.past.length", prevProps.transcript.past.length)
-      console.log("this.props.transcript.past.length", this.props.transcript.past.length)
+    // Check if we need to save to Firebase
+    if (Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 1) {
+      const pastResults = prevProps.transcript.present.results
+      const presentResults = this.props.transcript.present.results
 
-      console.log("😊SKAL SAVE😊😊😊😊  ")
-
-      this.save(prevProps.transcript.present.results, this.props.transcript.present.results)
+      if (pastResults !== undefined && presentResults !== undefined) {
+        this.save(pastResults, presentResults)
+      }
     }
   }
 
@@ -723,69 +724,68 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
 
-  private async save(pastResults?: IResult[], presentResults?: IResult[]) {
-    if (pastResults !== undefined && pastResults !== undefined) {
-      // Create an array with all result ids
+  private async save(pastResults: IResult[], presentResults: IResult[]) {
+    // Create an array with all result ids
 
-      const pastResultsIds = pastResults.map(result => result.id)
-      const presentResultsIds = presentResults.map(result => result.id)
+    const pastResultsIds = pastResults.map(result => result.id)
+    const presentResultsIds = presentResults.map(result => result.id)
 
-      const resultsIds = new Set([...pastResultsIds, ...presentResultsIds])
+    const resultsIds = new Set([...pastResultsIds, ...presentResultsIds])
 
-      const updateResults: IResult[] = new Array()
-      const createResults: IResult[] = new Array()
-      const deleteIds: string[] = new Array()
+    const updateResults: IResult[] = new Array()
+    const createResults: IResult[] = new Array()
+    const deleteIds: string[] = new Array()
 
-      for (const resultId of resultsIds) {
-        if (pastResultsIds.includes(resultId) && presentResultsIds.includes(resultId)) {
-          // In both arrays, need to compare them
+    for (const resultId of resultsIds) {
+      if (pastResultsIds.includes(resultId) && presentResultsIds.includes(resultId)) {
+        // In both arrays, need to compare them
 
-          const pastResult = pastResults.filter(result => result.id === resultId)[0]
-          const presentResult = presentResults.filter(result => result.id === resultId)[0]
+        const pastResult = pastResults.filter(result => result.id === resultId)[0]
+        const presentResult = presentResults.filter(result => result.id === resultId)[0]
 
-          if (equal(pastResult, presentResult) === false) {
-            updateResults.push(presentResult)
-          }
-        } else if (pastResultsIds.includes(resultId)) {
-          // Only in past, need to delete
-          deleteIds.push(resultId)
-        } else {
-          const presentResult = presentResults.filter(result => result.id === resultId)[0]
-
-          createResults.push(presentResult)
-          // Only in present, need to add
+        if (equal(pastResult, presentResult) === false) {
+          updateResults.push(presentResult)
         }
+      } else if (pastResultsIds.includes(resultId)) {
+        // Only in past, need to delete
+        deleteIds.push(resultId)
+      } else {
+        const presentResult = presentResults.filter(result => result.id === resultId)[0]
+
+        createResults.push(presentResult)
+        // Only in present, need to add
       }
+    }
 
-      const resultsCollectionReference = database.collection(`transcripts/${this.props.transcript.present.id}/results/`)
-      console.log("🧡🧡🧡🧡SAVER I FB: ", resultsCollectionReference)
+    const resultsCollectionReference = database.collection(`transcripts/${this.props.transcript.present.id}/results/`)
 
-      return
-      // Get a new write batch
-      const batch = database.batch()
+    // Get a new write batch
+    const batch = database.batch()
 
-      // Set the value in update Ids
+    // Set the value in update Ids
 
-      for (const result of updateResults) {
-        batch.update(resultsCollectionReference.doc(result.id), result)
-      }
+    for (const result of updateResults) {
+      console.log("UPDATE result", result)
 
-      for (const result of createResults) {
-        batch.set(resultsCollectionReference.doc(result.id), result)
-      }
-      for (const resultId of deleteIds) {
-        batch.delete(resultsCollectionReference.doc(resultId))
-      }
+      batch.update(resultsCollectionReference.doc(result.id), result)
+    }
 
-      try {
-        await batch.commit()
-      } catch (error) {
-        console.error(error)
-        ReactGA.exception({
-          description: error.message,
-          fatal: false,
-        })
-      }
+    for (const result of createResults) {
+      batch.set(resultsCollectionReference.doc(result.id), result)
+    }
+    for (const resultId of deleteIds) {
+      batch.delete(resultsCollectionReference.doc(resultId))
+    }
+
+    try {
+      await batch.commit()
+      console.log("🧡🧡🧡🧡SAVET I FB: ")
+    } catch (error) {
+      console.error(error)
+      ReactGA.exception({
+        description: error.message,
+        fatal: false,
+      })
     }
   }
 

@@ -94,8 +94,6 @@ const transcriptReducer = (state = initState, action: Action) => {
       //////////////////////
 
       for (const [index, word] of words.entries()) {
-        console.log(index, word)
-
         newWords.push({
           confidence: 1,
           endTime: state.results[resultIndex].words[wordIndexEnd + index].endTime,

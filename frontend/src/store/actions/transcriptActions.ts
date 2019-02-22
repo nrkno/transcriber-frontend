@@ -59,8 +59,6 @@ export const readResults = (transcriptId: string) => async (dispatch: Dispatch, 
 ////////////
 
 export const updateWords = (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => (dispatch: Dispatch, getState) => {
-  console.log("Dispatch UPDATE WORDS action", resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
-
   dispatch({
     recalculate,
     resultIndex,

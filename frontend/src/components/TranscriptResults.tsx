@@ -110,9 +110,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
 
     if (prevProps.transcript.past.length !== this.props.transcript.past.length) {
+      console.log("prevProps.transcript.past.length", prevProps.transcript.past.length)
+      console.log("this.props.transcript.past.length", this.props.transcript.past.length)
+
       console.log("😊SKAL SAVE😊😊😊😊  ")
 
-      this.save()
+      this.save(prevProps.transcript.present.results, this.props.transcript.present.results)
     }
   }
 
@@ -298,8 +301,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
   private commitEdits(stopEditing: boolean) {
     const edits = this.state.edits
-
-    console.log("edits: ", edits)
 
     if (edits !== undefined) {
       this.setWords(this.state.markerResultIndex, this.state.markerWordIndexStart, this.state.markerWordIndexEnd, edits, stopEditing)
@@ -722,13 +723,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
 
-  private async save() {
-    // Create an array with all result ids
+  private async save(pastResults?: IResult[], presentResults?: IResult[]) {
+    if (pastResults !== undefined && pastResults !== undefined) {
+      // Create an array with all result ids
 
-    const pastResults = this.props.transcript.past[0].results
-    const presentResults = this.props.transcript.present.results!
-
-    if (pastResults !== undefined) {
       const pastResultsIds = pastResults.map(result => result.id)
       const presentResultsIds = presentResults.map(result => result.id)
 

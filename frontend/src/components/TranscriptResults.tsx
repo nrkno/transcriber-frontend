@@ -356,14 +356,13 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           if (event.getModifierState("Meta")) {
             this.splitResult(markerResultIndex, markerWordIndexStart)
           } else {
-            console.log("Enter")
             // Go out of edit mode
 
             if (this.state.edits !== undefined) {
               this.commitEdits(true)
             }
-            // Go into edit mode
-            else {
+            // Go into edit mode if only word is selected
+            else if (markerWordIndexStart === markerWordIndexEnd) {
               this.setState({
                 edits: [currentWord],
               })
@@ -765,8 +764,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     // Set the value in update Ids
 
     for (const result of updateResults) {
-      console.log("UPDATE result", result)
-
       batch.update(resultsCollectionReference.doc(result.id), result)
     }
 

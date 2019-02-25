@@ -79,6 +79,7 @@ header div.user a {
   margin-left: 5px;
   text-align: center;
   width: 1.6em;
+  cursor: pointer;
 }
 
 .speaker-1 {

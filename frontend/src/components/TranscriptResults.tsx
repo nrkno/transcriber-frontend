@@ -111,11 +111,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
     // Check if we need to save to Firebase
     if (Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 1) {
+      console.log("finner endring")
+
       const pastResults = prevProps.transcript.present.results
       const presentResults = this.props.transcript.present.results
 
       if (pastResults !== undefined && presentResults !== undefined) {
-        this.save(pastResults, presentResults)
+        console.log("SAVERRRR")
+        // this.save(pastResults, presentResults)
       }
     }
   }
@@ -323,7 +326,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
 
     const key = event.key
-    console.log("event.key:", event.key)
 
     // If left or right is pressed, we reset the indeces to 0,0 and return,
     // so that the first word is highlighted
@@ -776,7 +778,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
     try {
       await batch.commit()
-      console.log("🧡🧡🧡🧡SAVET I FB: ")
     } catch (error) {
       console.error(error)
       ReactGA.exception({
@@ -813,7 +814,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       const speakerName = window.prompt(`Navn på person ${key}:`)
 
       if (speakerName) {
-        console.log(speakerName)
         this.props.updateSpeakerName(parseInt(key, 10), speakerName, markerResultIndex)
       }
     }
@@ -870,11 +870,11 @@ const mapStateToProps = (state: State): IReduxStateToProps => {
 
 const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
   return {
+    deleteWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(deleteWords(resultIndex, wordIndexStart, wordIndexEnd)),
     joinResults: (resultIndex: number, wordIndex: number) => dispatch(joinResults(resultIndex, wordIndex)),
     onRedo: () => dispatch(UndoActionCreators.redo()),
     onUndo: () => dispatch(UndoActionCreators.undo()),
     readResults: (transcriptId: string) => dispatch(readResults(transcriptId)),
-    deleteWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(deleteWords(resultIndex, wordIndexStart, wordIndexEnd)),
     splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
     updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)),
     updateSpeaker: (resultIndex: number, speaker: number) => dispatch(updateSpeaker(resultIndex, speaker)),

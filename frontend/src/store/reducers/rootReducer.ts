@@ -15,12 +15,3 @@ const rootReducer = combineReducers({
 })
 
 export default rootReducer
-
-/*
-
-import undoable, { groupByActionTypes } from "redux-undo"
-
-transcript: undoable(transcriptReducer, { groupBy: groupByActionTypes("UPDATE_WORDS") }),
-
-
-*/

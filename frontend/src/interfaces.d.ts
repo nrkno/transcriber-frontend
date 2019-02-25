@@ -39,7 +39,7 @@ interface ISpeechContext {
 
 interface IResult {
   id: string
-  speaker: number
+  speaker?: number
   startTime: number
   words: Array<IWord>
 }

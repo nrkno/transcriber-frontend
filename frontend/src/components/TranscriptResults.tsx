@@ -216,7 +216,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                   {formattedStartTime}
                   {speaker ? (
                     <>
-                      <span className={`speaker speaker-${speaker}`} onClick={(resultIndex, speaker, event) => this.handleChangeSpeakerName(resultIndex, speaker, event)}>
+                      <span className={`speaker speaker-${speaker}`} onClick={this.handleChangeSpeakerName(speaker)}>
                         {this.props.transcript.present.speakerNames[result.speaker][0].toUpperCase()}
                       </span>
                     </>
@@ -303,13 +303,16 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
 
-  private handleChangeSpeakerName(resultIndex: number, speaker: number, event: React.FormEvent<HTMLButtonElement>) {
-    /*if (event.defaultPrevented) {
-      return // Do nothing if the event was already processed
+  private handleChangeSpeakerName = (speaker: number) => (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
+    if (this.props.transcript.present.speakerNames !== undefined) {
+      const currentSpeakerName = this.props.transcript.present.speakerNames[speaker]
+
+      const newSpeakerName = window.prompt(`Navn på person ${speaker}:`, currentSpeakerName)
+
+      if (newSpeakerName) {
+        this.props.updateSpeakerName(speaker, newSpeakerName)
+      }
     }
-*/
-    console.log(resultIndex)
-    console.log(speaker)
   }
 
   private handleKeyPressed(keyX: string, event: KeyboardEvent) {

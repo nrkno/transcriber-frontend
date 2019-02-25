@@ -195,6 +195,8 @@ const transcriptReducer = (state = initState, action: Action) => {
           speaker: { $set: speaker },
         },
       })
+    } else {
+      results = state.results
     }
 
     return {

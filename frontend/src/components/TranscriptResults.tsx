@@ -111,15 +111,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
     // Check if we need to save to Firebase
     if (Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 1) {
-      console.log("finner endring")
-
-      const pastResults = prevProps.transcript.present.results
-      const presentResults = this.props.transcript.present.results
-
-      if (pastResults !== undefined && presentResults !== undefined) {
-        console.log("SAVERRRR")
-        // this.save(pastResults, presentResults)
-      }
+      this.save(prevProps.transcript.present, this.props.transcript.present)
     }
   }
 
@@ -725,55 +717,71 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
 
-  private async save(pastResults: IResult[], presentResults: IResult[]) {
-    // Create an array with all result ids
-
-    const pastResultsIds = pastResults.map(result => result.id)
-    const presentResultsIds = presentResults.map(result => result.id)
-
-    const resultsIds = new Set([...pastResultsIds, ...presentResultsIds])
-
-    const updateResults: IResult[] = new Array()
-    const createResults: IResult[] = new Array()
-    const deleteIds: string[] = new Array()
-
-    for (const resultId of resultsIds) {
-      if (pastResultsIds.includes(resultId) && presentResultsIds.includes(resultId)) {
-        // In both arrays, need to compare them
-
-        const pastResult = pastResults.filter(result => result.id === resultId)[0]
-        const presentResult = presentResults.filter(result => result.id === resultId)[0]
-
-        if (equal(pastResult, presentResult) === false) {
-          updateResults.push(presentResult)
-        }
-      } else if (pastResultsIds.includes(resultId)) {
-        // Only in past, need to delete
-        deleteIds.push(resultId)
-      } else {
-        const presentResult = presentResults.filter(result => result.id === resultId)[0]
-
-        createResults.push(presentResult)
-        // Only in present, need to add
-      }
-    }
-
-    const resultsCollectionReference = database.collection(`transcripts/${this.props.transcript.present.id}/results/`)
+  private async save(pastTranscript: ITranscript, presentTranscript: ITranscript) {
+    const transcriptDocumentReference = database.doc(`transcripts/${presentTranscript.id}/`)
 
     // Get a new write batch
     const batch = database.batch()
 
-    // Set the value in update Ids
+    // Check if we have changes in the transcript
 
-    for (const result of updateResults) {
-      batch.update(resultsCollectionReference.doc(result.id), result)
+    if (presentTranscript.speakerNames !== undefined && Object.is(pastTranscript.speakerNames, presentTranscript.speakerNames) !== true) {
+      batch.update(transcriptDocumentReference, {
+        speakerNames: presentTranscript.speakerNames,
+      })
     }
 
-    for (const result of createResults) {
-      batch.set(resultsCollectionReference.doc(result.id), result)
-    }
-    for (const resultId of deleteIds) {
-      batch.delete(resultsCollectionReference.doc(resultId))
+    const pastResults = pastTranscript.results
+    const presentResults = presentTranscript.results
+
+    // Changes in results
+    if (pastResults !== undefined && presentResults !== undefined) {
+      // Create an array with all result ids
+
+      const pastResultsIds = pastResults.map(result => result.id)
+      const presentResultsIds = presentResults.map(result => result.id)
+
+      const resultsIds = new Set([...pastResultsIds, ...presentResultsIds])
+
+      const updateResults: IResult[] = new Array()
+      const createResults: IResult[] = new Array()
+      const deleteIds: string[] = new Array()
+
+      for (const resultId of resultsIds) {
+        if (pastResultsIds.includes(resultId) && presentResultsIds.includes(resultId)) {
+          // In both arrays, need to compare them
+
+          const pastResult = pastResults.filter(result => result.id === resultId)[0]
+          const presentResult = presentResults.filter(result => result.id === resultId)[0]
+
+          if (equal(pastResult, presentResult) === false) {
+            updateResults.push(presentResult)
+          }
+        } else if (pastResultsIds.includes(resultId)) {
+          // Only in past, need to delete
+          deleteIds.push(resultId)
+        } else {
+          const presentResult = presentResults.filter(result => result.id === resultId)[0]
+
+          createResults.push(presentResult)
+          // Only in present, need to add
+        }
+      }
+
+      // Set the value in update Ids
+
+      const resultsCollectionReference = transcriptDocumentReference.collection("results")
+
+      for (const result of updateResults) {
+        batch.update(resultsCollectionReference.doc(result.id), result)
+      }
+
+      for (const result of createResults) {
+        batch.set(resultsCollectionReference.doc(result.id), result)
+      }
+      for (const resultId of deleteIds) {
+        batch.delete(resultsCollectionReference.doc(resultId))
+      }
     }
 
     try {

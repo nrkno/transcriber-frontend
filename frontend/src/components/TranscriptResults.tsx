@@ -701,9 +701,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
               this.joinResults(markerResultIndex, markerWordIndexStart)
               return
             } else if (edits === undefined) {
-              edits = [currentWord]
+              this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
+            } else {
+              edits[edits.length - 1] = edits[edits.length - 1].slice(0, -1)
             }
-            edits[edits.length - 1] = edits[edits.length - 1].slice(0, -1)
           }
           // Add character to last word
           else if (edits !== undefined) {

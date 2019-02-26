@@ -455,6 +455,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
         case "ArrowUp":
         case "Up":
+          this.commitEdits(true)
+
           // Jump to first word in current result
           if (markerWordIndexStart > 0) {
             const currentResultIndex = markerResultIndex
@@ -474,6 +476,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
         case "ArrowDown":
         case "Down":
+          this.commitEdits(true)
+
           // Jump to next result if it exists
 
           if (markerResultIndex < results.length - 1) {

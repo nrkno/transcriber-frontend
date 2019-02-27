@@ -200,7 +200,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   public render() {
     return (
       <>
-        <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={(key, event) => this.handleKeyPressed(key, event)} />
+        <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={this.handleKeyPressed} />
         {this.props.transcript &&
           this.props.transcript.present &&
           this.props.transcript.present.results &&
@@ -315,7 +315,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
 
-  private handleKeyPressed(keyX: string, event: KeyboardEvent) {
+  private handleKeyPressed = (_key: string, event: KeyboardEvent) => {
     if (event.defaultPrevented) {
       return // Do nothing if the event was already processed
     }

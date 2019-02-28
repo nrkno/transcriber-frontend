@@ -1,19 +1,22 @@
 import * as React from "react"
 import ReactGA from "react-ga"
 import { connect } from "react-redux"
+import { firestoreConnect, getVal } from "react-redux-firebase"
 import { RouteComponentProps } from "react-router"
+import { compose, withHandlers } from "recompose"
 import { ActionCreators } from "redux-undo"
 import { Step, SweetProgressStatus } from "../enums"
 import { functions } from "../firebaseApp"
+import firebaseApp from "../firebaseApp"
 import { ITranscript } from "../interfaces"
+import { selectTranscript } from "../store/actions/transcriptActions"
 import Process from "./Process"
 import TranscriptionProgress from "./TranscriptionProgress"
 import TranscriptResults from "./TranscriptResults"
 
 interface IProps {
   history: History
-  transcript: ITranscript | null
-  transcriptId?: string
+  transcriptId: string
 }
 
 interface IReduxStateToProps {
@@ -24,13 +27,29 @@ interface IReduxStateToProps {
 
 interface IReduxDispatchToProps {
   clearHistory: () => void
+  selectTranscript: (transcriptId: string, transcript: ITranscript) => void
 }
 
 class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateToProps & IReduxDispatchToProps> {
+  public componentDidMount() {
+    /*const transcriptId = this.props.transcriptId
+    console.log("DID mount", transcriptId, this.props)
+    const transcript = this.props.transcripts[transcriptId]
+    this.props.selectTranscript(transcriptId, transcript)*/
+  }
+
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps) {
+    const transcriptId = this.props.transcriptId
+
+    // If transcript has not yet been loaded, or user has selected a new ID, select transcript
+    if (Object.entries(this.props.transcript.present).length === 0 || transcriptId !== prevProps.transcriptId) {
+      const transcript = this.props.transcripts[transcriptId]
+
+      this.props.selectTranscript(transcriptId, transcript)
+    }
+
     // When the results are loaded the first, we reset the undo history
     // This is to stop users from undoing back to a state before the results were loaded
-
     if (prevProps.transcript.present.results === undefined && this.props.transcript.present.results !== undefined) {
       this.props.clearHistory()
     }
@@ -127,7 +146,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
             if (isDone) {
               return (
                 <div className="results">
-                  <TranscriptResults />
+                  <TranscriptResults transcriptId={this.props.transcriptId} />
                 </div>
               )
             } else {
@@ -176,12 +195,14 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
 const mapStateToProps = (state: State): IReduxStateToProps => {
   return {
     transcript: state.transcript,
+    transcripts: state.firestore.data.transcripts,
   }
 }
 
 const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
   return {
     clearHistory: () => dispatch(ActionCreators.clearHistory()),
+    selectTranscript: (transcriptId: string, transcript: ITranscript) => dispatch(selectTranscript(transcriptId, transcript)),
   }
 }
 

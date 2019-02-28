@@ -5,6 +5,8 @@ import ReactGA from "react-ga"
 import KeyboardEventHandler from "react-keyboard-event-handler"
 import TrackVisibility from "react-on-screen"
 import { connect } from "react-redux"
+import { withFirestore } from "react-redux-firebase"
+import { compose, withHandlers } from "recompose"
 import { Dispatch } from "redux"
 import { ActionCreators as UndoActionCreators } from "redux-undo"
 import { database } from "../firebaseApp"
@@ -51,13 +53,14 @@ interface IReduxStateToProps {
     past: ITranscript[]
     present: ITranscript
   }
+  transcriptId: string
 }
 
 interface IReduxDispatchToProps {
   joinResults: (resultIndex: number, wordIndex: number) => void
   onRedo: () => void
   onUndo: () => void
-  readResults: (transcriptId: string) => void
+  readResults: (results: IResult[]) => void
   splitResults: (resultIndex: number, wordIndex: number) => void
   deleteWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
   updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
@@ -77,8 +80,11 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps, prevState: IState) {
-    if (this.props.transcript.present.id !== prevProps.transcript.present.id) {
-      this.props.readResults(this.props.transcript.present.id)
+    const transcriptId = this.props.transcriptId
+    const prevTranscriptId = prevProps.transcriptId
+
+    if (transcriptId !== prevTranscriptId) {
+      this.fetchResults(transcriptId)
 
       // Reset state
       this.setState({
@@ -115,8 +121,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
 
-  public componentDidMount() {
-    this.props.readResults(this.props.transcript.present.id)
+  public async componentDidMount() {
+    console.log("THIS PROPS", this.props)
+
+    const transcriptId = this.props.transcriptId
+
+    this.fetchResults(transcriptId)
   }
   public handleTimeUpdate = (currentTime: number) => {
     // Find the next current result and word
@@ -293,6 +303,28 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         <Player ref={this.playerRef} playbackGsUrl={this.props.transcript.present.playbackGsUrl} handleTimeUpdate={this.handleTimeUpdate} />
       </>
     )
+  }
+
+  private async fetchResults(transcriptId: string) {
+    try {
+      const querySnapshot = await this.props.firestore.get({ collection: `transcripts/${transcriptId}/results`, orderBy: "startTime" })
+
+      const results = new Array()
+
+      querySnapshot.docs.forEach(doc => {
+        const result = doc.data()
+        const id = doc.id
+        results.push({ id, ...result })
+      })
+
+      this.props.readResults(results)
+    } catch (error) {
+      console.error("EERRRRRORRR", error)
+      ReactGA.exception({
+        description: error.message,
+        fatal: false,
+      })
+    }
   }
 
   private commitEdits(stopEditing: boolean) {
@@ -795,7 +827,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     try {
       await batch.commit()
     } catch (error) {
-      console.error(error)
+      console.error("Error saving to Firebase: ", error)
       ReactGA.exception({
         description: error.message,
         fatal: false,
@@ -890,7 +922,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
     joinResults: (resultIndex: number, wordIndex: number) => dispatch(joinResults(resultIndex, wordIndex)),
     onRedo: () => dispatch(UndoActionCreators.redo()),
     onUndo: () => dispatch(UndoActionCreators.undo()),
-    readResults: (transcriptId: string) => dispatch(readResults(transcriptId)),
+    readResults: (results: IResult[]) => dispatch(readResults(results)),
     splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
     updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)),
     updateSpeaker: (resultIndex: number, speaker: number) => dispatch(updateSpeaker(resultIndex, speaker)),
@@ -899,7 +931,12 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
   }
 }
 
-export default connect<void, IDispatchProps, void>(
-  mapStateToProps,
-  mapDispatchToProps,
-)(TranscriptResults)
+const enhance = compose(
+  withFirestore,
+  connect<void, IDispatchProps, void>(
+    mapStateToProps,
+    mapDispatchToProps,
+  ),
+)
+
+export default enhance(TranscriptResults)

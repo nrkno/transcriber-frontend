@@ -3,7 +3,6 @@ import ReactGA from "react-ga"
 import { connect } from "react-redux"
 import { RouteComponentProps, withRouter } from "react-router"
 import { Dispatch } from "redux"
-import { fetchUser, logOut } from "../store/actions/authActions"
 
 interface IProps {
   user?: firebase.User
@@ -14,15 +13,8 @@ interface IStateProps {
   user: firebase.User
 }
 
-interface IDispatchProps {
-  fetchUser: () => void
-  logOut: () => void
-}
-
 class Login extends Component<RouteComponentProps<{}> & IProps, any> {
   public render() {
-    this.props.fetchUser()
-
     return (
       <div className="user">
         {(() => {
@@ -78,7 +70,7 @@ const mapStateToProps = (state: State): IStateProps => {
 
 const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
   return {
-    fetchUser: () => dispatch(fetchUser()),
+    // fetchUser: () => dispatch(fetchUser()),
     logOut: () => dispatch(logOut()),
   }
 }

@@ -50,12 +50,14 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
     this.setState({ file })
   }
 
-  public handleTranscriptIdSelected = async (transcriptId: string) => {
+  public handleTranscriptIdSelected = (transcriptId: string) => {
+    console.log("PUSher")
+
     this.props.history.push(`/transcripts/${transcriptId}`)
 
-    const transcript = this.props.transcripts[transcriptId]
+    // const transcript = this.props.transcripts[transcriptId]
 
-    this.props.selectTranscript(transcriptId, transcript)
+    // this.props.selectTranscript(transcriptId /*, transcript*/)
   }
 
   private transcriptCreated = (transcriptId: string) => {
@@ -75,7 +77,7 @@ const mapStateToProps = (state: State): IStateProps => {
 
 const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
   return {
-    selectTranscript: (transcriptId: string, transcript: ITranscript) => dispatch(selectTranscript(transcriptId, transcript)),
+    selectTranscript: (transcriptId: string) => dispatch(selectTranscript(transcriptId)),
   }
 }
 

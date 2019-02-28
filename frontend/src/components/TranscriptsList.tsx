@@ -20,6 +20,8 @@ class TranscriptsList extends Component<IProps> {
     if (prevProps.transcripts === undefined && this.props.transcripts !== undefined) {
       // Transcripts are loaded for the first time, select from URL
 
+      console.log("// Transcripts are loaded for the first time, select from URL", this.props.selectedTranscriptId)
+
       this.props.handleTranscriptIdSelected(this.props.selectedTranscriptId)
     }
   }
@@ -122,16 +124,16 @@ class TranscriptsList extends Component<IProps> {
   private handleRowClick = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
     const transcriptId = event.currentTarget.dataset.transcriptId
 
-    if (transcriptId !== this.props.selectedTranscriptId) {
+    if (transcriptId !== undefined && transcriptId !== this.props.selectedTranscriptId) {
       this.props.handleTranscriptIdSelected(transcriptId)
     }
   }
 }
-const mapStateToProps = ({ firebase: { auth } }) => ({
-  auth,
-})
+
 export default compose(
-  connect(mapStateToProps),
+  connect(state => ({
+    auth: state.firebase.auth,
+  })),
   firestoreConnect(props => [
     {
       collection: "transcripts",
@@ -139,7 +141,7 @@ export default compose(
       where: ["userId", "==", props.auth.uid],
     },
   ]),
-  connect(({ firestore: { ordered } }) => ({
-    transcripts: ordered.transcripts,
+  connect(state => ({
+    transcripts: state.firestore.ordered.transcripts,
   })),
 )(TranscriptsList)

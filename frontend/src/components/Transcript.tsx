@@ -1,16 +1,12 @@
 import * as React from "react"
 import ReactGA from "react-ga"
 import { connect } from "react-redux"
-import { firestoreConnect, getVal } from "react-redux-firebase"
 import { RouteComponentProps } from "react-router"
-import { compose, withHandlers } from "recompose"
 import { ActionCreators } from "redux-undo"
-import { Step, SweetProgressStatus } from "../enums"
+import { SweetProgressStatus } from "../enums"
 import { functions } from "../firebaseApp"
-import firebaseApp from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 import { selectTranscript } from "../store/actions/transcriptActions"
-import Process from "./Process"
 import TranscriptionProgress from "./TranscriptionProgress"
 import TranscriptResults from "./TranscriptResults"
 
@@ -59,7 +55,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
     const transcript = this.props.transcript.present
 
     // Loading from Firebase
-    if (transcript === null) {
+    if (Object.entries(transcript).length === 0) {
       return "Loading"
     }
     // Transcription not found
@@ -75,84 +71,63 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
         </main>
       )
     } else {
-      // Check current step
-
-      const isDone = transcript && transcript.process && transcript.process.step === Step.Done ? true : false
-
       return (
         <main id="transcript">
           <section className="org-bar">
             <span className="org-text-l">{transcript.name}</span>
 
-            {(() => {
-              if (isDone) {
-                return (
-                  <>
-                    {(() => {
-                      if (this.props.transcript.present.results && this.props.transcript.past.length > 0) {
-                        return (
-                          <>
-                            <button className="org-btn">
-                              <svg width="20" height="20" focusable="false" aria-hidden="true">
-                                <use xlinkHref="#icon-undo" />
-                              </svg>{" "}
-                              Angre (⌘Z)
-                            </button>
-                          </>
-                        )
-                      } else {
-                        return (
-                          <>
-                            <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
-                              <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                                <g fill="none" fillRule="evenodd">
-                                  <path d="M17 0H3a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V3a3 3 0 0 0-3-3z" fill="#252627" />
-                                  <text fontFamily="Roboto-Medium, Roboto" fontSize="15" fontWeight="400" fill="#FFF" transform="translate(0 -2)">
-                                    <tspan x="4.4" y="16">
-                                      w
-                                    </tspan>
-                                  </text>
-                                </g>
-                              </svg>{" "}
-                              docx
-                            </button>
+            <>
+              {(() => {
+                if (this.props.transcript.present.results && this.props.transcript.past.length > 0) {
+                  return (
+                    <>
+                      <button className="org-btn">
+                        <svg width="20" height="20" focusable="false" aria-hidden="true">
+                          <use xlinkHref="#icon-undo" />
+                        </svg>{" "}
+                        Angre (⌘Z)
+                      </button>
+                    </>
+                  )
+                } else {
+                  return (
+                    <>
+                      <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
+                        <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                          <g fill="none" fillRule="evenodd">
+                            <path d="M17 0H3a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V3a3 3 0 0 0-3-3z" fill="#252627" />
+                            <text fontFamily="Roboto-Medium, Roboto" fontSize="15" fontWeight="400" fill="#FFF" transform="translate(0 -2)">
+                              <tspan x="4.4" y="16">
+                                w
+                              </tspan>
+                            </text>
+                          </g>
+                        </svg>{" "}
+                        docx
+                      </button>
 
-                            <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("xmp")}>
-                              <svg width="20" height="20" focusable="false" aria-hidden="true">
-                                <use xlinkHref="#icon-premiere" />
-                              </svg>{" "}
-                              xmp
-                            </button>
-                          </>
-                        )
-                      }
-                    })()}
+                      <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("xmp")}>
+                        <svg width="20" height="20" focusable="false" aria-hidden="true">
+                          <use xlinkHref="#icon-premiere" />
+                        </svg>{" "}
+                        xmp
+                      </button>
+                    </>
+                  )
+                }
+              })()}
 
-                    <button className="org-btn" onClick={this.handleDeleteButtonClicked}>
-                      <svg width="20" height="20" focusable="false" aria-hidden="true">
-                        <use xlinkHref="#icon-garbage" />
-                      </svg>{" "}
-                      Slett
-                    </button>
-                  </>
-                )
-              } else {
-                return "Loading transcript"
-              }
-            })()}
+              <button className="org-btn" onClick={this.handleDeleteButtonClicked}>
+                <svg width="20" height="20" focusable="false" aria-hidden="true">
+                  <use xlinkHref="#icon-garbage" />
+                </svg>{" "}
+                Slett
+              </button>
+            </>
           </section>
-
-          {(() => {
-            if (isDone) {
-              return (
-                <div className="results">
-                  <TranscriptResults transcriptId={this.props.transcriptId} />
-                </div>
-              )
-            } else {
-              return <Process transcript={transcript} />
-            }
-          })()}
+          <div className="results">
+            <TranscriptResults transcriptId={transcript.id} />
+          </div>
         </main>
       )
     }

@@ -223,7 +223,6 @@ class CreateTranscript extends React.Component<IProps, IState> {
 
       this.props.createTranscript(transcriptId, transcript)
 
-      /*
       database
         .doc(`transcripts/${transcriptId}`)
         .set(transcript)
@@ -236,8 +235,6 @@ class CreateTranscript extends React.Component<IProps, IState> {
             fatal: false,
           })
         })
-
-        */
     }
   }
 

@@ -122,8 +122,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   }
 
   public async componentDidMount() {
-    console.log("THIS PROPS", this.props)
-
     const transcriptId = this.props.transcriptId
 
     this.fetchResults(transcriptId)

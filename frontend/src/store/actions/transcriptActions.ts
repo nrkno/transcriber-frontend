@@ -6,7 +6,13 @@ import { IResult, ITranscript } from "../../interfaces"
 // CREATE //
 ////////////
 
-export const createTranscript = (transcriptId: string, transcript: ITranscript) => async (dispatch: Dispatch, getState, { getFirebase, getFirestore }) => {
+export const createTranscript = () => (dispatch: Dispatch) => {
+  dispatch({
+    type: "TRANSCRIPT_CREATED",
+  })
+}
+
+export const createTranscript2222 = (transcriptId: string, transcript: ITranscript) => async (dispatch: Dispatch, getState, { getFirebase, getFirestore }) => {
   const firestore = getFirestore()
 
   try {

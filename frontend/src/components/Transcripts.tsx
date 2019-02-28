@@ -2,9 +2,11 @@ import React, { Component } from "react"
 import { connect } from "react-redux"
 import { RouteComponentProps } from "react-router"
 import { Dispatch } from "redux"
+import { Step } from "../enums"
 import { ITranscript } from "../interfaces"
 import { selectTranscript } from "../store/actions/transcriptActions"
 import CreateTranscript from "./CreateTranscript"
+import Process from "./Process"
 import Transcript from "./Transcript"
 import TranscriptsList from "./TranscriptsList"
 
@@ -34,10 +36,22 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
               if (this.state.file) {
                 return <CreateTranscript file={this.state.file} userId={this.props.user.uid} transcriptCreated={this.transcriptCreated} />
               } else if (this.props.match.params.id) {
+                if (this.props.transcripts !== undefined) {
+                  const transcriptId = this.props.match.params.id
+
+                  // Check status
+
+                  const transcript: ITranscript = this.props.transcripts[transcriptId]
+
+                  if (transcript.process && transcript.process.step && transcript.process.step !== Step.Done) {
+                    console.log("IKKE FERDIG")
+                    return <Process transcript={transcript} />
+                  }
+                }
                 return <Transcript transcriptId={this.props.match.params.id} history={this.props.history} />
-              } else {
-                return
               }
+
+              return
             })()}
           </>
         ) : (
@@ -51,8 +65,6 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
   }
 
   public handleTranscriptIdSelected = (transcriptId: string) => {
-    console.log("PUSher")
-
     this.props.history.push(`/transcripts/${transcriptId}`)
 
     // const transcript = this.props.transcripts[transcriptId]

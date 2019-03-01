@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import ReactGA from "react-ga"
 import { connect } from "react-redux"
 import { RouteComponentProps } from "react-router"
 import { Dispatch } from "redux"
@@ -15,12 +16,16 @@ interface IStateProps {
   user: firebase.User
 }
 
+interface IProps {
+  history: History
+}
+
 interface IState {
   file?: File
 }
 
-class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
-  constructor(props: RouteComponentProps<{}> & IProps) {
+class Transcripts extends Component<RouteComponentProps<{}> & IStateProps, IState> {
+  constructor(props: RouteComponentProps<{}> & IStateProps) {
     super(props)
     this.state = {}
   }
@@ -45,6 +50,11 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
 
                   if (transcript === undefined) {
                     // Transcript not found
+                    ReactGA.event({
+                      action: "not found",
+                      category: "transcript",
+                      label: this.props.transcriptId,
+                    })
                     return <div>Fant ikke transkripsjon</div>
                   } else if (transcript.process && transcript.process.step && transcript.process.step !== Step.Done) {
                     return <Process transcript={transcript} />
@@ -71,10 +81,10 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
   }
 
   private transcriptCreated = (transcriptId: string) => {
-    // Remove file so that Transcript is shown, and not CreateTranscript
-    this.setState({ file: undefined })
     // Push the newly created transcript id
     this.props.history.push(`/transcripts/${transcriptId}`)
+    // Remove file so that Transcript is shown, and not CreateTranscript
+    this.setState({ file: undefined })
   }
 }
 

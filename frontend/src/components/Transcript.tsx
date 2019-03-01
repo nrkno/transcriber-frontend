@@ -7,7 +7,6 @@ import { SweetProgressStatus } from "../enums"
 import { functions } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 import { selectTranscript } from "../store/actions/transcriptActions"
-import TranscriptionProgress from "./TranscriptionProgress"
 import TranscriptResults from "./TranscriptResults"
 
 interface IProps {
@@ -62,19 +61,6 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
     // Loading from Firebase
     if (Object.entries(transcript).length === 0) {
       return "Laster inn"
-    }
-    // Transcription not found
-    else if (transcript === undefined) {
-      ReactGA.event({
-        action: "not found",
-        category: "transcript",
-        label: this.props.transcriptId,
-      })
-      return (
-        <main id="loading">
-          <TranscriptionProgress message={"Fant ikke transkripsjonen"} status={SweetProgressStatus.Error} />
-        </main>
-      )
     } else {
       return (
         <main id="transcript">

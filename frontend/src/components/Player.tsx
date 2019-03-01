@@ -20,6 +20,7 @@ class Player extends React.Component<IProps, IState> {
 
   constructor(props: IProps) {
     super(props)
+    console.log("constructor i PLAYER")
 
     this.audioRef = React.createRef<HTMLAudioElement>()
 
@@ -30,22 +31,34 @@ class Player extends React.Component<IProps, IState> {
   }
 
   public componentDidMount() {
+    console.log("componentDidMount i PLAYER")
+
     this.fetchPlaybackUrl()
   }
 
   public componentDidUpdate(prevProps: IProps) {
+    console.log("componentDidUpdate i PLAYER", this.props.playbackGsUrl, prevProps.playbackGsUrl)
+
     if (this.props.playbackGsUrl !== prevProps.playbackGsUrl) {
       this.fetchPlaybackUrl()
 
       // Reset state
 
       this.setState({ isPlaying: false })
-      this.audioRef.current!.currentTime = 0
+
+      console.log("this.audioRef", this.audioRef)
+
+      if (this.audioRef.current) {
+        this.audioRef.current.currentTime = 0
+      }
+
       clearInterval(this.timer)
     }
   }
 
   public componentWillUnmount() {
+    console.log("componentWillUnmount i PLAYER")
+
     clearInterval(this.timer)
   }
 

@@ -23,7 +23,7 @@ interface IState {
   markerWordIndexStart?: number
   markerWordIndexEnd?: number
   edits?: [string]
-  editingForward: boolean
+  selectingForward: boolean
 }
 
 interface IReduxStateToProps {
@@ -76,7 +76,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     super(props)
     this.state = {
       currentTime: 0,
-      editingForward: true,
+      selectingForward: true,
     }
   }
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps, prevState: IState) {
@@ -351,52 +351,93 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
 
     const key = event.key
+    const { markerResultIndex, markerWordIndexStart, markerWordIndexEnd } = this.state
 
-    // If left or right is pressed, we reset the indeces to 0,0 and return,
-    // so that the first word is highlighted
-    if ((key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown") && this.state.markerResultIndex === undefined && this.state.markerWordIndexStart === undefined) {
-      this.setState({
-        markerResultIndex: 0,
-        markerWordIndexEnd: 0,
-        markerWordIndexStart: 0,
-      })
+    // Exit early if no word is selected
+    if (markerResultIndex === undefined || markerWordIndexStart === undefined || markerWordIndexEnd === undefined) {
+      // If arrow keys are pressed, we reset the indeces to 0,0
+      // so that the first word is highlighted
+      if (key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown") {
+        this.setState({
+          markerResultIndex: 0,
+          markerWordIndexEnd: 0,
+          markerWordIndexStart: 0,
+        })
+      }
+
       return
     }
 
-    const markerResultIndex = this.state.markerResultIndex!
-    const markerWordIndexStart = this.state.markerWordIndexStart!
-    const markerWordIndexEnd = this.state.markerWordIndexEnd!
-    const editingForward = this.state.editingForward
-    const results = this.props.transcript.present.results!
+    // First, we check for meta or control keys
+    if (event.getModifierState("Meta") || event.getModifierState("Control")) {
+      switch (event.key) {
+        // Join
+        case "Backspace":
+          this.joinResults(markerResultIndex, markerWordIndexStart)
+          break
+        // Split
+        case "Enter":
+          this.splitResult(markerResultIndex, markerWordIndexStart)
+          break
 
-    if (markerResultIndex !== undefined && markerWordIndexStart !== undefined) {
+        // Undo/redo
+        case "z":
+          if (event.getModifierState("Shift")) {
+            this.props.onRedo()
+          } else if (this.state.edits) {
+            this.setState({ edits: undefined })
+          } else {
+            this.props.onUndo()
+          }
+          break
+
+        // Speaker name
+        case "0":
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9":
+          this.handleSetSpeaker(key, markerResultIndex)
+          break
+        // If we don't regonize the command, return and let the browser handle it
+        default:
+          return
+      }
+    } else {
+      const editingForward = this.state.selectingForward
+      const results = this.props.transcript.present.results!
+
       const currentWord = results![markerResultIndex].words[markerWordIndexEnd].word
 
       switch (event.key) {
+        // Cancel edit
         case "Escape": {
           this.setState({
             edits: undefined,
           })
           break
         }
+
+        // Go in and out of edit mode
         case "Enter":
-          if (event.getModifierState("Meta")) {
-            this.splitResult(markerResultIndex, markerWordIndexStart)
-          } else {
-            // Go out of edit mode
-
-            if (this.state.edits !== undefined) {
-              this.commitEdits(true)
-            }
-            // Go into edit mode if only word is selected
-            else if (markerWordIndexStart === markerWordIndexEnd) {
-              this.setState({
-                edits: [currentWord],
-              })
-            }
+          // Go out of edit mode
+          if (this.state.edits !== undefined) {
+            this.commitEdits(true)
           }
-
+          // Go into edit mode if only word is selected
+          else if (markerWordIndexStart === markerWordIndexEnd) {
+            this.setState({
+              edits: [currentWord],
+            })
+          }
           break
+
+        // Select navigation
         case "ArrowLeft":
         case "Left":
           if (event.getModifierState("Shift")) {
@@ -409,9 +450,9 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
               // Increase selection
             } else if (markerWordIndexStart > 0) {
               this.setState({
-                editingForward: false,
                 edits: undefined,
                 markerWordIndexStart: markerWordIndexStart - 1,
+                selectingForward: false,
               })
             }
           } else {
@@ -451,7 +492,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             // Increase selection
             else if (markerWordIndexEnd + 1 < results[markerResultIndex].words.length) {
               this.setState({
-                editingForward: true,
+                selectingForward: true,
                 edits: undefined,
                 markerWordIndexEnd: markerWordIndexEnd + 1,
               })
@@ -528,7 +569,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
           break
 
-        //
         // Tab will toggle the word from lowercase, first letter capitalized
         // Only works when not in edit mode, and only on a single word
         case "Tab":
@@ -544,6 +584,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           }
           break
 
+        // Space
         case " ":
           if (this.state.edits === undefined) {
             this.playerRef.current!.togglePlay()
@@ -552,8 +593,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           }
           break
 
-        // Punctation
-        // When we're not in edit mode,
+        // Punctation, when we're not in edit mode
         case ".":
         case ",":
         case "!":
@@ -635,19 +675,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
           break
 
-        // Undo/redo
-        case "z":
-          if (event.getModifierState("Meta")) {
-            if (event.getModifierState("Shift")) {
-              this.props.onRedo()
-            } else if (this.state.edits) {
-              this.setState({ edits: undefined })
-            } else {
-              this.props.onUndo()
-            }
-            break
-          }
-
+        case "0":
         case "1":
         case "2":
         case "3":
@@ -657,11 +685,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "7":
         case "8":
         case "9":
-        case "0":
-          if (event.getModifierState("Control")) {
-            this.handleSetSpeaker(key, markerResultIndex)
-            break
-          }
         case "a":
         case "b":
         case "c":
@@ -687,6 +710,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "w":
         case "x":
         case "y":
+        case "z":
         case "æ":
         case "ø":
         case "å":
@@ -728,10 +752,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           let edits = update(this.state.edits, {}) // Copy edits from state
 
           if (key === "Backspace") {
-            if (event.getModifierState("Meta")) {
-              this.joinResults(markerResultIndex, markerWordIndexStart)
-              return
-            } else if (edits === undefined) {
+            if (edits === undefined) {
               this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
             } else {
               edits[edits.length - 1] = edits[edits.length - 1].slice(0, -1)
@@ -749,11 +770,11 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
           break
       }
-
-      // Cancel the default action to avoid it being handled twice
-      event.preventDefault()
-      event.stopPropagation()
     }
+
+    // Cancel the default action to avoid it being handled twice
+    event.preventDefault()
+    event.stopPropagation()
   }
 
   private async save(pastTranscript: ITranscript, presentTranscript: ITranscript) {
@@ -874,7 +895,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   private joinResults(resultIndex: number, wordIndex: number) {
     // Calculating where the marker will be in the joined result
 
-    if (resultIndex > 0) {
+    if (resultIndex > 0 && wordIndex === 0) {
       const result = this.props.transcript.present.results[resultIndex - 1]
 
       // Saving marker in undo history
@@ -886,9 +907,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         markerWordIndexEnd: result.words.length,
         markerWordIndexStart: result.words.length,
       })
+      this.props.joinResults(resultIndex, wordIndex)
     }
-
-    this.props.joinResults(resultIndex, wordIndex)
   }
 
   private splitResult(resultIndex: number, wordIndex: number) {

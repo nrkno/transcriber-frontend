@@ -91,8 +91,6 @@ export const deleteWords = (resultIndex: number, wordIndexStart: number, wordInd
 //////////
 
 export const joinResults = (resultIndex: number, wordIndex: number) => (dispatch: Dispatch) => {
-  console.log("JOIN_RESULTS action", resultIndex, wordIndex)
-
   dispatch({
     resultIndex,
     type: "JOIN_RESULTS",

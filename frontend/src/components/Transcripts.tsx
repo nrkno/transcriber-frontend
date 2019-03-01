@@ -43,8 +43,10 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
 
                   const transcript: ITranscript = this.props.transcripts[transcriptId]
 
-                  if (transcript.process && transcript.process.step && transcript.process.step !== Step.Done) {
-                    console.log("IKKE FERDIG")
+                  if (transcript === undefined) {
+                    // Transcript not found
+                    return <div>Fant ikke transkripsjon</div>
+                  } else if (transcript.process && transcript.process.step && transcript.process.step !== Step.Done) {
                     return <Process transcript={transcript} />
                   }
                 }
@@ -55,7 +57,7 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
             })()}
           </>
         ) : (
-          <div>Loading</div>
+          ""
         )}
       </main>
     )
@@ -66,10 +68,6 @@ class Transcripts extends Component<RouteComponentProps<{}> & IProps, IState> {
 
   public handleTranscriptIdSelected = (transcriptId: string) => {
     this.props.history.push(`/transcripts/${transcriptId}`)
-
-    // const transcript = this.props.transcripts[transcriptId]
-
-    // this.props.selectTranscript(transcriptId /*, transcript*/)
   }
 
   private transcriptCreated = (transcriptId: string) => {

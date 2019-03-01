@@ -30,10 +30,13 @@ interface IReduxDispatchToProps {
 
 class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateToProps & IReduxDispatchToProps> {
   public componentDidMount() {
-    /*const transcriptId = this.props.transcriptId
-    console.log("DID mount", transcriptId, this.props)
-    const transcript = this.props.transcripts[transcriptId]
-    this.props.selectTranscript(transcriptId, transcript)*/
+    const { transcripts, transcriptId } = this.props
+
+    if (transcriptId !== undefined && transcripts !== undefined) {
+      const transcript = transcripts[transcriptId]
+
+      this.props.selectTranscript(transcriptId, transcript)
+    }
   }
 
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps) {
@@ -58,7 +61,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
 
     // Loading from Firebase
     if (Object.entries(transcript).length === 0) {
-      return "Loading"
+      return "Laster inn"
     }
     // Transcription not found
     else if (transcript === undefined) {

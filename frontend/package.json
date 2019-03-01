@@ -27,7 +27,8 @@
     "redux": "^4.0.1",
     "redux-firestore": "^0.7.0",
     "redux-thunk": "^2.3.0",
-    "redux-undo": "^1.0.0-beta9-9-7"
+    "redux-undo": "^1.0.0-beta9-9-7",
+    "typesafe-actions": "^3.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.3.3",

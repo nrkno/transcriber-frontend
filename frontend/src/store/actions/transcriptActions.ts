@@ -81,8 +81,6 @@ export const joinResults = (resultIndex: number, wordIndex: number) => (dispatch
 }
 
 export const splitResults = (resultIndex: number, wordIndex: number) => (dispatch: Dispatch) => {
-  console.log("SPLIT_RESULTS action", resultIndex, wordIndex)
-
   dispatch({
     resultIndex,
     type: "SPLIT_RESULTS",

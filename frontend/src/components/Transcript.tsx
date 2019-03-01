@@ -17,6 +17,8 @@ interface IProps {
 
 interface IReduxStateToProps {
   transcript: {
+    future: ITranscript[]
+    past: ITranscript[]
     present: ITranscript
   }
 }
@@ -85,7 +87,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
                         <svg width="20" height="20" focusable="false" aria-hidden="true">
                           <use xlinkHref="#icon-undo" />
                         </svg>{" "}
-                        Angre (⌘Z)
+                        Angre
                       </button>
                     </>
                   )

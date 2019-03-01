@@ -317,7 +317,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
       this.props.readResults(results)
     } catch (error) {
-      console.error("EERRRRRORRR", error)
+      console.error("Error fetching results: ", error)
       ReactGA.exception({
         description: error.message,
         fatal: false,

@@ -630,6 +630,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
             break
           }
+        // Delete
+        case "Delete":
+          this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
+          break
 
         // Undo/redo
         case "z":
@@ -643,9 +647,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             }
             break
           }
-        case "Delete":
-          this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
-          break
 
         case "1":
         case "2":

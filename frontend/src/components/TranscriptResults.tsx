@@ -70,7 +70,6 @@ interface IReduxDispatchToProps {
 }
 
 class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToProps, IState> {
-
   public readonly state: IState = {
     currentTime: 0,
     selectingForward: true,
@@ -303,6 +302,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
   private async fetchResults(transcriptId: string) {
     try {
+      console.log("FESTCH ", transcriptId)
       const querySnapshot = await this.props.firestore.get({ collection: `transcripts/${transcriptId}/results`, orderBy: "startTime" })
 
       const results = new Array()

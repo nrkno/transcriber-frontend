@@ -1,16 +1,12 @@
 import firebase from "firebase/app"
 import * as React from "react"
 import ReactGA from "react-ga"
-import { connect } from "react-redux"
-import "react-sweet-progress/lib/style.css"
-import { Dispatch } from "redux"
 import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Step } from "../enums"
 import { database, storage } from "../firebaseApp"
 import { IMetadata, ITranscript } from "../interfaces"
-import { createTranscript } from "../store/actions/transcriptActions"
 
-interface IDispatchProps {
-  createTranscript: (transcriptId: string, transcript: ITranscript) => void
+interface IProps {
+  transcriptCreated: (transcriptId: string) => void
 }
 
 interface IState {
@@ -217,8 +213,6 @@ class CreateTranscript extends React.Component<IProps, IState> {
       transcript.metadata = metadata
 
       const transcriptId = this.state.transcriptId
-
-      this.props.createTranscript(transcriptId, transcript)
 
       database
         .doc(`transcripts/${transcriptId}`)
@@ -530,13 +524,4 @@ class CreateTranscript extends React.Component<IProps, IState> {
   }
 }
 
-const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
-  return {
-    createTranscript: (transcriptId: string, transcript: ITranscript) => dispatch(createTranscript(transcriptId, transcript)),
-  }
-}
-
-export default connect<void, IDispatchProps, void>(
-  null,
-  mapDispatchToProps,
-)(CreateTranscript)
+export default CreateTranscript

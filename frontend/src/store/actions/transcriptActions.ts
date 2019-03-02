@@ -1,16 +1,11 @@
-import { Dispatch } from "redux"
-import { IResult, ITranscript } from "../../interfaces"
 import { createAction } from "typesafe-actions"
-
-////////////
-// CREATE //
-////////////
-export const createTranscript = createAction("TRANSCRIPT_CREATED")
+import { IResult, ITranscript } from "../../interfaces"
+import { DELETE_WORDS, JOIN_RESULTS, READ_RESULTS, SELECT_TRANSCRIPT, SPLIT_RESULTS, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_WORDS } from "../constants"
 
 //////////
 // READ //
 //////////
-export const readResults = createAction("READ_RESULTS", action => {
+export const readResults = createAction(READ_RESULTS, action => {
   return (results: IResult[]) => action({ results })
 })
 
@@ -18,76 +13,50 @@ export const readResults = createAction("READ_RESULTS", action => {
 // UPDATE //
 ////////////
 
-export const updateWords = createAction("UPDATE_WORDS", action => {
+export const updateWords = createAction(UPDATE_WORDS, action => {
   return (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => action({ recalculate, resultIndex, wordIndexEnd, wordIndexStart, words })
 })
 
-export const updateWords2 = (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => (dispatch: Dispatch, getState) => {
-  dispatch({
-    recalculate,
-    resultIndex,
-    type: "UPDATE_WORDS",
-    wordIndexEnd,
-    wordIndexStart,
-    words,
-  })
-}
+export const updateSpeaker = createAction(UPDATE_SPEAKER, action => {
+  return (resultIndex: number, speaker: number) => action({ resultIndex, speaker })
+})
 
-export const updateSpeaker = (resultIndex: number, speaker: number) => (dispatch: Dispatch) => {
-  dispatch({
-    resultIndex,
-    speaker,
-    type: "UPDATE_SPEAKER",
-  })
-}
-
-export const updateSpeakerName = (speaker: number, name: string, resultIndex?: number) => (dispatch: Dispatch) => {
-  dispatch({
-    name,
-    resultIndex,
-    speaker,
-    type: "UPDATE_SPEAKER_NAME",
-  })
-}
+export const updateSpeakerName = createAction(UPDATE_SPEAKER_NAME, action => {
+  return (speaker: number, name: string, resultIndex?: number) => action({ name, resultIndex, speaker })
+})
 
 //////////
 // DELETE//
 //////////
 
-export const deleteWords = (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => (dispatch: Dispatch) => {
-  dispatch({
-    name,
-    resultIndex,
-    type: "DELETE_WORDS",
-    wordIndexEnd,
-    wordIndexStart,
-  })
-}
+export const deleteWords = createAction(DELETE_WORDS, action => {
+  return (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => action({ name, resultIndex, wordIndexEnd, wordIndexStart })
+})
 
 //////////
 // OTHER//
 //////////
 
-export const joinResults = (resultIndex: number, wordIndex: number) => (dispatch: Dispatch) => {
-  dispatch({
-    resultIndex,
-    type: "JOIN_RESULTS",
-    wordIndex,
-  })
-}
+export const joinResults = createAction(JOIN_RESULTS, action => {
+  return (resultIndex: number, wordIndex: number) =>
+    action({
+      resultIndex,
+      wordIndex,
+    })
+})
 
-export const splitResults = (resultIndex: number, wordIndex: number) => (dispatch: Dispatch) => {
-  dispatch({
-    resultIndex,
-    type: "SPLIT_RESULTS",
-    wordIndex,
-  })
-}
+export const splitResults = createAction(SPLIT_RESULTS, action => {
+  return (resultIndex: number, wordIndex: number) =>
+    action({
+      resultIndex,
+      wordIndex,
+    })
+})
 
-export const selectTranscript = (transcriptId: string, transcript: ITranscript) => (dispatch: Dispatch) => {
-  dispatch({
-    transcript,
-    transcriptId,
-    type: "SELECT_TRANSCRIPT",
-  })
-}
+export const selectTranscript = createAction(SELECT_TRANSCRIPT, action => {
+  return (transcriptId: string, transcript: ITranscript) =>
+    action({
+      transcript,
+      transcriptId,
+    })
+})

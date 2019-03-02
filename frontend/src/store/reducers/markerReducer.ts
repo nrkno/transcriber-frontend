@@ -1,17 +1,22 @@
-import { ActionType, getType } from "typesafe-actions"
+import { ActionType } from "typesafe-actions"
 import * as markers from "../actions/markersActions"
+import { UPDATE_MARKERS } from "../constants"
 
 export type MarkersAction = ActionType<typeof markers>
 
 interface IState {
   readonly resultIndex?: number
-  wordIndexStart?: number
-  wordIndexEnd?: number
+  readonly wordIndexStart?: number
+  readonly wordIndexEnd?: number
 }
 
 export default (state: IState = {}, action: MarkersAction) => {
   switch (action.type) {
-    case getType(markers.updateMarkers):
+    //////////
+    // READ //
+    //////////
+
+    case UPDATE_MARKERS:
       const payload = action.payload
       return { ...payload }
 

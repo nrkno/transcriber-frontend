@@ -3,34 +3,19 @@ import * as markers from "../actions/markersActions"
 
 export type MarkersAction = ActionType<typeof markers>
 
-export default (state: Todo[] = [], action: MarkersAction) => {
+interface IState {
+  resultIndex?: number
+  wordIndexStart?: number
+  wordIndexEnd?: number
+}
+
+export default (state: IState = {}, action: MarkersAction) => {
   switch (action.type) {
     case getType(markers.updateMarkers):
-      return [...state, action.payload]
+      const payload = action.payload
+      return { ...state, ...payload }
 
     default:
       return state
   }
 }
-/*
-import { Action } from "redux"
-
-const markerReducer = (state = {}, action: Action) => {
-  switch (action.type) {
-    case "UPDATE_MARKERS":
-      const { resultIndex, wordIndexEnd, wordIndexStart } = action
-
-      return {
-        ...state,
-        resultIndex,
-        wordIndexEnd,
-        wordIndexStart,
-      }
-
-    default:
-      return state
-  }
-}
-
-export default markerReducer
-*/

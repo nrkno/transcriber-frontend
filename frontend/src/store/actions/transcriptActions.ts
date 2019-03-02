@@ -1,32 +1,28 @@
 import { Dispatch } from "redux"
 import { IResult, ITranscript } from "../../interfaces"
+import { createAction } from "typesafe-actions"
 
 ////////////
 // CREATE //
 ////////////
-
-export const createTranscript = () => (dispatch: Dispatch) => {
-  dispatch({
-    type: "TRANSCRIPT_CREATED",
-  })
-}
+export const createTranscript = createAction("TRANSCRIPT_CREATED")
 
 //////////
 // READ //
 //////////
-
-export const readResults = (results: IResult[]) => (dispatch: Dispatch) => {
-  dispatch({
-    results,
-    type: "READ_RESULTS",
-  })
-}
+export const readResults = createAction("READ_RESULTS", action => {
+  return (results: IResult[]) => action({ results })
+})
 
 ////////////
 // UPDATE //
 ////////////
 
-export const updateWords = (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => (dispatch: Dispatch, getState) => {
+export const updateWords = createAction("UPDATE_WORDS", action => {
+  return (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => action({ recalculate, resultIndex, wordIndexEnd, wordIndexStart, words })
+})
+
+export const updateWords2 = (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => (dispatch: Dispatch, getState) => {
   dispatch({
     recalculate,
     resultIndex,

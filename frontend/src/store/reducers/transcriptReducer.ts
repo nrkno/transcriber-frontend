@@ -6,12 +6,13 @@ import { IResult, ITranscript, IWord } from "../../interfaces"
 const initState: ITranscript = {}
 
 const transcriptReducer = (state = initState, action: Action) => {
+  const payload = action.payload
   switch (action.type) {
     //////////
     // READ //
     //////////
     case "READ_RESULTS":
-      return readResults(action.results)
+      return readResults(payload.results)
 
     case "SELECT_TRANSCRIPT":
       const transcriptId = action.transcriptId
@@ -33,7 +34,7 @@ const transcriptReducer = (state = initState, action: Action) => {
       return updateSpeakerName(action.speaker, action.name, action.resultIndex)
 
     case "UPDATE_WORDS":
-      return updateWords(action.resultIndex, action.wordIndexStart, action.wordIndexEnd, action.words, action.recalculate)
+      return updateWords(payload.resultIndex, payload.wordIndexStart, payload.wordIndexEnd, payload.words, payload.recalculate)
 
     case "SPLIT_RESULTS":
       return splitResult(action.resultIndex, action.wordIndex)

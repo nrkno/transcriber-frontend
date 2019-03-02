@@ -26,27 +26,24 @@ interface IProps {
 }
 
 class CreateTranscript extends React.Component<IProps, IState> {
-  constructor(props: IProps) {
-    super(props)
-
-    this.state = {
-      fileUploaded: false,
-      isSubmitting: false,
-      transcript: {
-        metadata: {
-          audioTopic: "",
-          industryNaicsCodeOfAudio: "",
-          interactionType: InteractionType.Unspecified,
-          languageCodes: ["nb-NO", "", "", ""],
-          microphoneDistance: MicrophoneDistance.Unspecified,
-          originalMediaType: OriginalMediaType.Unspecified,
-          recordingDeviceName: "",
-          recordingDeviceType: RecordingDeviceType.Unspecified,
-          speechContexts: [{ phrases: [""] }],
-        },
+  public readonly state: IState = {
+    fileUploaded: false,
+    isSubmitting: false,
+    transcript: {
+      metadata: {
+        audioTopic: "",
+        industryNaicsCodeOfAudio: "",
+        interactionType: InteractionType.Unspecified,
+        languageCodes: ["nb-NO", "", "", ""],
+        microphoneDistance: MicrophoneDistance.Unspecified,
+        originalMediaType: OriginalMediaType.Unspecified,
+        recordingDeviceName: "",
+        recordingDeviceType: RecordingDeviceType.Unspecified,
+        speechContexts: [{ phrases: [""] }],
       },
-    }
+    },
   }
+
   public componentDidMount() {
     this.uploadFile()
   }

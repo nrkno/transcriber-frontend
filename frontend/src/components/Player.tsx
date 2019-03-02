@@ -15,6 +15,10 @@ interface IProps {
 }
 
 class Player extends React.Component<IProps, IState> {
+  public readonly state: IState = {
+    currentTime: 0,
+    isPlaying: false,
+  }
   private audioRef: React.RefObject<HTMLAudioElement>
   private timer: number
 
@@ -22,11 +26,6 @@ class Player extends React.Component<IProps, IState> {
     super(props)
 
     this.audioRef = React.createRef<HTMLAudioElement>()
-
-    this.state = {
-      currentTime: 0,
-      isPlaying: false,
-    }
   }
 
   public componentDidMount() {

@@ -25,10 +25,7 @@ interface IState {
 }
 
 class Transcripts extends Component<RouteComponentProps<{}> & IStateProps, IState> {
-  constructor(props: RouteComponentProps<{}> & IStateProps) {
-    super(props)
-    this.state = {}
-  }
+  public readonly state: IState = {}
 
   public render() {
     return (

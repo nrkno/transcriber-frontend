@@ -70,15 +70,13 @@ interface IReduxDispatchToProps {
 }
 
 class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToProps, IState> {
+
+  public readonly state: IState = {
+    currentTime: 0,
+    selectingForward: true,
+  }
   private playerRef = React.createRef<Player>()
 
-  constructor(props: any) {
-    super(props)
-    this.state = {
-      currentTime: 0,
-      selectingForward: true,
-    }
-  }
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps, prevState: IState) {
     const transcriptId = this.props.transcriptId
     const prevTranscriptId = prevProps.transcriptId

@@ -4,21 +4,25 @@ import { connect } from "react-redux"
 import { BrowserRouter, Link, Redirect, Route, Switch } from "react-router-dom"
 import "../css/App.css"
 import { auth } from "../firebaseApp"
+import Auth from "./Auth"
 import GAListener from "./GAListener"
 import Index from "./Index"
-import Login from "./Login"
 import Transcripts from "./Transcripts"
 
-ReactGA.initialize(process.env.GOOGLE_ANALYTICS_PROPERTY_ID, {
-  debug: false /* process.env.NODE_ENV === "development"*/,
-  titleCase: false,
-})
+const trackingCode = process.env.GOOGLE_ANALYTICS_PROPERTY_ID
+
+if (trackingCode) {
+  ReactGA.initialize(trackingCode, {
+    debug: false, // process.env.NODE_ENV === "development",
+    titleCase: false,
+  })
+}
 
 interface IStateProps {
   user?: firebase.User
 }
 
-class App extends React.Component<any, IState> {
+class App extends React.Component<IStateProps, IState> {
   public async componentDidMount() {
     /*try {
       const userCredential = await auth.signInWithEmailAndPassword("andreas@schjonhaug.com", "andreas")
@@ -62,7 +66,7 @@ class App extends React.Component<any, IState> {
                 <Link to="/"> Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</Link>
               </h1>
 
-              <Login logout={this.logout} />
+              <Auth />
             </header>
             <Switch>
               <Redirect from="/login" to="/" />
@@ -90,7 +94,7 @@ class App extends React.Component<any, IState> {
   }
 }
 
-const mapStateToProps = (state: State): IStateProps => {
+const mapStateToProps = (state: IStateProps): IStateProps => {
   return {
     user: state.firebase.auth,
   }

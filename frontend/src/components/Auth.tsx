@@ -1,32 +1,31 @@
 import React, { Component } from "react"
 import ReactGA from "react-ga"
 import { connect } from "react-redux"
-import { RouteComponentProps, withRouter } from "react-router"
-import { Dispatch } from "redux"
+import { FirebaseReducer } from "react-redux-firebase"
+import { withFirebase } from "react-redux-firebase"
+import { RouteComponentProps } from "react-router"
+import { compose } from "redux"
 
-interface IProps {
-  user?: firebase.User
+interface IStateProps {
+  auth: FirebaseReducer.Auth
   logout: () => void
 }
 
-interface IStateProps {
-  user: firebase.User
-}
-
-class Login extends Component<RouteComponentProps<{}> & IProps, any> {
+class Auth extends Component<RouteComponentProps<{}> & IStateProps, any> {
   public render() {
+    console.log("this.props", this.props)
     return (
       <div className="user">
         {(() => {
-          if (this.props.user.uid) {
-            let displayName = this.props.user.displayName
+          if (this.props.auth.isLoaded === true && this.props.auth.uid) {
+            let displayName = this.props.auth.displayName
             if (process.env.NODE_ENV === "development") {
-              displayName += ` (${this.props.user.uid})`
+              displayName += ` (${this.props.auth.uid})`
             }
             return (
               <>
                 {displayName}
-                <button className="org-btn" onClick={() => this.logout()}>
+                <button className="org-btn" onClick={this.logout}>
                   Logg ut
                 </button>
               </>
@@ -44,9 +43,8 @@ class Login extends Component<RouteComponentProps<{}> & IProps, any> {
       category: "authentication",
     })
 
-    this.props.logOut()
+    this.props.firebase.logOut()
 
-    /*
     try {
       this.props.history.push("/")
       this.props.logout()
@@ -57,11 +55,9 @@ class Login extends Component<RouteComponentProps<{}> & IProps, any> {
         fatal: false,
       })
     }
-
-    */
   }
 }
-
+/*
 const mapStateToProps = (state: State): IStateProps => {
   return {
     user: state.firebase.auth,
@@ -78,5 +74,28 @@ const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
 export default connect<IStateProps, IDispatchProps, void>(
   mapStateToProps,
   mapDispatchToProps,
-)(Login)
+)(Auth)
 // export default withRouter(Login)
+
+
+
+
+const enhance = compose(
+  withFirestore,
+  connect<void, IDispatchProps, void>(
+    mapStateToProps,
+    mapDispatchToProps,
+  ),
+)
+*/
+
+export default compose(
+  withFirebase,
+  connect(
+    // Map redux state to component props
+    ({ firebase: { auth, profile } }) => ({
+      auth,
+      profile,
+    }),
+  ),
+)(Auth)

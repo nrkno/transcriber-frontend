@@ -1,6 +1,7 @@
 import firebase from "firebase/app"
 import * as React from "react"
 import ReactGA from "react-ga"
+import { connect } from "react-redux"
 import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Step } from "../enums"
 import { database, storage } from "../firebaseApp"
 import { IMetadata, ITranscript } from "../interfaces"
@@ -523,5 +524,14 @@ class CreateTranscript extends React.Component<IProps, IState> {
     ))
   }
 }
+const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
+  return {
+    createTranscript: (transcriptId: string, transcript: ITranscript) => dispatch(createTranscript(transcriptId, transcript)),
+  }
+}
 
-export default CreateTranscript
+export default connect<void, IDispatchProps, void>(
+  null,
+  mapDispatchToProps,
+)(CreateTranscript)
+// export default CreateTranscript

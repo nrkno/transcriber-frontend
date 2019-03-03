@@ -1,4 +1,5 @@
 import firebase from "firebase/app"
+import update from "immutability-helper"
 import * as React from "react"
 import ReactGA from "react-ga"
 import { connect } from "react-redux"
@@ -11,10 +12,10 @@ interface IProps {
 }
 
 interface IState {
-  fileUploaded: boolean
-  transcript: ITranscript
-  isSubmitting: boolean
-  transcriptId?: string
+  readonly fileUploaded: boolean
+  readonly transcript: ITranscript
+  readonly isSubmitting: boolean
+  readonly transcriptId?: string
 }
 
 interface IProps {
@@ -38,6 +39,10 @@ class CreateTranscript extends React.Component<IProps, IState> {
         recordingDeviceType: RecordingDeviceType.Unspecified,
         speechContexts: [{ phrases: [""] }],
       },
+      process: {
+        percent: 0,
+        step: Step.Uploading,
+      },
     },
   }
 
@@ -46,6 +51,8 @@ class CreateTranscript extends React.Component<IProps, IState> {
   }
 
   public componentDidUpdate() {
+    console.log("create tran componentDidUpdate", this.state.transcript)
+
     this.checkIfReadyToSubmit()
   }
 
@@ -157,8 +164,12 @@ class CreateTranscript extends React.Component<IProps, IState> {
   }
 
   private checkIfReadyToSubmit() {
+    console.log("ORIGINAL checkIfReadyToSubmit", this.state.transcript)
+
     if (this.state.isSubmitting === true && this.state.fileUploaded === true && this.state.transcriptId !== undefined) {
-      const transcript = this.state.transcript
+      console.log("Klar til å sende inn")
+
+      const transcript = update(this.state.transcript, {})
 
       const file = this.props.file
 
@@ -215,6 +226,9 @@ class CreateTranscript extends React.Component<IProps, IState> {
 
       const transcriptId = this.state.transcriptId
 
+      console.log("ORIGINAL", this.state.transcript)
+      console.log("KOPI", transcript)
+
       database
         .doc(`transcripts/${transcriptId}`)
         .set(transcript)
@@ -245,12 +259,12 @@ class CreateTranscript extends React.Component<IProps, IState> {
     uploadTask.on(
       firebase.storage.TaskEvent.STATE_CHANGED,
       (snapshot: firebase.storage.UploadTaskSnapshot) => {
-        const transcript = this.state.transcript
-
-        transcript.process = {
-          percent: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
-          step: Step.Uploading,
-        }
+        const transcript = update(this.state.transcript, {
+          process: {
+            percent: { $set: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100) },
+            step: { $set: Step.Uploading },
+          },
+        })
 
         this.setState({ transcript })
       },
@@ -283,12 +297,16 @@ class CreateTranscript extends React.Component<IProps, IState> {
   }
 
   private handleLanguageChange = (index: number, event: React.ChangeEvent<HTMLSelectElement>) => {
-    const transcript = this.state.transcript
+    const transcript = update(this.state.transcript, {
+      metadata: {
+        languageCodes: {
+          [index]: { $set: event.target.value },
+        },
+      },
+    })
 
-    const languageCodes = transcript.metadata.languageCodes
-    languageCodes[index] = event.target.value
-
-    transcript.metadata.languageCodes = languageCodes
+    console.log("langauge change State", this.state.transcript)
+    console.log("langauge change local", transcript)
 
     this.setState({ transcript })
   }
@@ -362,7 +380,9 @@ class CreateTranscript extends React.Component<IProps, IState> {
   }
 
   private handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    console.log("trkkker på sybmit", this.state.transcript)
     event.preventDefault()
+    console.log("trkkker på sybmit", this.state.transcript)
 
     const selectedLanguageCodes = this.selectedLanguageCodes()
 

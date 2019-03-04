@@ -10,11 +10,11 @@ interface ITranscript {
     percent?: number
     step?: Step
   }
-  speakerNames?: {
-    number: string
-  }
   metadata?: IMetadata
   results?: Array<IResult>
+  speakerNames?: {
+    [key: number]: string
+  }
   userId?: string
 }
 

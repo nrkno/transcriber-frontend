@@ -78,20 +78,6 @@ class App extends React.Component<IStateProps, IState> {
       </BrowserRouter>
     )
   }
-
-  private logout = async () => {
-    this.setState({ user: undefined })
-    ReactGA.set({ userId: null })
-    try {
-      await auth.signOut()
-    } catch (error) {
-      ReactGA.exception({
-        description: error.message,
-        fatal: false,
-      })
-      console.error(error)
-    }
-  }
 }
 
 const mapStateToProps = (state: IStateProps): IStateProps => {

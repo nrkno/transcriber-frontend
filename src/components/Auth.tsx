@@ -3,7 +3,7 @@ import ReactGA from "react-ga"
 import { connect } from "react-redux"
 import { FirebaseReducer } from "react-redux-firebase"
 import { withFirebase } from "react-redux-firebase"
-import { RouteComponentProps } from "react-router"
+import { RouteComponentProps, withRouter } from "react-router"
 import { compose } from "redux"
 
 interface IStateProps {
@@ -37,57 +37,17 @@ class Auth extends Component<RouteComponentProps<{}> & IStateProps, any> {
       </div>
     )
   }
-  private async logout() {
+
+  private logout = () => {
+    this.props.history.push("/")
+    this.props.firebase.logout()
+
     ReactGA.event({
       action: "log out button pressed",
       category: "authentication",
     })
-
-    this.props.firebase.logOut()
-
-    try {
-      this.props.history.push("/")
-      this.props.logout()
-    } catch (error) {
-      console.error(error)
-      ReactGA.exception({
-        description: error.message,
-        fatal: false,
-      })
-    }
   }
 }
-/*
-const mapStateToProps = (state: State): IStateProps => {
-  return {
-    user: state.firebase.auth,
-  }
-}
-
-const mapDispatchToProps = (dispatch: Dispatch): IDispatchProps => {
-  return {
-    // fetchUser: () => dispatch(fetchUser()),
-    logOut: () => dispatch(logOut()),
-  }
-}
-
-export default connect<IStateProps, IDispatchProps, void>(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Auth)
-// export default withRouter(Login)
-
-
-
-
-const enhance = compose(
-  withFirestore,
-  connect<void, IDispatchProps, void>(
-    mapStateToProps,
-    mapDispatchToProps,
-  ),
-)
-*/
 
 export default compose(
   withFirebase,
@@ -98,4 +58,5 @@ export default compose(
       profile,
     }),
   ),
+  withRouter,
 )(Auth)

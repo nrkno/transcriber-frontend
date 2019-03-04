@@ -66,36 +66,6 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
           <section className="org-bar">
             <span className="org-text-l">{transcript.name}</span>
 
-            {(() => {
-              if (this.props.transcript.present.results && this.props.transcript.past.length > 0) {
-                return (
-                  <button className="org-btn">
-                    <svg width="20" height="20" focusable="false" aria-hidden="true">
-                      <use xlinkHref="#icon-undo" />
-                    </svg>{" "}
-                    Angre
-                  </button>
-                )
-              } else {
-                return
-              }
-            })()}
-
-            {(() => {
-              if (this.props.transcript.present.results && this.props.transcript.future.length > 0) {
-                return (
-                  <button className="org-btn">
-                    <svg width="20" height="20" focusable="false" aria-hidden="true">
-                      <use xlinkHref="#icon-redo" />
-                    </svg>{" "}
-                    Gjør om
-                  </button>
-                )
-              } else {
-                return
-              }
-            })()}
-
             <button className="org-btn" onClick={() => this.handleExportTranscriptButtonClicked("docx")}>
               <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
                 <g fill="none" fillRule="evenodd">

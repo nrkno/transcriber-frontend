@@ -302,7 +302,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
   private async fetchResults(transcriptId: string) {
     try {
-      console.log("FESTCH ", transcriptId)
       const querySnapshot = await this.props.firestore.get({ collection: `transcripts/${transcriptId}/results`, orderBy: "startTime" })
 
       const results = new Array()

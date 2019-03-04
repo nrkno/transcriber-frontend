@@ -20,7 +20,7 @@ class Player extends React.Component<IProps, IState> {
     isPlaying: false,
   }
   private audioRef: React.RefObject<HTMLAudioElement>
-  private timer: number
+  private timer: NodeJS.Timeout
 
   constructor(props: IProps) {
     super(props)
@@ -147,19 +147,17 @@ class Player extends React.Component<IProps, IState> {
     )
   }
 
-  private fetchPlaybackUrl() {
-    storage
-
-      .refFromURL(this.props.playbackGsUrl)
-      .getDownloadURL()
-      .then(url => {
-        this.setState({ playbackUrl: url })
+  private async fetchPlaybackUrl() {
+    try {
+      const playbackUrl = await storage.refFromURL(this.props.playbackGsUrl).getDownloadURL()
+      this.setState({ playbackUrl })
+    } catch (error) {
+      console.error("Error fetching Playback URL: ", error)
+      ReactGA.exception({
+        description: error.message,
+        fatal: false,
       })
-      .catch(error => {
-        // Handle any errors
-
-        console.error(error)
-      })
+    }
   }
 
   private play = () => {

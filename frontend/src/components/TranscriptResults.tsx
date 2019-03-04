@@ -370,11 +370,17 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       switch (event.key) {
         // Join
         case "Backspace":
-          this.joinResults(markerResultIndex, markerWordIndexStart)
+          // Works only if a single word is selected
+          if (markerWordIndexStart === markerWordIndexEnd) {
+            this.joinResults(markerResultIndex, markerWordIndexStart)
+          }
           break
         // Split
         case "Enter":
-          this.splitResult(markerResultIndex, markerWordIndexStart)
+          // Works only if a single word is selected
+          if (markerWordIndexStart === markerWordIndexEnd) {
+            this.splitResult(markerResultIndex, markerWordIndexStart)
+          }
           break
 
         // Undo/redo
@@ -489,9 +495,9 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             // Increase selection
             else if (markerWordIndexEnd + 1 < results[markerResultIndex].words.length) {
               this.setState({
-                selectingForward: true,
                 edits: undefined,
                 markerWordIndexEnd: markerWordIndexEnd + 1,
+                selectingForward: true,
               })
               // Decrease selection
             }
@@ -590,12 +596,17 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           }
           break
 
+        // Delete
+        case "Delete":
+          this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
+          break
+
         // Punctation, when we're not in edit mode
         case ".":
         case ",":
         case "!":
         case "?":
-          if (this.state.edits === undefined) {
+          if (this.state.edits === undefined && markerWordIndexStart === markerWordIndexEnd) {
             const wordText = results![markerResultIndex].words[markerWordIndexEnd].word
             const nextWord = results[markerResultIndex].words[markerWordIndexEnd + 1]
             const wordTextLastChar = wordText.charAt(wordText.length - 1)
@@ -667,11 +678,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
             break
           }
-        // Delete
-        case "Delete":
-          this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
-          break
-
         case "0":
         case "1":
         case "2":

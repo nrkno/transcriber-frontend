@@ -67,6 +67,37 @@ header div.user a {
   text-decoration: none;
 }
 
+/* Speakers */
+
+.speaker {
+  border-radius: 0.8em;
+  color: #ffffff;
+  display: inline-block;
+  font-weight: bold;
+  line-height: 1.6em;
+  margin-right: 5px;
+  margin-left: 5px;
+  text-align: center;
+  width: 1.6em;
+  cursor: pointer;
+}
+
+.speaker-1 {
+  background-color: rgb(29, 158, 218);
+}
+.speaker-2 {
+  background-color: rgb(230, 92, 33);
+}
+.speaker-3 {
+  background-color: rgb(165, 102, 163);
+}
+.speaker-4 {
+  background-color: rgb(4, 76, 151);
+}
+.speaker-5 {
+  background-color: rgb(70, 168, 61);
+}
+
 /* Heat map */
 
 .confidence-0 {
@@ -403,13 +434,9 @@ main#transcripts {
 }
 
 /* Transcript */
-/*
-#transcript section {
-  grid-column-start: 2;
-}*/
 
-.active {
-  background: #ffc600;
+.marker {
+  background: #0bb5ff;
 }
 
 .results {
@@ -585,4 +612,25 @@ input[type="range"]:focus::-ms-fill-lower {
 }
 input[type="range"]:focus::-ms-fill-upper {
   background: #4e54c8;
+}
+
+/* Editor */
+.typewriter {
+  overflow: hidden; /* Ensures the content is not revealed until the animation */
+  border-right: 0.15em solid black; /* The typwriter cursor */
+  white-space: nowrap; /* Keeps the content on a single line */
+  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+  letter-spacing: 0.15em; /* Adjust as needed */
+  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: black;
+  }
 }

@@ -1,36 +1,45 @@
 import * as React from "react"
 import ReactGA from "react-ga"
+import { connect } from "react-redux"
 import { BrowserRouter, Link, Redirect, Route, Switch } from "react-router-dom"
 import "../css/App.css"
 import { auth } from "../firebaseApp"
+import Auth from "./Auth"
 import GAListener from "./GAListener"
 import Index from "./Index"
-import Login from "./Login"
 import Transcripts from "./Transcripts"
 
-ReactGA.initialize(process.env.GOOGLE_ANALYTICS_PROPERTY_ID, {
-  debug: false /* process.env.NODE_ENV === "development"*/,
-  titleCase: false,
-})
+const trackingCode = process.env.GOOGLE_ANALYTICS_PROPERTY_ID
 
-interface IState {
+if (trackingCode) {
+  ReactGA.initialize(trackingCode, {
+    debug: false, // process.env.NODE_ENV === "development",
+    titleCase: false,
+  })
+}
+
+interface IStateProps {
   user?: firebase.User
 }
 
-class App extends React.Component<any, IState> {
-  constructor(props: any) {
-    super(props)
-    this.state = {}
-  }
-
+class App extends React.Component<IStateProps, IState> {
   public async componentDidMount() {
-    auth.onAuthStateChanged(user => {
+    /*try {
+      const userCredential = await auth.signInWithEmailAndPassword("andreas@schjonhaug.com", "andreas")
+      await userCredential.user!.updateProfile({ displayName: "Andreas Schjønhaug", photoURL: null })
+    } catch (error) {
+      const errorCode = error.code
+      const errorMessage = error.message
+
+      console.error(errorCode, errorMessage)
+    }*/
+    /*auth.onAuthStateChanged(user => {
       if (user) {
         // Set Google Analytics ID
         this.setState({ user })
         ReactGA.set({ userId: user.uid })
       }
-    })
+    })*/
   }
 
   public render() {
@@ -57,12 +66,12 @@ class App extends React.Component<any, IState> {
                 <Link to="/"> Transkribering {process.env.NODE_ENV === "development" ? "(utvikling)" : ""}</Link>
               </h1>
 
-              <Login user={this.state.user} logout={this.logout} />
+              <Auth />
             </header>
             <Switch>
               <Redirect from="/login" to="/" />
-              <Route exact={true} path="/" render={() => (this.state.user ? <Redirect to="/transcripts" /> : <Index />)} />
-              <Route path="/transcripts/:id?" render={props => <Transcripts {...props} user={this.state.user} />} />
+              <Route path="/" exact={true} render={() => (this.props.user.uid ? <Redirect to="/transcripts" /> : <Index />)} />
+              <Route path="/transcripts/:id?" render={props => <Transcripts {...props} user={this.props.user} />} />
             </Switch>
           </div>
         </GAListener>
@@ -85,4 +94,10 @@ class App extends React.Component<any, IState> {
   }
 }
 
-export default App
+const mapStateToProps = (state: IStateProps): IStateProps => {
+  return {
+    user: state.firebase.auth,
+  }
+}
+
+export default connect<IStateProps, void, void>(mapStateToProps)(App)

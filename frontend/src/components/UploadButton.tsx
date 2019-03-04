@@ -4,14 +4,9 @@ import ReactGA from "react-ga"
 
 interface IProps {
   fileSelected: (file: File) => void
-  userId: string
 }
 
-interface IState {
-  file?: File
-}
-
-class UploadButton extends Component<IProps, IState> {
+class UploadButton extends Component<IProps, any> {
   public render() {
     const style = { alignContent: "center", borderColor: "rgb(102, 102, 102)", borderRadius: "5px", borderStyle: "dashed", borderWidth: "2px", display: "grid", height: "100px", justifyContent: "center", position: "relative", width: "100%" }
 
@@ -32,24 +27,22 @@ class UploadButton extends Component<IProps, IState> {
       </Dropzone>
     )
   }
-  private handleFileDrop: DropFilesEventHandler = (acceptedFiles: [File], rejectedFiles: [File]) => {
-    if (rejectedFiles.length > 0) {
-      console.error(rejectedFiles)
-
-      this.setState({ file: undefined })
+  private handleFileDrop: DropFilesEventHandler = (accepted: File[], rejected: File[], event: React.DragEvent<HTMLElement>) => {
+    if (rejected.length > 0) {
+      console.error(rejected)
 
       ReactGA.event({
         action: "upload failed",
         category: "transcript",
-        label: rejectedFiles[0].type,
+        label: rejected[0].type,
       })
     } else {
       // Take the first file
-      const [file] = acceptedFiles
+      const [file] = accepted
+
+      console.log(file)
 
       this.props.fileSelected(file)
-
-      this.setState({ file })
     }
   }
 }

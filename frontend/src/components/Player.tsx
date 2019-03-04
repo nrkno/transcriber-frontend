@@ -15,18 +15,17 @@ interface IProps {
 }
 
 class Player extends React.Component<IProps, IState> {
+  public readonly state: IState = {
+    currentTime: 0,
+    isPlaying: false,
+  }
   private audioRef: React.RefObject<HTMLAudioElement>
-  private timer: number
+  private timer: NodeJS.Timeout
 
   constructor(props: IProps) {
     super(props)
 
     this.audioRef = React.createRef<HTMLAudioElement>()
-
-    this.state = {
-      currentTime: 0,
-      isPlaying: false,
-    }
   }
 
   public componentDidMount() {
@@ -40,7 +39,11 @@ class Player extends React.Component<IProps, IState> {
       // Reset state
 
       this.setState({ isPlaying: false })
-      this.audioRef.current!.currentTime = 0
+
+      if (this.audioRef.current) {
+        this.audioRef.current.currentTime = 0
+      }
+
       clearInterval(this.timer)
     }
   }
@@ -49,24 +52,32 @@ class Player extends React.Component<IProps, IState> {
     clearInterval(this.timer)
   }
 
-  public handlePlay = (event: React.FormEvent<HTMLButtonElement>) => {
-    this.play()
+  public togglePlay() {
+    if (this.state.isPlaying) {
+      this.audioRef.current!.pause()
 
-    ReactGA.event({
-      action: "play button pressed",
-      category: "player",
-    })
+      clearInterval(this.timer)
+
+      this.setState({ isPlaying: false })
+      ReactGA.event({
+        action: "pause button pressed",
+        category: "player",
+      })
+    } else {
+      this.play()
+
+      ReactGA.event({
+        action: "play button pressed",
+        category: "player",
+      })
+    }
+  }
+
+  public handlePlay = (event: React.FormEvent<HTMLButtonElement>) => {
+    this.togglePlay()
   }
   public handlePause = (event: React.FormEvent<HTMLButtonElement>) => {
-    this.audioRef.current!.pause()
-
-    clearInterval(this.timer)
-
-    this.setState({ isPlaying: false })
-    ReactGA.event({
-      action: "pause button pressed",
-      category: "player",
-    })
+    this.togglePlay()
   }
   public handleVolume = (event: React.FormEvent<HTMLInputElement>) => {
     this.audioRef.current!.volume = Number(event.currentTarget.value)
@@ -77,8 +88,6 @@ class Player extends React.Component<IProps, IState> {
   }
   public setTime = (time: number) => {
     this.audioRef.current!.currentTime = time
-
-    this.play()
 
     ReactGA.event({
       action: "word selected",
@@ -138,19 +147,17 @@ class Player extends React.Component<IProps, IState> {
     )
   }
 
-  private fetchPlaybackUrl() {
-    storage
-
-      .refFromURL(this.props.playbackGsUrl)
-      .getDownloadURL()
-      .then(url => {
-        this.setState({ playbackUrl: url })
+  private async fetchPlaybackUrl() {
+    try {
+      const playbackUrl = await storage.refFromURL(this.props.playbackGsUrl).getDownloadURL()
+      this.setState({ playbackUrl })
+    } catch (error) {
+      console.error("Error fetching Playback URL: ", error)
+      ReactGA.exception({
+        description: error.message,
+        fatal: false,
       })
-      .catch(error => {
-        // Handle any errors
-
-        console.error(error)
-      })
+    }
   }
 
   private play = () => {

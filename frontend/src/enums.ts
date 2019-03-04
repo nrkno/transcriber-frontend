@@ -1,9 +1,3 @@
-export enum SweetProgressStatus {
-  Active = "active",
-  Error = "error",
-  Success = "success",
-}
-
 export enum Step {
   Uploading = "UPLOADING",
   Transcoding = "TRANSCODING",

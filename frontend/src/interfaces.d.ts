@@ -2,6 +2,7 @@ import { Step, InteractionType, MicrophoneDistance, OriginalMediaType, Recording
 
 interface ITranscript {
   createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
+  id?: string
   name?: string
   playbackGsUrl?: string
   process?: {
@@ -9,7 +10,10 @@ interface ITranscript {
     percent?: number
     step?: Step
   }
-  metadata: IMetadata
+  speakerNames?: {
+    number: string
+  }
+  metadata?: IMetadata
   results?: Array<IResult>
   userId?: string
 }
@@ -34,14 +38,15 @@ interface ISpeechContext {
 }
 
 interface IResult {
+  id: string
+  speaker?: number
   startTime: number
-  confidence: number
-  transcript: string
   words: Array<IWord>
 }
 
 interface IWord {
   confidence: number
+  deleted?: boolean
   word: string
   endTime: number
   startTime: number

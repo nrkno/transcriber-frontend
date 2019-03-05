@@ -13,7 +13,6 @@ interface IStateProps {
 
 class Auth extends Component<RouteComponentProps<{}> & IStateProps, any> {
   public render() {
-    console.log("this.props", this.props)
     return (
       <div className="user">
         {(() => {

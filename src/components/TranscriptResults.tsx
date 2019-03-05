@@ -240,8 +240,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                           if (isEditing) {
                             // Only show the last word
                             if (j < this.state.markerWordIndexEnd) {
-                              console.log("returning")
-
                               return
                             }
 

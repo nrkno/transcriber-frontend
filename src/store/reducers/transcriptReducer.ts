@@ -153,7 +153,6 @@ function updateWords(state: ITranscript, resultIndex: number, wordIndexStart: nu
 }
 
 function updateSpeaker(state: ITranscript, resultIndex: number, speaker: number) {
-  console.log("Update speaker", resultIndex, speaker)
   let results
 
   if (state.results[resultIndex].speaker === speaker || speaker === 0) {

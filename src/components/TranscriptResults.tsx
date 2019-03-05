@@ -438,12 +438,15 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
               edits: [currentWord],
             })
           }
+          this.playerRef.current!.pause()
           break
 
         // Select navigation
         case "ArrowLeft":
         case "Left":
           if (event.getModifierState("Shift")) {
+            this.playerRef.current!.pause()
+
             // Decrease selection
             if (editingForward && markerWordIndexStart < markerWordIndexEnd && markerWordIndexEnd > 0) {
               this.setState({
@@ -486,6 +489,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "ArrowRight":
         case "Right":
           if (event.getModifierState("Shift")) {
+            this.playerRef.current!.pause()
+
             if (editingForward === false && markerWordIndexStart < markerWordIndexEnd) {
               this.setState({
                 edits: undefined,
@@ -575,6 +580,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         // Tab will toggle the word from lowercase, first letter capitalized
         // Only works when not in edit mode, and only on a single word
         case "Tab":
+          this.playerRef.current!.pause()
+
           if (this.state.edits === undefined && markerWordIndexStart === markerWordIndexEnd) {
             // Lower case to capitalised case
             if (currentWord === currentWord.toLowerCase()) {
@@ -595,6 +602,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             // Pressing space twice will stop editing
           } else if (this.state.edits[this.state.edits.length - 1] === "") {
             this.commitEdits(true) // Stop editing
+            this.playerRef.current!.togglePlay()
           } else {
             this.commitEdits(false) // Don't stop editing
           }
@@ -602,6 +610,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
         // Delete
         case "Delete":
+          this.playerRef.current!.pause()
+
           this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
           break
 
@@ -611,6 +621,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "!":
         case "?":
           if (this.state.edits === undefined && markerWordIndexStart === markerWordIndexEnd) {
+            this.playerRef.current!.pause()
+
             const wordText = results![markerResultIndex].words[markerWordIndexEnd].word
             const nextWord = results[markerResultIndex].words[markerWordIndexEnd + 1]
             const wordTextLastChar = wordText.charAt(wordText.length - 1)
@@ -774,6 +786,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             edits = [key]
           }
           this.setState({ edits })
+          this.playerRef.current!.pause()
 
           break
       }
@@ -782,8 +795,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     // Cancel the default action to avoid it being handled twice
     event.preventDefault()
     event.stopPropagation()
-
-    console.log("X", this.state.edits, "X")
   }
 
   private async save(pastTranscript: ITranscript, presentTranscript: ITranscript) {

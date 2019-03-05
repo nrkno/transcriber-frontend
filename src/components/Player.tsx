@@ -52,13 +52,19 @@ class Player extends React.Component<IProps, IState> {
     clearInterval(this.timer)
   }
 
-  public togglePlay() {
+  public pause() {
     if (this.state.isPlaying) {
       this.audioRef.current!.pause()
-
       clearInterval(this.timer)
 
       this.setState({ isPlaying: false })
+    }
+  }
+
+  public togglePlay() {
+    if (this.state.isPlaying) {
+      this.pause()
+
       ReactGA.event({
         action: "pause button pressed",
         category: "player",

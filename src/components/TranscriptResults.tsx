@@ -22,7 +22,7 @@ interface IState {
   markerResultIndex?: number
   markerWordIndexStart?: number
   markerWordIndexEnd?: number
-  edits?: [string]
+  edits?: string[]
   selectingForward: boolean
 }
 
@@ -591,8 +591,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case " ":
           if (this.state.edits === undefined) {
             this.playerRef.current!.togglePlay()
+
+            // Pressing space twice will stop editing
+          } else if (this.state.edits[this.state.edits.length - 1] === "") {
+            this.commitEdits(true) // Stop editing
           } else {
-            this.commitEdits(false)
+            this.commitEdits(false) // Don't stop editing
           }
           break
 
@@ -778,6 +782,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     // Cancel the default action to avoid it being handled twice
     event.preventDefault()
     event.stopPropagation()
+
+    console.log("X", this.state.edits, "X")
   }
 
   private async save(pastTranscript: ITranscript, presentTranscript: ITranscript) {
@@ -865,14 +871,19 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     this.props.updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)
   }
 
-  private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, texts: [string], stopEditing: boolean) {
-    this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, texts, true)
+  private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, texts: string[], stopEditing: boolean) {
+    const words = [...texts]
 
-    const edits = update(texts, { $push: [""] })
+    // If we stop editing, we need to remove the last space if it exists. Otherwise it will be commited
+    if (stopEditing === true && words[words.length - 1] === "") {
+      words.splice(-1, 1)
+    }
+
+    this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, true)
 
     this.setState({
-      edits: stopEditing ? undefined : edits,
-      markerWordIndexEnd: wordIndexStart + texts.length - 1,
+      edits: stopEditing ? undefined : [...words, ""], // Add space if we continue to edit
+      markerWordIndexEnd: wordIndexStart + words.length - 1,
     })
   }
 

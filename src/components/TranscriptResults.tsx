@@ -763,6 +763,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "'":
         case "-":
         case '"':
+        case "(":
+        case ")":
+        case "{":
+        case "}":
+        case "[":
+        case "]":
         case "Backspace":
           // Change the selected word
 

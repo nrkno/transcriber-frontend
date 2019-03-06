@@ -63,7 +63,7 @@ class CreateTranscript extends React.Component<IProps, IState> {
         <div className="create">
           <h2 className="org-text-xl">{this.props.file.name}</h2>
           <form className="dropForm" onSubmit={this.handleSubmit}>
-            <fieldset disabled={this.state.isSubmitting === true}>
+            <fieldset disabled={this.state.submitButtonPressed === true}>
               <label className="org-label">
                 Språk
                 <select value={this.state.languageCodes[0]} onChange={event => this.handleLanguageChange(0, event)}>
@@ -150,7 +150,7 @@ class CreateTranscript extends React.Component<IProps, IState> {
 
               <button className="org-btn org-btn--primary" disabled={this.submitButtonIsDisabled()} type="submit">
                 {(() => {
-                  if (this.state.isSubmitting === true && this.state.fileUploaded === false && this.state.percent !== undefined) {
+                  if (this.state.submitButtonPressed === true && this.state.fileUploaded === false && this.state.percent !== undefined) {
                     return `Laster opp ${this.state.percent}%`
                   } else {
                     return "Last opp"

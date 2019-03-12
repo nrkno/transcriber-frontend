@@ -220,10 +220,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
               <React.Fragment key={i}>
                 <div key={`startTime-${i}`} className="startTime" onClick={i === 0 ? this.handleChangeStartTime() : ""}>
                   {formattedStartTime}
-                  {speaker !== undefined ? (
+                  {speaker ? (
                     <>
                       <span className={`speaker speaker-${speaker}`} onClick={this.handleChangeSpeakerName(speaker)}>
-                        {this.props.transcript.present.speakerNames[result.speaker][0].toUpperCase()}
+                        {this.props.transcript.present.speakerNames[speaker][0].toUpperCase()}
                       </span>
                     </>
                   ) : (

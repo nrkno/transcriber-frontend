@@ -3,7 +3,7 @@ import { ActionType } from "typesafe-actions"
 import { database } from "../../firebaseApp"
 import { IResult, ITranscript, IWord } from "../../interfaces"
 import * as transcriptActions from "../actions/transcriptActions"
-import { DELETE_WORDS, JOIN_RESULTS, READ_RESULTS, SELECT_TRANSCRIPT, SPLIT_RESULTS, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_WORDS } from "../constants"
+import { DELETE_WORDS, JOIN_RESULTS, READ_RESULTS, SELECT_TRANSCRIPT, SPLIT_RESULTS, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_START_TIME, UPDATE_WORDS } from "../constants"
 
 export type TranscriptAction = ActionType<typeof transcriptActions>
 
@@ -27,6 +27,9 @@ export default (state: ITranscript = {}, action: TranscriptAction) => {
 
     case UPDATE_SPEAKER_NAME:
       return updateSpeakerName(state, action.payload.speaker, action.payload.name, action.payload.resultIndex)
+
+    case UPDATE_START_TIME:
+      return updateStartTime(state, action.payload.startTime)
 
     case UPDATE_WORDS:
       return updateWords(state, action.payload.resultIndex, action.payload.wordIndexStart, action.payload.wordIndexEnd, action.payload.words, action.payload.recalculate)
@@ -152,10 +155,20 @@ function updateWords(state: ITranscript, resultIndex: number, wordIndexStart: nu
   }
 }
 
+function updateStartTime(state: ITranscript, startTime: number) {
+  const transcript = update(state, {
+    metadata: {
+      startTime: { $set: startTime },
+    },
+  })
+
+  return transcript
+}
+
 function updateSpeaker(state: ITranscript, resultIndex: number, speaker: number) {
   let results
 
-  if (state.results[resultIndex].speaker === speaker || speaker === 0) {
+  if ((state.results && state.results[resultIndex].speaker === speaker) || speaker === 0) {
     // Remove speaker
 
     results = update(state.results, {

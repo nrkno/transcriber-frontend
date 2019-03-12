@@ -11,9 +11,9 @@ import { Dispatch } from "redux"
 import { ActionCreators as UndoActionCreators } from "redux-undo"
 import { database } from "../firebaseApp"
 import { IResult, ITranscript, IWord } from "../interfaces"
-import secondsToTime from "../secondsToTime"
+import nanoSecondsToFormattedTime from "../nanoSecondsToFormattedTime"
 import { updateMarkers } from "../store/actions/markersActions"
-import { deleteWords, joinResults, readResults, splitResults, updateSpeaker, updateSpeakerName, updateWords } from "../store/actions/transcriptActions"
+import { deleteWords, joinResults, readResults, splitResults, updateSpeaker, updateSpeakerName, updateStartTime, updateWords } from "../store/actions/transcriptActions"
 import Player from "./Player"
 import Word from "./Word"
 
@@ -66,6 +66,7 @@ interface IReduxDispatchToProps {
   updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
   updateSpeaker: (resultIndex: number, speaker: number) => void
   updateSpeakerName: (speaker: number, name: string, resultIndex?: number) => void
+  updateStartTime: (startTime: number) => void
   updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
 }
 
@@ -212,14 +213,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           this.props.transcript.present.results.map((result, i) => {
             const startTime = result.startTime
 
-            const formattedStartTime = secondsToTime(startTime * 1e-9)
+            const formattedStartTime = nanoSecondsToFormattedTime(this.props.transcript.present.metadata.startTime || 0, startTime, true, false)
             const speaker = result.speaker
 
             return (
               <React.Fragment key={i}>
-                <div key={`startTime-${i}`} className="startTime">
+                <div key={`startTime-${i}`} className="startTime" onClick={i === 0 ? this.handleChangeStartTime() : ""}>
                   {formattedStartTime}
-                  {speaker ? (
+                  {speaker !== undefined ? (
                     <>
                       <span className={`speaker speaker-${speaker}`} onClick={this.handleChangeSpeakerName(speaker)}>
                         {this.props.transcript.present.speakerNames[result.speaker][0].toUpperCase()}
@@ -325,6 +326,33 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
     if (edits !== undefined) {
       this.setWords(this.state.markerResultIndex, this.state.markerWordIndexStart, this.state.markerWordIndexEnd, edits, stopEditing)
+    }
+  }
+
+  private handleChangeStartTime = () => (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
+    let startTime = 0
+
+    if (this.props.transcript.present.metadata && this.props.transcript.present.metadata.startTime) {
+      startTime = this.props.transcript.present.metadata.startTime
+    }
+
+    const formattedStartTime = nanoSecondsToFormattedTime(0, startTime, true, true)
+
+    const newStartTimeCode = window.prompt("Starttid:", formattedStartTime)
+
+    if (newStartTimeCode) {
+      const units = newStartTimeCode.split(":")
+
+      if (units.length === 4) {
+        const nanoseconds =
+          parseInt(units[0], 10) * 3600e9 + // Hours
+          parseInt(units[1], 10) * 60e9 + // Minutes
+          parseInt(units[2], 10) * 1e9 + // Seconds
+          parseInt(units[3], 10) * 1e7 // Centiseconds
+        console.log(nanoseconds)
+
+        this.props.updateStartTime(nanoseconds)
+      }
     }
   }
 
@@ -834,6 +862,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       })
     }
 
+    // Check if we have changes in start time
+
+    if (presentTranscript.metadata && presentTranscript.metadata.startTime !== pastTranscript.metadata.startTime) {
+      batch.update(transcriptDocumentReference, {
+        "metadata.startTime": presentTranscript.metadata.startTime,
+      })
+    }
+
     const pastResults = pastTranscript.results
     const presentResults = presentTranscript.results
 
@@ -993,7 +1029,8 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
     splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
     updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)),
     updateSpeaker: (resultIndex: number, speaker: number) => dispatch(updateSpeaker(resultIndex, speaker)),
-    updateSpeakerName: (speaker: number, name: string, resultIndex: number) => dispatch(updateSpeakerName(speaker, name, resultIndex)),
+    updateSpeakerName: (speaker: number, name: string, resultIndex?: number) => dispatch(updateSpeakerName(speaker, name, resultIndex)),
+    updateStartTime: (startTime: number) => dispatch(updateStartTime(startTime)),
     updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => dispatch(updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)),
   }
 }

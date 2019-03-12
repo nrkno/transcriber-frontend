@@ -1,6 +1,6 @@
 import { createAction } from "typesafe-actions"
 import { IResult, ITranscript } from "../../interfaces"
-import { DELETE_WORDS, JOIN_RESULTS, READ_RESULTS, SELECT_TRANSCRIPT, SPLIT_RESULTS, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_WORDS } from "../constants"
+import { DELETE_WORDS, JOIN_RESULTS, READ_RESULTS, SELECT_TRANSCRIPT, SPLIT_RESULTS, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_START_TIME, UPDATE_WORDS } from "../constants"
 
 //////////
 // READ //
@@ -23,6 +23,10 @@ export const updateSpeaker = createAction(UPDATE_SPEAKER, action => {
 
 export const updateSpeakerName = createAction(UPDATE_SPEAKER_NAME, action => {
   return (speaker: number, name: string, resultIndex?: number) => action({ name, resultIndex, speaker })
+})
+
+export const updateStartTime = createAction(UPDATE_START_TIME, action => {
+  return (startTime: number) => action({ startTime })
 })
 
 //////////

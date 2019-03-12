@@ -31,6 +31,7 @@ interface IMetadata {
   recordingDeviceName?: string
   recordingDeviceType: RecordingDeviceType
   speechContexts?: Array<ISpeechContext>
+  startTime?: number
 }
 
 interface ISpeechContext {

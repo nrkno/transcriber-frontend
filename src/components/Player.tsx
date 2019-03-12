@@ -1,7 +1,7 @@
 import * as React from "react"
 import ReactGA from "react-ga"
 import { storage } from "../firebaseApp"
-import secondsToTime from "../secondsToTime"
+import nanoSecondsToFormattedTime from "../nanoSecondsToFormattedTime"
 
 interface IState {
   isPlaying: boolean
@@ -102,6 +102,7 @@ class Player extends React.Component<IProps, IState> {
   }
   public render() {
     const currentTime = this.audioRef.current && this.audioRef.current.currentTime ? this.audioRef.current.currentTime : 0
+
     const duration = this.audioRef.current && this.audioRef.current.duration ? this.audioRef.current.duration : 0
 
     // Avoid division by zero
@@ -133,7 +134,7 @@ class Player extends React.Component<IProps, IState> {
             </button>
           )}
 
-          <div className="currentTime">{secondsToTime(currentTime)}</div>
+          <div className="currentTime">{nanoSecondsToFormattedTime(0, currentTime * 1e9, true, false)}</div>
           <div className="timer-wrapper">
             <div className="timer-background">
               <div
@@ -144,7 +145,7 @@ class Player extends React.Component<IProps, IState> {
               />
             </div>
           </div>
-          <div className="duration">{secondsToTime(duration)}</div>
+          <div className="duration">{nanoSecondsToFormattedTime(0, duration * 1e9, true, false)}</div>
           <div className="volume">
             <input type="range" min="0" max="1" step="0.1" onChange={this.handleVolume} />
           </div>

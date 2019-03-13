@@ -822,7 +822,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "Backspace":
           // Change the selected word
 
-          let edits = update(this.state.edits, {}) // Copy edits from state
+          let edits = this.state.edits ? [...this.state.edits] : undefined // Copy edits from state
 
           if (key === "Backspace") {
             // If not in edit mode, delete the word
@@ -831,10 +831,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
               // If in edit mode, and last element is a space, we pop the array to remove it
             } else if (edits[edits.length - 1] === "") {
               edits.pop()
+              this.commitEdits(false) // Don't stop editing
+
               // Else we remove the last character
             } else {
-              console.log(edits)
-
               edits[edits.length - 1] = edits[edits.length - 1].slice(0, -1)
             }
           }

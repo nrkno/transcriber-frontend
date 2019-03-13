@@ -114,6 +114,9 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
 
     // Check if we need to save to Firebase
+    console.log("prevProps.transcript.past.length", prevProps.transcript.past.length)
+    console.log("this.props.transcript.past.length", this.props.transcript.past.length)
+
     if (Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 1) {
       this.save(prevProps.transcript.present, this.props.transcript.present)
     }
@@ -822,9 +825,16 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           let edits = update(this.state.edits, {}) // Copy edits from state
 
           if (key === "Backspace") {
+            // If not in edit mode, delete the word
             if (edits === undefined) {
               this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
+              // If in edit mode, and last element is a space, we pop the array to remove it
+            } else if (edits[edits.length - 1] === "") {
+              edits.pop()
+              // Else we remove the last character
             } else {
+              console.log(edits)
+
               edits[edits.length - 1] = edits[edits.length - 1].slice(0, -1)
             }
           }
@@ -925,6 +935,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
     try {
       await batch.commit()
+      console.log("SAVED")
     } catch (error) {
       console.error("Error saving to Firebase: ", error)
       ReactGA.exception({

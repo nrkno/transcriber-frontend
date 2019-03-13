@@ -114,8 +114,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
 
     // Check if we need to save to Firebase
-    console.log("prevProps.transcript.past.length", prevProps.transcript.past.length)
-    console.log("this.props.transcript.past.length", this.props.transcript.past.length)
 
     if (Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 1) {
       this.save(prevProps.transcript.present, this.props.transcript.present)
@@ -327,6 +325,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   private commitEdits(stopEditing: boolean) {
     const edits = this.state.edits
 
+    console.log("ccommiting edits", edits, stopEditing)
+
     if (edits !== undefined) {
       this.setWords(this.state.markerResultIndex, this.state.markerWordIndexStart, this.state.markerWordIndexEnd, edits, stopEditing)
     }
@@ -352,7 +352,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           parseInt(units[1], 10) * 60e9 + // Minutes
           parseInt(units[2], 10) * 1e9 + // Seconds
           parseInt(units[3], 10) * 1e7 // Centiseconds
-        console.log(nanoseconds)
 
         this.props.updateStartTime(nanoseconds)
       }
@@ -825,17 +824,35 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           let edits = this.state.edits ? [...this.state.edits] : undefined // Copy edits from state
 
           if (key === "Backspace") {
-            // If not in edit mode, delete the word
+            // If not in edit mode, or all characters have been removed,  delete the word
             if (edits === undefined) {
+              console.log("edits === undefined")
+
               this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
               // If in edit mode, and last element is a space, we pop the array to remove it
             } else if (edits[edits.length - 1] === "") {
-              edits.pop()
-              this.commitEdits(false) // Don't stop editing
+              console.log("edits[edits.length - 1")
 
-              // Else we remove the last character
-            } else {
+              edits.pop()
+
+              // Stop editing if there are no characters in edits
+              // Otherwise, continue editing
+
+              console.log("edits.length === 0", edits.length === 0)
+
+              this.commitEdits(edits.length === 0)
+
+              // Else we remove the last character if exists
+            } else if (edits.length > 0) {
+              console.log("Else we remove the last character if exists")
+
               edits[edits.length - 1] = edits[edits.length - 1].slice(0, -1)
+
+              // Edits is empty, do nothing
+            } else {
+              console.log("Edits is empty, do nothing")
+
+              return
             }
           }
           // Add character to last word
@@ -846,6 +863,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           else {
             edits = [key]
           }
+
+          console.log(edits)
           this.setState({ edits })
           this.playerRef.current!.pause()
 
@@ -935,7 +954,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
     try {
       await batch.commit()
-      console.log("SAVED")
     } catch (error) {
       console.error("Error saving to Firebase: ", error)
       ReactGA.exception({
@@ -962,9 +980,15 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
     this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, true)
 
+    console.log("texts", texts)
+    console.log("words", words)
+    console.log("start", wordIndexStart)
+    console.log("end", wordIndexEnd)
+    console.log("end", Math.max(wordIndexStart, wordIndexStart + words.length - 1))
+
     this.setState({
       edits: stopEditing ? undefined : [...words, ""], // Add space if we continue to edit
-      markerWordIndexEnd: wordIndexStart + words.length - 1,
+      markerWordIndexEnd: Math.max(wordIndexStart, wordIndexStart + words.length - 1), // Using max so that end with not be smaller than start and thus not drawn
     })
   }
 

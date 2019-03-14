@@ -15,7 +15,7 @@
     "moment": "^2.24.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
-    "react-dropzone": "^10.0.1",
+    "react-dropzone": "^10.0.2",
     "react-ga": "^2.5.7",
     "react-keyboard-event-handler": "^1.4.1",
     "react-on-screen": "^2.1.1",

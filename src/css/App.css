@@ -448,6 +448,10 @@ main#transcripts {
   font-family: "Roboto Mono", monospace;
 }
 
+.result s {
+  color: lightgray;
+}
+
 .startTime:first-of-type {
   text-decoration: underline;
   cursor: pointer;

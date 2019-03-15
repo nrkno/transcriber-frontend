@@ -324,8 +324,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   private commitEdits(stopEditing: boolean) {
     const edits = this.state.edits
 
-    console.log("ccommiting edits", edits, stopEditing)
-
     if (edits !== undefined) {
       this.setWords(this.state.markerResultIndex, this.state.markerWordIndexStart, this.state.markerWordIndexEnd, edits, stopEditing)
     }
@@ -908,32 +906,22 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           if (key === "Backspace") {
             // If not in edit mode, or all characters have been removed,  delete the word
             if (edits === undefined) {
-              console.log("edits === undefined")
-
               this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
               // If in edit mode, and last element is a space, we pop the array to remove it
             } else if (edits[edits.length - 1] === "") {
-              console.log("edits[edits.length - 1")
-
               edits.pop()
 
               // Stop editing if there are no characters in edits
               // Otherwise, continue editing
 
-              console.log("edits.length === 0", edits.length === 0)
-
               this.commitEdits(edits.length === 0)
 
               // Else we remove the last character if exists
             } else if (edits.length > 0) {
-              console.log("Else we remove the last character if exists")
-
               edits[edits.length - 1] = edits[edits.length - 1].slice(0, -1)
 
               // Edits is empty, do nothing
             } else {
-              console.log("Edits is empty, do nothing")
-
               return
             }
           }
@@ -946,7 +934,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             edits = [key]
           }
 
-          console.log(edits)
           this.setState({ edits })
           this.playerRef.current!.pause()
 
@@ -1061,12 +1048,6 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
 
     this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, true)
-
-    console.log("texts", texts)
-    console.log("words", words)
-    console.log("start", wordIndexStart)
-    console.log("end", wordIndexEnd)
-    console.log("end", Math.max(wordIndexStart, wordIndexStart + words.length - 1))
 
     this.setState({
       edits: stopEditing ? undefined : [...words, ""], // Add space if we continue to edit

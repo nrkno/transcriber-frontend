@@ -18,7 +18,7 @@ class Word extends React.Component<IProps, {}> {
   public render() {
     return (
       <>
-        <span onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${this.props.isMarked ? "marker" : ""}`}>
+        <span style={{ backgroundColor: "green" }} onClick={this.handleWordClick} className={`word confidence-${this.props.confidence} ${this.props.isMarked ? "marker" : ""}`}>
           {this.props.word && this.props.word.deleted && this.props.word.deleted === true ? <s>{this.props.text}</s> : this.props.text}
 
           {(() => {
@@ -37,10 +37,14 @@ class Word extends React.Component<IProps, {}> {
             if (strikeThrough) {
               return <s className={this.props.isMarked ? "marker" : ""}> </s>
             } else {
-              return <span className={this.props.isMarked ? "marker" : ""}> </span>
+              return (
+                <span style={{ backgroundColor: "red" }} className={this.props.isMarked ? "marker" : ""}>
+                  {" "}
+                </span>
+              )
             }
           } else if (strikeThrough) {
-            return <s> </s>
+            return <s ref={node => node && console.log(node.offsetWidth)}> </s>
           } else {
             return " "
           }

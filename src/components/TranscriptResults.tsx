@@ -75,6 +75,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     selectingForward: true,
   }
   private playerRef = React.createRef<Player>()
+  private resultsRef = React.createRef()
 
   public componentDidUpdate(prevProps: IReduxStateToProps & IReduxDispatchToProps, prevState: IState) {
     const transcriptId = this.props.transcriptId
@@ -205,7 +206,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
   public render() {
     return (
-      <>
+      <div
+        ref={node => node && console.log(node.offsetWidth)}
+        style={
+          {
+            /*backgroundColor: "red"*/
+          }
+        }
+      >
         <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={this.handleKeyPressed} />
         {this.props.transcript &&
           this.props.transcript.present &&
@@ -295,7 +303,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           })}
 
         <Player ref={this.playerRef} playbackGsUrl={this.props.transcript.present.playbackGsUrl} handleTimeUpdate={this.handleTimeUpdate} />
-      </>
+      </div>
     )
   }
 

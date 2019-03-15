@@ -1,5 +1,4 @@
 import equal from "fast-deep-equal"
-import update from "immutability-helper"
 import React, { Component } from "react"
 import ReactGA from "react-ga"
 import KeyboardEventHandler from "react-keyboard-event-handler"
@@ -722,6 +721,17 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
             break
           }
+        case "!":
+        case "\\":
+        case "#":
+        case "$":
+        case "%":
+        case "&":
+        case ")":
+        case "*":
+        case "/":
+        case "-":
+        case "–":
         case "0":
         case "1":
         case "2":
@@ -732,35 +742,10 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "7":
         case "8":
         case "9":
-        case "a":
-        case "b":
-        case "c":
-        case "d":
-        case "e":
-        case "f":
-        case "g":
-        case "h":
-        case "i":
-        case "j":
-        case "k":
-        case "l":
-        case "m":
-        case "n":
-        case "o":
-        case "p":
-        case "q":
-        case "r":
-        case "s":
-        case "t":
-        case "u":
-        case "v":
-        case "w":
-        case "x":
-        case "y":
-        case "z":
-        case "æ":
-        case "ø":
-        case "å":
+        case ":":
+        case "=":
+        case ">":
+        case "@":
         case "A":
         case "B":
         case "C":
@@ -787,37 +772,134 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "X":
         case "Y":
         case "Z":
-        case "Æ":
-        case "Ø":
-        case "Å":
-        case "'":
-        case "-":
-        case '"':
-        case "(":
-        case ")":
-        case "{":
-        case "}":
         case "[":
-        case "]":
-        case '"':
-        case "#":
-        case "$":
-        case "%":
-        case "&":
-        case "/":
         case "\\":
-        case "=":
-        case "+":
-        case "´":
-        case "`":
-        case "£":
-        case "€":
-        case "§":
-        case "@":
-        case "*":
+        case "]":
+        case "^":
         case "_":
-        case ":":
-        case ";":
+        case "`":
+        case "a":
+        case "b":
+        case "c":
+        case "d":
+        case "e":
+        case "f":
+        case "g":
+        case "h":
+        case "i":
+        case "j":
+        case "k":
+        case "l":
+        case "m":
+        case "n":
+        case "o":
+        case "p":
+        case "q":
+        case "r":
+        case "s":
+        case "t":
+        case "u":
+        case "v":
+        case "w":
+        case "x":
+        case "y":
+        case "z":
+        case "{":
+        case "|":
+        case "}":
+        case "~":
+        case "¡":
+        case "¢":
+        case "£":
+        case "¤":
+        case "¥":
+        case "¦":
+        case "§":
+        case "¨":
+        case "ª":
+        case "«":
+        case "¬":
+        case "®":
+        case "¯":
+        case "±":
+        case "²":
+        case "³":
+        case "´":
+        case "µ":
+        case "¶":
+        case "·":
+        case "¸":
+        case "º":
+        case "»":
+        case "¼":
+        case "½":
+        case "¾":
+        case "¿":
+        case "À":
+        case "Á":
+        case "Â":
+        case "Ã":
+        case "Ä":
+        case "Å":
+        case "Æ":
+        case "Ç":
+        case "È":
+        case "É":
+        case "Ê":
+        case "Ë":
+        case "Ì":
+        case "Í":
+        case "Î":
+        case "Ï":
+        case "Ð":
+        case "Ñ":
+        case "Ò":
+        case "Ó":
+        case "Ô":
+        case "Õ":
+        case "Ö":
+        case "×":
+        case "Ø":
+        case "Ù":
+        case "Ú":
+        case "Û":
+        case "Ü":
+        case "Ý":
+        case "Þ":
+        case "ß":
+        case "à":
+        case "á":
+        case "â":
+        case "ã":
+        case "ä":
+        case "å":
+        case "æ":
+        case "ç":
+        case "è":
+        case "é":
+        case "ê":
+        case "ë":
+        case "ì":
+        case "í":
+        case "î":
+        case "ï":
+        case "ð":
+        case "ñ":
+        case "ò":
+        case "ó":
+        case "ô":
+        case "õ":
+        case "ö":
+        case "÷":
+        case "ø":
+        case "ù":
+        case "ú":
+        case "û":
+        case "ü":
+        case "ý":
+        case "þ":
+        case "ÿ":
+        case "…":
         case "Backspace":
           // Change the selected word
 

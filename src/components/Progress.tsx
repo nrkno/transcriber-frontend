@@ -1,20 +1,20 @@
 import * as React from "react"
-import { Step } from "../enums"
+import { ProgressEnum } from "../enums"
 import { ITranscript } from "../interfaces"
 
 interface IProps {
   transcript: ITranscript
 }
 
-class Process extends React.Component<IProps, any> {
+class Progress extends React.Component<IProps, any> {
   public render() {
     const transcript = this.props.transcript
 
-    if (transcript === undefined || transcript.process === undefined || transcript.process.step === Step.Done) {
+    if (transcript === undefined || transcript.status === undefined || transcript.status.progress === ProgressEnum.Done) {
       return null
     }
 
-    const step = transcript.process.step
+    const progress = transcript.status.progress
 
     return (
       <main id="transcript">
@@ -24,7 +24,7 @@ class Process extends React.Component<IProps, any> {
 
         <div>
           {(() => {
-            if (transcript.process.error) {
+            if (transcript.status.error) {
               return (
                 <div>
                   <svg width="40" height="40" focusable="false" aria-hidden="true">
@@ -58,17 +58,17 @@ class Process extends React.Component<IProps, any> {
           <label className="org-label">
             Transkoding:
             {(() => {
-              if (step === Step.Transcoding) {
-                if (transcript.process.error) {
+              if (progress === ProgressEnum.Analysing) {
+                if (transcript.status.error) {
                   return (
                     <div>
-                      <progress data-status="error" className="org-progress" value="1" max="100" /> <div className="org-color-error"> {transcript.process.error.message}</div>
+                      <progress data-status="error" className="org-progress" value="1" max="100" /> <div className="org-color-error"> {transcript.status.error.message}</div>
                     </div>
                   )
                 } else {
                   return <progress className="org-progress" />
                 }
-              } else if (step === Step.Uploading) {
+              } else if (progress === ProgressEnum.Uploading) {
                 return <progress className="org-progress" value="0" max="100" />
               } else {
                 return <progress data-status="completed" className="org-progress" value="100" max="100" />
@@ -79,13 +79,13 @@ class Process extends React.Component<IProps, any> {
           <label className="org-label">
             Transkribering:
             {(() => {
-              if (step === Step.Transcribing) {
-                if (transcript.process.error) {
-                  return <progress data-status="error" className="org-progress" value={transcript.process.percent} max="100" />
+              if (progress === ProgressEnum.Transcribing) {
+                if (transcript.status.error) {
+                  return <progress data-status="error" className="org-progress" value={transcript.status.percent} max="100" />
                 } else {
-                  return <progress className="org-progress" value={transcript.process.percent} max="100" />
+                  return <progress className="org-progress" value={transcript.status.percent} max="100" />
                 }
-              } else if (step === Step.Uploading || step === Step.Transcoding) {
+              } else if (progress === ProgressEnum.Uploading || progress === ProgressEnum.Analysing) {
                 return <progress className="org-progress" value="0" max="100" />
               } else {
                 return <progress data-status="completed" className="org-progress" value="100" max="100" />
@@ -96,13 +96,13 @@ class Process extends React.Component<IProps, any> {
           <label className="org-label">
             Lagring:
             {(() => {
-              if (step === Step.Saving) {
-                if (transcript.process.error) {
-                  return <progress data-status="error" className="org-progress" value={transcript.process.percent} max="100" />
+              if (progress === ProgressEnum.Saving) {
+                if (transcript.status.error) {
+                  return <progress data-status="error" className="org-progress" value={transcript.status.percent} max="100" />
                 } else {
-                  return <progress className="org-progress" value={transcript.process.percent} max="100" />
+                  return <progress className="org-progress" value={transcript.status.percent} max="100" />
                 }
-              } else if (step === Step.Uploading || step === Step.Transcoding || step === Step.Transcribing) {
+              } else if (progress === ProgressEnum.Uploading || progress === ProgressEnum.Analysing || progress === ProgressEnum.Transcribing) {
                 return <progress className="org-progress" value="0" max="100" />
               } else {
                 return <progress data-status="completed" className="org-progress" value="100" max="100" />
@@ -115,4 +115,4 @@ class Process extends React.Component<IProps, any> {
   }
 }
 
-export default Process
+export default Progress

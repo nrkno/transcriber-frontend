@@ -1,14 +1,14 @@
-import { Step, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Timestamp } from "./enums"
+import { ProgressEnum, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Timestamp } from "./enums"
 
 interface ITranscript {
   createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   id?: string
   name?: string
   playbackGsUrl?: string
-  process?: {
+  status?: {
     error?: any
     percent?: number
-    step?: Step
+    progress?: ProgressEnum
   }
   metadata?: IMetadata
   results?: Array<IResult>

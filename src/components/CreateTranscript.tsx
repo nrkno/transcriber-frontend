@@ -1,7 +1,7 @@
 import firebase from "firebase/app"
 import * as React from "react"
 import ReactGA from "react-ga"
-import { InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Step } from "../enums"
+import { InteractionType, MicrophoneDistance, OriginalMediaType, ProgressEnum, RecordingDeviceType } from "../enums"
 import { database, storage } from "../firebaseApp"
 import { IMetadata, ITranscript } from "../interfaces"
 
@@ -225,9 +225,9 @@ class CreateTranscript extends React.Component<IProps, IState> {
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       metadata,
       name,
-      process: {
+      status: {
         percent: this.state.percent,
-        step: Step.Uploading,
+        progress: ProgressEnum.Uploading,
       },
       userId: this.props.userId,
     }

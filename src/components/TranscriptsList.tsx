@@ -1,11 +1,10 @@
 import moment from "moment"
 import React, { Component } from "react"
-import ReactGA from "react-ga"
 import { connect } from "react-redux"
 import { firestoreConnect } from "react-redux-firebase"
 import { compose } from "redux"
 import "../css/TranscriptsList.css"
-import { ProgressEnum } from "../enums"
+import { ProgressType } from "../enums"
 import { ITranscript } from "../interfaces"
 import UploadButton from "./UploadButton"
 
@@ -77,7 +76,7 @@ class TranscriptsList extends Component<IProps> {
                               <use xlinkHref="#icon-warning" />
                             </svg>
                           )
-                        } else if (transcript.status && transcript.status.progress !== ProgressEnum.Done) {
+                        } else if (transcript.status && transcript.status.progress !== ProgressType.Done) {
                           return (
                             <svg width="20" height="20">
                               <defs>
@@ -138,6 +137,7 @@ export default compose(
       collection: "transcripts",
       orderBy: ["createdAt", "desc"],
       where: ["userId", "==", props.auth.uid],
+      //      where: ["userIds", "array-contains", props.auth.uid],
     },
   ]),
   connect(state => ({

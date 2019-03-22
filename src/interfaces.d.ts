@@ -1,4 +1,4 @@
-import { ProgressEnum, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Timestamp } from "./enums"
+import { ProgressType, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Timestamp } from "./enums"
 
 interface ITranscript {
   createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
@@ -8,14 +8,16 @@ interface ITranscript {
   status?: {
     error?: any
     percent?: number
-    progress?: ProgressEnum
+    progress?: ProgressType
   }
   metadata?: IMetadata
-  results?: Array<IResult>
+  paragraphs?: Array<IParagraph>
   speakerNames?: {
     [key: number]: string
   }
-  userId?: string
+  userIds?: {
+    [key: string]: string
+  }
 }
 
 interface IMetadata {
@@ -38,7 +40,7 @@ interface ISpeechContext {
   phrases: Array<string>
 }
 
-interface IResult {
+interface IParagraph {
   id: string
   speaker?: number
   startTime: number
@@ -48,7 +50,7 @@ interface IResult {
 interface IWord {
   confidence: number
   deleted?: boolean
-  word: string
+  text: string
   endTime: number
   startTime: number
 }

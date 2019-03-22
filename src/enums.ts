@@ -1,4 +1,4 @@
-export enum ProgressEnum {
+export enum ProgressType {
   Uploading = "UPLOADING",
   Analysing = "ANALYSING",
   Transcribing = "TRANSCRIBING",

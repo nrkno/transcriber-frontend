@@ -1,12 +1,12 @@
 import { createAction } from "typesafe-actions"
-import { IResult, ITranscript } from "../../interfaces"
+import { IParagraph, ITranscript } from "../../interfaces"
 import { DELETE_WORDS, JOIN_RESULTS, READ_RESULTS, SELECT_TRANSCRIPT, SPLIT_RESULTS, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_START_TIME, UPDATE_WORDS } from "../constants"
 
 //////////
 // READ //
 //////////
 export const readResults = createAction(READ_RESULTS, action => {
-  return (results: IResult[]) => action({ results })
+  return (results: IParagraph[]) => action({ results })
 })
 
 ////////////

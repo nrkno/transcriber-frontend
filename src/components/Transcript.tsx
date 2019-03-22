@@ -6,7 +6,7 @@ import { ActionCreators } from "redux-undo"
 import { functions } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
 import { selectTranscript } from "../store/actions/transcriptActions"
-import TranscriptResults from "./TranscriptResults"
+import Paragraphs from "./Paragraphs"
 
 interface IProps {
   history: History
@@ -49,7 +49,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
 
     // When the results are loaded the first, we reset the undo history
     // This is to stop users from undoing back to a state before the results were loaded
-    if (prevProps.transcript.present.results === undefined && this.props.transcript.present.results !== undefined) {
+    if (prevProps.transcript.present.paragraphs === undefined && this.props.transcript.present.paragraphs !== undefined) {
       this.props.clearHistory()
     }
   }
@@ -95,7 +95,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
             </button>
           </section>
           <div className="results">
-            <TranscriptResults transcriptId={transcript.id} />
+            <Paragraphs transcriptId={transcript.id} />
           </div>
         </main>
       )

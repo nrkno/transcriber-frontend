@@ -3,7 +3,7 @@ import ReactGA from "react-ga"
 import { connect } from "react-redux"
 import { RouteComponentProps } from "react-router"
 import { Dispatch } from "redux"
-import { ProgressEnum } from "../enums"
+import { ProgressType } from "../enums"
 import { ITranscript } from "../interfaces"
 import { selectTranscript } from "../store/actions/transcriptActions"
 import CreateTranscript from "./CreateTranscript"
@@ -53,7 +53,7 @@ class Transcripts extends Component<RouteComponentProps<{}> & IStateProps, IStat
                       label: this.props.transcriptId,
                     })
                     return <div>Fant ikke transkripsjon</div>
-                  } else if (transcript.status && transcript.status.progress && transcript.status.progress !== ProgressEnum.Done) {
+                  } else if (transcript.status && transcript.status.progress && transcript.status.progress !== ProgressType.Done) {
                     return <Progress transcript={transcript} />
                   }
                 }

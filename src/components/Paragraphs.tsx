@@ -9,7 +9,7 @@ import { compose } from "recompose"
 import { Dispatch } from "redux"
 import { ActionCreators as UndoActionCreators } from "redux-undo"
 import { database } from "../firebaseApp"
-import { IResult, ITranscript, IWord } from "../interfaces"
+import { IParagraph, ITranscript, IWord } from "../interfaces"
 import nanoSecondsToFormattedTime from "../nanoSecondsToFormattedTime"
 import { updateMarkers } from "../store/actions/markersActions"
 import { deleteWords, joinResults, readResults, splitResults, updateSpeaker, updateSpeakerName, updateStartTime, updateWords } from "../store/actions/transcriptActions"
@@ -59,7 +59,7 @@ interface IReduxDispatchToProps {
   joinResults: (resultIndex: number, wordIndex: number) => void
   onRedo: () => void
   onUndo: () => void
-  readResults: (results: IResult[]) => void
+  readResults: (results: IParagraph[]) => void
   splitResults: (resultIndex: number, wordIndex: number) => void
   deleteWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
   updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
@@ -69,7 +69,7 @@ interface IReduxDispatchToProps {
   updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
 }
 
-class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToProps, IState> {
+class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, IState> {
   public readonly state: IState = {
     currentTime: 0,
     selectingForward: true,
@@ -129,11 +129,11 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
     const { markerResultIndex, markerWordIndexStart } = this.state
 
-    if (this.props.transcript === undefined || this.props.transcript.present.results === undefined) {
+    if (this.props.transcript === undefined || this.props.transcript.present.paragraphs === undefined) {
       return
     }
 
-    const results = this.props.transcript.present.results
+    const results = this.props.transcript.present.paragraphs
 
     // First, we check if the current word is still being said
 
@@ -209,8 +209,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={this.handleKeyPressed} />
         {this.props.transcript &&
           this.props.transcript.present &&
-          this.props.transcript.present.results &&
-          this.props.transcript.present.results.map((result, i) => {
+          this.props.transcript.present.paragraphs &&
+          this.props.transcript.present.paragraphs.map((result, i) => {
             const startTime = result.startTime
 
             const formattedStartTime = nanoSecondsToFormattedTime(this.props.transcript.present.metadata.startTime || 0, startTime, true, false)
@@ -276,7 +276,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                                 resultIndex={i}
                                 shouldSelectSpace={shouldSelectSpace}
                                 setCurrentWord={this.setCurrentPlayingWord}
-                                text={word.word}
+                                text={word.text}
                                 wordIndex={j}
                               />
                             )
@@ -284,7 +284,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                         })
                       } else {
                         return result.words.map(word => {
-                          return word.word + " "
+                          return word.text + " "
                         })
                       }
                     }}
@@ -438,9 +438,9 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       }
     } else {
       const editingForward = this.state.selectingForward
-      const results = this.props.transcript.present.results!
+      const results = this.props.transcript.present.paragraphs!
 
-      const currentWord = results![markerResultIndex].words[markerWordIndexEnd].word
+      const currentWord = results![markerResultIndex].words[markerWordIndexEnd].text
 
       switch (event.key) {
         // Cancel edit
@@ -648,7 +648,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           if (this.state.edits === undefined && markerWordIndexStart === markerWordIndexEnd) {
             this.playerRef.current!.pause()
 
-            const wordText = results![markerResultIndex].words[markerWordIndexEnd].word
+            const wordText = results![markerResultIndex].words[markerWordIndexEnd].text
             const nextWord = results[markerResultIndex].words[markerWordIndexEnd + 1]
             const wordTextLastChar = wordText.charAt(wordText.length - 1)
 
@@ -668,7 +668,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
               // Lower case next word if it exist and is not lower case
 
-              if (nextWord !== undefined && (key === "." || key === "!" || key === "?") && nextWord.word[0] === nextWord.word[0].toUpperCase()) {
+              if (nextWord !== undefined && (key === "." || key === "!" || key === "?") && nextWord.text[0] === nextWord.text[0].toUpperCase()) {
                 nextWordToLowerCase = true
               }
             }
@@ -685,13 +685,13 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
               // Check to see if we need to lower case the next word
               if (nextWord !== undefined) {
                 if (key === "." || key === "!" || key === "?") {
-                  if (nextWord.word[0] !== nextWord.word[0].toUpperCase()) {
+                  if (nextWord.text[0] !== nextWord.text[0].toUpperCase()) {
                     nextWordToUpperCase = true
                   } else {
                     // Next word is already uppercase, cancel the effect of nextWordToLowerCase = true from above
                     nextWordToLowerCase = false
                   }
-                } else if (nextWord.word[0] !== nextWord.word[0].toLowerCase()) {
+                } else if (nextWord.text[0] !== nextWord.text[0].toLowerCase()) {
                   nextWordToLowerCase = true
                 }
               }
@@ -708,9 +708,9 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             }
 
             if (nextWordToUpperCase) {
-              nextWordText = nextWord.word[0].toUpperCase() + nextWord.word.substring(1)
+              nextWordText = nextWord.text[0].toUpperCase() + nextWord.text.substring(1)
             } else if (nextWordToLowerCase) {
-              nextWordText = nextWord.word[0].toLowerCase() + nextWord.word.substring(1)
+              nextWordText = nextWord.text[0].toLowerCase() + nextWord.text.substring(1)
             }
 
             const words = [firstWordText, nextWordText].filter(word => word)
@@ -968,8 +968,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       })
     }
 
-    const pastResults = pastTranscript.results
-    const presentResults = presentTranscript.results
+    const pastResults = pastTranscript.paragraphs
+    const presentResults = presentTranscript.paragraphs
 
     // Changes in results
     if (pastResults !== undefined && presentResults !== undefined) {
@@ -980,8 +980,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
       const resultsIds = new Set([...pastResultsIds, ...presentResultsIds])
 
-      const updateResults: IResult[] = new Array()
-      const createResults: IResult[] = new Array()
+      const updateResults: IParagraph[] = new Array()
+      const createResults: IParagraph[] = new Array()
       const deleteIds: string[] = new Array()
 
       for (const resultId of resultsIds) {
@@ -1078,7 +1078,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     // Calculating where the marker will be in the joined result
 
     if (resultIndex > 0 && wordIndex === 0) {
-      const result = this.props.transcript.present.results[resultIndex - 1]
+      const result = this.props.transcript.present.paragraphs[resultIndex - 1]
 
       // Saving marker in undo history
       this.props.updateMarkers(this.state.markerResultIndex, 0, 0)
@@ -1123,7 +1123,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
     joinResults: (resultIndex: number, wordIndex: number) => dispatch(joinResults(resultIndex, wordIndex)),
     onRedo: () => dispatch(UndoActionCreators.redo()),
     onUndo: () => dispatch(UndoActionCreators.undo()),
-    readResults: (results: IResult[]) => dispatch(readResults(results)),
+    readResults: (results: IParagraph[]) => dispatch(readResults(results)),
     splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
     updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)),
     updateSpeaker: (resultIndex: number, speaker: number) => dispatch(updateSpeaker(resultIndex, speaker)),
@@ -1141,4 +1141,4 @@ const enhance = compose(
   ),
 )
 
-export default enhance(TranscriptResults)
+export default enhance(Paragraphs)

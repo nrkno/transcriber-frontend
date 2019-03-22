@@ -1,7 +1,7 @@
 import update from "immutability-helper"
 import { ActionType } from "typesafe-actions"
 import { database } from "../../firebaseApp"
-import { IResult, ITranscript, IWord } from "../../interfaces"
+import { IParagraph, ITranscript, IWord } from "../../interfaces"
 import * as transcriptActions from "../actions/transcriptActions"
 import { DELETE_WORDS, JOIN_RESULTS, READ_RESULTS, SELECT_TRANSCRIPT, SPLIT_RESULTS, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_START_TIME, UPDATE_WORDS } from "../constants"
 
@@ -52,7 +52,7 @@ export default (state: ITranscript = {}, action: TranscriptAction) => {
   }
 }
 
-function readResults(state: ITranscript, results: IResult[]) {
+function readResults(state: ITranscript, results: IParagraph[]) {
   return {
     ...state,
     results,
@@ -70,7 +70,7 @@ function deleteWords(state: ITranscript, resultIndex: number, wordIndexStart: nu
   const newWords = Array<IWord>()
 
   for (let i = wordIndexStart; i <= wordIndexEnd; i++) {
-    const word = state.results[resultIndex].words[i]
+    const word = state.paragraphs[resultIndex].words[i]
 
     newWords.push({
       ...word,
@@ -80,7 +80,7 @@ function deleteWords(state: ITranscript, resultIndex: number, wordIndexStart: nu
 
   // Replace array of words in correct position
 
-  const results = update(state.results, {
+  const results = update(state.paragraphs, {
     [resultIndex]: {
       words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords]] },
     },
@@ -103,9 +103,9 @@ function updateWords(state: ITranscript, resultIndex: number, wordIndexStart: nu
     for (const [index, word] of words.entries()) {
       newWords.push({
         confidence: 1,
-        endTime: state.results[resultIndex].words[wordIndexEnd + index].endTime,
-        startTime: state.results[resultIndex].words[wordIndexStart + index].startTime,
-        word,
+        endTime: state.paragraphs[resultIndex].words[wordIndexEnd + index].endTime,
+        startTime: state.paragraphs[resultIndex].words[wordIndexStart + index].startTime,
+        text: word,
       })
     }
   } else {
@@ -115,8 +115,8 @@ function updateWords(state: ITranscript, resultIndex: number, wordIndexStart: nu
 
     const textLengthWithoutSpaces = words.join("").length
 
-    const wordStart = state.results[resultIndex].words[wordIndexStart]
-    const wordEnd = state.results[resultIndex].words[wordIndexEnd]
+    const wordStart = state.paragraphs[resultIndex].words[wordIndexStart]
+    const wordEnd = state.paragraphs[resultIndex].words[wordIndexEnd]
 
     if (textLengthWithoutSpaces === 0) {
       // Delete words
@@ -134,7 +134,7 @@ function updateWords(state: ITranscript, resultIndex: number, wordIndexStart: nu
         confidence: 1,
         endTime,
         startTime,
-        word,
+        text: word,
       })
 
       startTime = endTime
@@ -143,7 +143,7 @@ function updateWords(state: ITranscript, resultIndex: number, wordIndexStart: nu
 
   // Replace array of words in correct position
 
-  const results = update(state.results, {
+  const results = update(state.paragraphs, {
     [resultIndex]: {
       words: { $splice: [[wordIndexStart, wordIndexEnd - wordIndexStart + 1, ...newWords]] },
     },
@@ -168,10 +168,10 @@ function updateStartTime(state: ITranscript, startTime: number) {
 function updateSpeaker(state: ITranscript, resultIndex: number, speaker: number) {
   let results
 
-  if ((state.results && state.results[resultIndex].speaker === speaker) || speaker === 0) {
+  if ((state.paragraphs && state.paragraphs[resultIndex].speaker === speaker) || speaker === 0) {
     // Remove speaker
 
-    results = update(state.results, {
+    results = update(state.paragraphs, {
       [resultIndex]: {
         speaker: { $set: null },
       },
@@ -179,7 +179,7 @@ function updateSpeaker(state: ITranscript, resultIndex: number, speaker: number)
   } else {
     // Add speaker
 
-    results = update(state.results, {
+    results = update(state.paragraphs, {
       [resultIndex]: {
         speaker: { $set: speaker },
       },
@@ -206,13 +206,13 @@ function updateSpeakerName(state: ITranscript, speaker: number, name: string, re
 
   let results
   if (resultIndex !== undefined) {
-    results = update(state.results, {
+    results = update(state.paragraphs, {
       [resultIndex]: {
         speaker: { $set: speaker },
       },
     })
   } else {
-    results = state.results
+    results = state.paragraphs
   }
 
   return {
@@ -228,9 +228,9 @@ function joinResults(state: ITranscript, resultIndex: number, wordIndex: number)
     return state
   }
 
-  const results: IResult[] = update(state.results, {
+  const results: IParagraph[] = update(state.paragraphs, {
     [resultIndex - 1]: {
-      words: { $push: state.results[resultIndex].words }, // Push words from selected result to previous result
+      words: { $push: state.paragraphs[resultIndex].words }, // Push words from selected result to previous result
     },
     $splice: [[resultIndex, 1]], // Removes selected result
   })
@@ -242,7 +242,7 @@ function joinResults(state: ITranscript, resultIndex: number, wordIndex: number)
 }
 function splitResult(state: ITranscript, resultIndex: number, wordIndex: number) {
   // Return if we're at the last word in the result
-  if (wordIndex === state.results[resultIndex].words.length - 1) {
+  if (wordIndex === state.paragraphs[resultIndex].words.length - 1) {
     return state
   }
 
@@ -250,18 +250,18 @@ function splitResult(state: ITranscript, resultIndex: number, wordIndex: number)
   const start = wordIndex + 1
 
   // Making a deep copy of the results, splicing off the rest of the words in the current result
-  const results: IResult[] = update(state.results, {
+  const results: IParagraph[] = update(state.paragraphs, {
     [resultIndex]: {
       words: { $splice: [[start]] },
     },
   })
 
   // Deep clone the the rest of the words, which will be moved to the next result
-  const words: IWord[] = JSON.parse(JSON.stringify(state.results[resultIndex].words.slice(start)))
+  const words: IWord[] = JSON.parse(JSON.stringify(state.paragraphs[resultIndex].words.slice(start)))
 
   // We push a new result to the array
 
-  const result: IResult = {
+  const result: IParagraph = {
     id: database.collection("/dummypath").doc().id,
     startTime: words[0].startTime,
     words,

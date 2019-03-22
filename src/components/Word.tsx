@@ -1,4 +1,5 @@
 import * as React from "react"
+import * as ReactDOM from "react-dom"
 import { IWord } from "../interfaces"
 
 interface IProps {
@@ -12,9 +13,16 @@ interface IProps {
   word?: IWord
   wordIndex: number
   setCurrentWord(word: IWord, resultIndex: number, wordIndex: number): void
+  setOffsetTop(offsetTop: number, resultIndex: number, wordIndex: number)
 }
 
 class Word extends React.Component<IProps, {}> {
+  public componentDidMount() {
+    const n = ReactDOM.findDOMNode(this)
+    console.log("OFFSET TOP", n.offsetTop)
+    //this.props.setOffsetTop(this.p)
+  }
+
   public render() {
     return (
       <>

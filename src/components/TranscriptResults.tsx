@@ -256,7 +256,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                               const isLastWord = this.state.edits.length - 1 === k
                               return (
                                 <Word
-                                  key={`word-${i}-${j}-${k}`}
+                                   key={`word-${i}-${j}-${k}`}
                                   confidence={Math.round(word.confidence * 100)}
                                   showTypewriter={isLastWord}
                                   isMarked={isMarked}

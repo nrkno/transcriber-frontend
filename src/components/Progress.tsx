@@ -56,7 +56,7 @@ class Progress extends React.Component<IProps, any> {
           })()}
 
           <label className="org-label">
-            Transkoding:
+            Analyserer:
             {(() => {
               if (progress === ProgressType.Analysing) {
                 if (transcript.status.error) {

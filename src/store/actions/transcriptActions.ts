@@ -1,12 +1,12 @@
 import { createAction } from "typesafe-actions"
 import { IParagraph, ITranscript } from "../../interfaces"
-import { DELETE_WORDS, JOIN_RESULTS, READ_RESULTS, SELECT_TRANSCRIPT, SPLIT_RESULTS, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_START_TIME, UPDATE_WORDS } from "../constants"
+import { DELETE_WORDS, JOIN_PARAGRAPHS, READ_PARAGRAPHS, SELECT_TRANSCRIPT, SPLIT_PARAGRAPHS, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_START_TIME, UPDATE_WORDS } from "../constants"
 
 //////////
 // READ //
 //////////
-export const readResults = createAction(READ_RESULTS, action => {
-  return (results: IParagraph[]) => action({ results })
+export const readParagraphs = createAction(READ_PARAGRAPHS, action => {
+  return (paragraphs: IParagraph[]) => action({ paragraphs })
 })
 
 ////////////
@@ -14,15 +14,15 @@ export const readResults = createAction(READ_RESULTS, action => {
 ////////////
 
 export const updateWords = createAction(UPDATE_WORDS, action => {
-  return (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => action({ recalculate, resultIndex, wordIndexEnd, wordIndexStart, words })
+  return (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => action({ recalculate, paragraphIndex, wordIndexEnd, wordIndexStart, words })
 })
 
 export const updateSpeaker = createAction(UPDATE_SPEAKER, action => {
-  return (resultIndex: number, speaker: number) => action({ resultIndex, speaker })
+  return (paragraphIndex: number, speaker: number) => action({ paragraphIndex, speaker })
 })
 
 export const updateSpeakerName = createAction(UPDATE_SPEAKER_NAME, action => {
-  return (speaker: number, name: string, resultIndex?: number) => action({ name, resultIndex, speaker })
+  return (speaker: number, name: string, paragraphIndex?: number) => action({ name, paragraphIndex, speaker })
 })
 
 export const updateStartTime = createAction(UPDATE_START_TIME, action => {
@@ -34,25 +34,25 @@ export const updateStartTime = createAction(UPDATE_START_TIME, action => {
 //////////
 
 export const deleteWords = createAction(DELETE_WORDS, action => {
-  return (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => action({ name, resultIndex, wordIndexEnd, wordIndexStart })
+  return (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number) => action({ name, paragraphIndex, wordIndexEnd, wordIndexStart })
 })
 
 //////////
 // OTHER//
 //////////
 
-export const joinResults = createAction(JOIN_RESULTS, action => {
-  return (resultIndex: number, wordIndex: number) =>
+export const joinParagraphs = createAction(JOIN_PARAGRAPHS, action => {
+  return (paragraphIndex: number, wordIndex: number) =>
     action({
-      resultIndex,
+      paragraphIndex,
       wordIndex,
     })
 })
 
-export const splitResults = createAction(SPLIT_RESULTS, action => {
-  return (resultIndex: number, wordIndex: number) =>
+export const splitParagraphs = createAction(SPLIT_PARAGRAPHS, action => {
+  return (paragraphIndex: number, wordIndex: number) =>
     action({
-      resultIndex,
+      paragraphIndex,
       wordIndex,
     })
 })

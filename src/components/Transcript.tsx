@@ -47,8 +47,8 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
       this.props.selectTranscript(transcriptId, transcript)
     }
 
-    // When the results are loaded the first, we reset the undo history
-    // This is to stop users from undoing back to a state before the results were loaded
+    // When the paragraphs are loaded the first time, we reset the undo history
+    // This is to stop users from undoing back to a state before the paragraphs were loaded
     if (prevProps.transcript.present.paragraphs === undefined && this.props.transcript.present.paragraphs !== undefined) {
       this.props.clearHistory()
     }
@@ -94,7 +94,7 @@ class Transcript extends React.Component<RouteComponentProps<{}> & IReduxStateTo
               Slett
             </button>
           </section>
-          <div className="results">
+          <div className="paragraphs">
             <Paragraphs transcriptId={transcript.id} />
           </div>
         </main>

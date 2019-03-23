@@ -985,27 +985,26 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       const deleteIds: string[] = new Array()
 
       for (const paragraphId of paragraphsIds) {
+        // If in both arrays, need to compare them
         if (pastParagraphsIds.includes(paragraphId) && presentParagraphsIds.includes(paragraphId)) {
-          // In both arrays, need to compare them
-
           const pastParagraph = pastParagraphs.filter(paragraph => paragraph.id === paragraphId)[0]
           const presentParagraph = presentParagraphs.filter(paragraph => paragraph.id === paragraphId)[0]
 
           if (equal(pastParagraph, presentParagraph) === false) {
             updateParagraphs.push(presentParagraph)
           }
+          // If only in past, need to delete
         } else if (pastParagraphsIds.includes(paragraphId)) {
-          // Only in past, need to delete
           deleteIds.push(paragraphId)
+          // If only in present, need to add
         } else {
           const presentParagraph = presentParagraphs.filter(paragraph => paragraph.id === paragraphId)[0]
 
           createParagraphs.push(presentParagraph)
-          // Only in present, need to add
         }
       }
 
-      // Set the value in update Ids
+      // Set the value in update ids
 
       const paragraphsCollectionReference = transcriptDocumentReference.collection("paragraphs")
 
@@ -1014,6 +1013,7 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       }
 
       for (const paragraph of createParagraphs) {
+        console.log("Create", paragraph)
         batch.set(paragraphsCollectionReference.doc(paragraph.id), paragraph)
       }
       for (const paragraphId of deleteIds) {

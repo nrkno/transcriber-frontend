@@ -1,6 +1,6 @@
-export enum Step {
+export enum ProgressType {
   Uploading = "UPLOADING",
-  Transcoding = "TRANSCODING",
+  Analysing = "ANALYSING",
   Transcribing = "TRANSCRIBING",
   Saving = "SAVING",
   Done = "DONE",

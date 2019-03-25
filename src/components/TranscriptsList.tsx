@@ -1,11 +1,11 @@
 import moment from "moment"
 import React, { Component } from "react"
-import ReactGA from "react-ga"
 import { connect } from "react-redux"
 import { firestoreConnect } from "react-redux-firebase"
 import { compose } from "redux"
 import "../css/TranscriptsList.css"
-import { Step } from "../enums"
+import { ProgressType } from "../enums"
+import { ITranscript } from "../interfaces"
 import UploadButton from "./UploadButton"
 
 interface IProps {
@@ -42,7 +42,7 @@ class TranscriptsList extends Component<IProps> {
           </thead>
           <tbody>
             {this.props.transcripts &&
-              this.props.transcripts.map(transcript => {
+              this.props.transcripts.map((transcript: ITranscript) => {
                 let createdAt: string
 
                 if (transcript.createdAt !== null) {
@@ -62,7 +62,7 @@ class TranscriptsList extends Component<IProps> {
                 if (transcriptId === this.props.selectedTranscriptId) {
                   className += " trans-item--selected"
                 }
-                if (transcript.process && transcript.process.error) {
+                if (transcript.status && transcript.status.error) {
                   className += " org-color-error"
                 }
 
@@ -70,13 +70,13 @@ class TranscriptsList extends Component<IProps> {
                   <tr key={transcriptId} data-transcript-id={transcriptId} className={className} onClick={this.handleRowClick}>
                     <td>
                       {(() => {
-                        if (transcript.process && transcript.process.error) {
+                        if (transcript.status && transcript.status.error) {
                           return (
                             <svg width="20" height="20" focusable="false" aria-hidden="true">
                               <use xlinkHref="#icon-warning" />
                             </svg>
                           )
-                        } else if (transcript.process && transcript.process.step !== Step.Done) {
+                        } else if (transcript.status && transcript.status.progress !== ProgressType.Done) {
                           return (
                             <svg width="20" height="20">
                               <defs>
@@ -137,6 +137,7 @@ export default compose(
       collection: "transcripts",
       orderBy: ["createdAt", "desc"],
       where: ["userId", "==", props.auth.uid],
+      //      where: ["userIds", "array-contains", props.auth.uid],
     },
   ]),
   connect(state => ({

@@ -439,7 +439,7 @@ main#transcripts {
   background: #0bb5ff;
 }
 
-.results {
+.paragraphs {
   display: grid;
   grid-template-columns: auto 1fr;
   grid-gap: 10px;
@@ -448,7 +448,7 @@ main#transcripts {
   font-family: "Roboto Mono", monospace;
 }
 
-.result s {
+.paragraph s {
   color: lightgray;
 }
 
@@ -457,11 +457,11 @@ main#transcripts {
   cursor: pointer;
 }
 
-.results .startTime {
+.paragraphs .startTime {
   color: grey;
 }
 
-.results p {
+.paragraphs p {
   font-size: 24px;
   margin-top: 0.5rem;
   border-radius: 4px;
@@ -469,11 +469,11 @@ main#transcripts {
   line-height: 1.8;
 }
 
-.result {
+.paragraph {
   cursor: pointer;
 }
 
-.result .word:hover {
+.paragraph .word:hover {
   color: var(--org-color-primary);
 }
 

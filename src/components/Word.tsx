@@ -6,12 +6,12 @@ interface IProps {
   showTypewriter: boolean
   isMarked: boolean
   isNextWordDeleted: boolean
-  resultIndex: number
+  paragraphIndex: number
   shouldSelectSpace: boolean
   text: string
   word?: IWord
   wordIndex: number
-  setCurrentWord(word: IWord, resultIndex: number, wordIndex: number): void
+  setCurrentWord(word: IWord, paragraphIndex: number, wordIndex: number): void
 }
 
 class Word extends React.Component<IProps, {}> {
@@ -51,7 +51,7 @@ class Word extends React.Component<IProps, {}> {
 
   private handleWordClick = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
     if (this.props.word) {
-      this.props.setCurrentWord(this.props.word, this.props.resultIndex, this.props.wordIndex)
+      this.props.setCurrentWord(this.props.word, this.props.paragraphIndex, this.props.wordIndex)
     }
   }
 }

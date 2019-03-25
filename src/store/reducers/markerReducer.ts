@@ -5,7 +5,7 @@ import { UPDATE_MARKERS } from "../constants"
 export type MarkersAction = ActionType<typeof markers>
 
 interface IState {
-  readonly resultIndex?: number
+  readonly paragraphIndex?: number
   readonly wordIndexStart?: number
   readonly wordIndexEnd?: number
 }

@@ -9,16 +9,16 @@ import { compose } from "recompose"
 import { Dispatch } from "redux"
 import { ActionCreators as UndoActionCreators } from "redux-undo"
 import { database } from "../firebaseApp"
-import { IResult, ITranscript, IWord } from "../interfaces"
+import { IParagraph, ITranscript, IWord } from "../interfaces"
 import nanoSecondsToFormattedTime from "../nanoSecondsToFormattedTime"
 import { updateMarkers } from "../store/actions/markersActions"
-import { deleteWords, joinResults, readResults, splitResults, updateSpeaker, updateSpeakerName, updateStartTime, updateWords } from "../store/actions/transcriptActions"
+import { deleteWords, joinParagraphs, readParagraphs, splitParagraphs, updateSpeaker, updateSpeakerName, updateStartTime, updateWords } from "../store/actions/transcriptActions"
 import Player from "./Player"
 import Word from "./Word"
 
 interface IState {
   currentTime: number
-  markerResultIndex?: number
+  markerParagraphIndex?: number
   markerWordIndexStart?: number
   markerWordIndexEnd?: number
   edits?: string[]
@@ -29,20 +29,20 @@ interface IReduxStateToProps {
   markers: {
     future: [
       {
-        resultIndex: number
+        paragraphIndex: number
         wordIndexStart: number
         wordIndexEnd: number
       }
     ]
     past: [
       {
-        resultIndex: number
+        paragraphIndex: number
         wordIndexStart: number
         wordIndexEnd: number
       }
     ]
     present: {
-      resultIndex?: number
+      paragraphIndex?: number
       wordIndexStart?: number
       wordIndexEnd?: number
     }
@@ -56,20 +56,20 @@ interface IReduxStateToProps {
 }
 
 interface IReduxDispatchToProps {
-  joinResults: (resultIndex: number, wordIndex: number) => void
+  joinParagraphs: (paragraphIndex: number, wordIndex: number) => void
   onRedo: () => void
   onUndo: () => void
-  readResults: (results: IResult[]) => void
-  splitResults: (resultIndex: number, wordIndex: number) => void
-  deleteWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
-  updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
-  updateSpeaker: (resultIndex: number, speaker: number) => void
-  updateSpeakerName: (speaker: number, name: string, resultIndex?: number) => void
+  readParagraphs: (paragraphs: IParagraph[]) => void
+  splitParagraphs: (paragraphIndex: number, wordIndex: number) => void
+  deleteWords: (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
+  updateMarkers: (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
+  updateSpeaker: (paragraphIndex: number, speaker: number) => void
+  updateSpeakerName: (speaker: number, name: string, paragraphIndex?: number) => void
   updateStartTime: (startTime: number) => void
-  updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
+  updateWords: (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
 }
 
-class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToProps, IState> {
+class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, IState> {
   public readonly state: IState = {
     currentTime: 0,
     selectingForward: true,
@@ -81,12 +81,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     const prevTranscriptId = prevProps.transcriptId
 
     if (transcriptId !== prevTranscriptId) {
-      this.fetchResults(transcriptId)
+      this.fetchParagraphs(transcriptId)
 
       // Reset state
       this.setState({
         currentTime: 0,
-        markerResultIndex: undefined,
+        markerParagraphIndex: undefined,
         markerWordIndexEnd: undefined,
         markerWordIndexStart: undefined,
       })
@@ -103,9 +103,9 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       }
 
       // Set state if the current marker is different from the saved one
-      if (markers !== undefined && (this.state.markerResultIndex !== markers.resultIndex || this.state.markerWordIndexStart !== markers.wordIndexStart || this.state.markerWordIndexEnd !== markers.wordIndexEnd)) {
+      if (markers !== undefined && (this.state.markerParagraphIndex !== markers.paragraphIndex || this.state.markerWordIndexStart !== markers.wordIndexStart || this.state.markerWordIndexEnd !== markers.wordIndexEnd)) {
         this.setState({
-          markerResultIndex: markers.resultIndex,
+          markerParagraphIndex: markers.paragraphIndex,
           markerWordIndexEnd: markers.wordIndexEnd,
           markerWordIndexStart: markers.wordIndexStart,
         })
@@ -122,49 +122,49 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
   public async componentDidMount() {
     const transcriptId = this.props.transcriptId
 
-    this.fetchResults(transcriptId)
+    this.fetchParagraphs(transcriptId)
   }
   public handleTimeUpdate = (currentTime: number) => {
-    // Find the next current result and word
+    // Find the next current paragraph and word
 
-    const { markerResultIndex, markerWordIndexStart } = this.state
+    const { markerParagraphIndex, markerWordIndexStart } = this.state
 
-    if (this.props.transcript === undefined || this.props.transcript.present.results === undefined) {
+    if (this.props.transcript === undefined || this.props.transcript.present.paragraphs === undefined) {
       return
     }
 
-    const results = this.props.transcript.present.results
+    const paragraphs = this.props.transcript.present.paragraphs
 
     // First, we check if the current word is still being said
 
-    if (markerResultIndex !== undefined && markerWordIndexStart !== undefined) {
-      const currentWord = results[markerResultIndex].words[markerWordIndexStart]
+    if (markerParagraphIndex !== undefined && markerWordIndexStart !== undefined) {
+      const currentWord = paragraphs[markerParagraphIndex].words[markerWordIndexStart]
 
       if (currentTime < currentWord.endTime * 1e-9) {
         return
       }
     }
     // The current word has been said, start scanning for the next word
-    // We assume that it will be the next word in the current result
+    // We assume that it will be the next word in the current paragraph
 
     let nextWordIndex = 0
-    let nextResultIndex = 0
+    let nextParagraphIndex = 0
 
-    if (markerResultIndex !== undefined && markerWordIndexStart !== undefined) {
+    if (markerParagraphIndex !== undefined && markerWordIndexStart !== undefined) {
       nextWordIndex = markerWordIndexStart ? markerWordIndexStart + 1 : 0
-      nextResultIndex = markerResultIndex
+      nextParagraphIndex = markerParagraphIndex
 
-      if (nextWordIndex === results[markerResultIndex].words.length) {
-        // This was the last word, reset word index and move to next result
+      if (nextWordIndex === paragraphs[markerParagraphIndex].words.length) {
+        // This was the last word, reset word index and move to next paragraph
 
         nextWordIndex = 0
-        nextResultIndex = nextResultIndex + 1
+        nextParagraphIndex = nextParagraphIndex + 1
       }
     }
 
     // Start scanning for next word
-    for (let i = nextResultIndex; i < results.length; i++) {
-      const words = results[i].words
+    for (let i = nextParagraphIndex; i < paragraphs.length; i++) {
+      const words = paragraphs[i].words
 
       for (let j = nextWordIndex; j < words.length; j++) {
         const word = words[j]
@@ -183,7 +183,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
         this.setState({
           currentTime,
-          markerResultIndex: i,
+          markerParagraphIndex: i,
           markerWordIndexEnd: j,
           markerWordIndexStart: j,
         })
@@ -192,12 +192,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       }
     }
   }
-  public setCurrentPlayingWord = (word: IWord, resultIndex: number, wordIndex: number) => {
+  public setCurrentPlayingWord = (word: IWord, paragraphIndex: number, wordIndex: number) => {
     this.playerRef.current!.setTime(word.startTime * 1e-9)
 
     this.setState({
       edits: undefined,
-      markerResultIndex: resultIndex,
+      markerParagraphIndex: paragraphIndex,
       markerWordIndexEnd: wordIndex,
       markerWordIndexStart: wordIndex,
     })
@@ -209,12 +209,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         <KeyboardEventHandler handleKeys={["all"]} onKeyEvent={this.handleKeyPressed} />
         {this.props.transcript &&
           this.props.transcript.present &&
-          this.props.transcript.present.results &&
-          this.props.transcript.present.results.map((result, i) => {
-            const startTime = result.startTime
+          this.props.transcript.present.paragraphs &&
+          this.props.transcript.present.paragraphs.map((paragraph, i) => {
+            const startTime = paragraph.startTime
 
             const formattedStartTime = nanoSecondsToFormattedTime(this.props.transcript.present.metadata.startTime || 0, startTime, true, false)
-            const speaker = result.speaker
+            const speaker = paragraph.speaker
 
             return (
               <React.Fragment key={i}>
@@ -230,12 +230,12 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                     <span>&nbsp;</span>
                   )}
                 </div>
-                <div key={`result-${i}`} className="result">
+                <div key={`paragraph-${i}`} className="paragraph">
                   <TrackVisibility partialVisibility={true}>
                     {({ isVisible }) => {
                       if (isVisible) {
-                        return result.words.map((word, j) => {
-                          const isMarked = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j <= this.state.markerWordIndexEnd
+                        return paragraph.words.map((word, j) => {
+                          const isMarked = this.state.markerParagraphIndex === i && this.state.markerWordIndexStart <= j && j <= this.state.markerWordIndexEnd
                           const isEditing = isMarked && this.state.edits !== undefined
 
                           if (isEditing) {
@@ -252,7 +252,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                                   confidence={Math.round(word.confidence * 100)}
                                   showTypewriter={isLastWord}
                                   isMarked={isMarked}
-                                  resultIndex={i}
+                                  paragraphIndex={i}
                                   shouldSelectSpace={!isLastWord}
                                   setCurrentWord={this.setCurrentPlayingWord}
                                   text={edit}
@@ -261,9 +261,9 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                               )
                             })
                           } else {
-                            const shouldSelectSpace = this.state.markerResultIndex === i && this.state.markerWordIndexStart <= j && j < this.state.markerWordIndexEnd
+                            const shouldSelectSpace = this.state.markerParagraphIndex === i && this.state.markerWordIndexStart <= j && j < this.state.markerWordIndexEnd
 
-                            const isNextWordDeleted = j + 1 < result.words.length && result.words[j + 1].deleted !== undefined && result.words[j + 1].deleted === true
+                            const isNextWordDeleted = j + 1 < paragraph.words.length && paragraph.words[j + 1].deleted !== undefined && paragraph.words[j + 1].deleted === true
 
                             return (
                               <Word
@@ -273,18 +273,18 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
                                 showTypewriter={false}
                                 isMarked={isMarked}
                                 isNextWordDeleted={isNextWordDeleted}
-                                resultIndex={i}
+                                paragraphIndex={i}
                                 shouldSelectSpace={shouldSelectSpace}
                                 setCurrentWord={this.setCurrentPlayingWord}
-                                text={word.word}
+                                text={word.text}
                                 wordIndex={j}
                               />
                             )
                           }
                         })
                       } else {
-                        return result.words.map(word => {
-                          return word.word + " "
+                        return paragraph.words.map(word => {
+                          return word.text + " "
                         })
                       }
                     }}
@@ -299,21 +299,21 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     )
   }
 
-  private async fetchResults(transcriptId: string) {
+  private async fetchParagraphs(transcriptId: string) {
     try {
-      const querySnapshot = await this.props.firestore.get({ collection: `transcripts/${transcriptId}/results`, orderBy: "startTime" })
+      const querySnapshot = await this.props.firestore.get({ collection: `transcripts/${transcriptId}/paragraphs`, orderBy: "startTime" })
 
-      const results = new Array()
+      const paragraphs = new Array()
 
       querySnapshot.docs.forEach(doc => {
-        const result = doc.data()
+        const paragraph = doc.data()
         const id = doc.id
-        results.push({ id, ...result })
+        paragraphs.push({ id, ...paragraph })
       })
 
-      this.props.readResults(results)
+      this.props.readParagraphs(paragraphs)
     } catch (error) {
-      console.error("Error fetching results: ", error)
+      console.error("Error fetching paragraphs: ", error)
       ReactGA.exception({
         description: error.message,
         fatal: false,
@@ -325,7 +325,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     const edits = this.state.edits
 
     if (edits !== undefined) {
-      this.setWords(this.state.markerResultIndex, this.state.markerWordIndexStart, this.state.markerWordIndexEnd, edits, stopEditing)
+      this.setWords(this.state.markerParagraphIndex, this.state.markerWordIndexStart, this.state.markerWordIndexEnd, edits, stopEditing)
     }
   }
 
@@ -373,15 +373,15 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
 
     const key = event.key
-    const { markerResultIndex, markerWordIndexStart, markerWordIndexEnd } = this.state
+    const { markerParagraphIndex: markerParagraphIndex, markerWordIndexStart, markerWordIndexEnd } = this.state
 
     // Exit early if no word is selected
-    if (markerResultIndex === undefined || markerWordIndexStart === undefined || markerWordIndexEnd === undefined) {
+    if (markerParagraphIndex === undefined || markerWordIndexStart === undefined || markerWordIndexEnd === undefined) {
       // If arrow keys are pressed, we reset the indeces to 0,0
       // so that the first word is highlighted
       if (key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown") {
         this.setState({
-          markerResultIndex: 0,
+          markerParagraphIndex: 0,
           markerWordIndexEnd: 0,
           markerWordIndexStart: 0,
         })
@@ -397,14 +397,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "Backspace":
           // Works only if a single word is selected
           if (markerWordIndexStart === markerWordIndexEnd) {
-            this.joinResults(markerResultIndex, markerWordIndexStart)
+            this.joinParagraphs(markerParagraphIndex, markerWordIndexStart)
           }
           break
         // Split
         case "Enter":
           // Works only if a single word is selected
           if (markerWordIndexStart === markerWordIndexEnd) {
-            this.splitResult(markerResultIndex, markerWordIndexStart)
+            this.splitParagraph(markerParagraphIndex, markerWordIndexStart)
           }
           break
 
@@ -430,7 +430,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "7":
         case "8":
         case "9":
-          this.handleSetSpeaker(key, markerResultIndex)
+          this.handleSetSpeaker(key, markerParagraphIndex)
           break
         // If we don't regonize the command, return and let the browser handle it
         default:
@@ -438,9 +438,9 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       }
     } else {
       const editingForward = this.state.selectingForward
-      const results = this.props.transcript.present.results!
+      const paragraphs = this.props.transcript.present.paragraphs!
 
-      const currentWord = results![markerResultIndex].words[markerWordIndexEnd].word
+      const currentWord = paragraphs![markerParagraphIndex].words[markerWordIndexEnd].text
 
       switch (event.key) {
         // Cancel edit
@@ -492,20 +492,20 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             // Move marker
 
             if (markerWordIndexStart > 0) {
-              // Mark previous word in current result
-              const currentResultIndex = markerResultIndex
+              // Mark previous word in current paragraph
+              const currentParagraphIndex = markerParagraphIndex
               const previousWordIndex = markerWordIndexStart - 1
-              const previousWord = results[markerResultIndex].words[previousWordIndex]
+              const previousWord = paragraphs[markerParagraphIndex].words[previousWordIndex]
 
-              this.setCurrentPlayingWord(previousWord, currentResultIndex, previousWordIndex)
-            } else if (markerResultIndex > 0) {
-              // Mark last word in previous result
+              this.setCurrentPlayingWord(previousWord, currentParagraphIndex, previousWordIndex)
+            } else if (markerParagraphIndex > 0) {
+              // Mark last word in previous paragraph
 
-              const previousResultIndex = markerResultIndex - 1
-              const previousWordIndex = results[markerResultIndex - 1].words.length - 1
-              const previousWord = results[previousResultIndex].words[previousWordIndex]
+              const previousParagraphIndex = markerParagraphIndex - 1
+              const previousWordIndex = paragraphs[markerParagraphIndex - 1].words.length - 1
+              const previousWord = paragraphs[previousParagraphIndex].words[previousWordIndex]
 
-              this.setCurrentPlayingWord(previousWord, previousResultIndex, previousWordIndex)
+              this.setCurrentPlayingWord(previousWord, previousParagraphIndex, previousWordIndex)
             }
           }
 
@@ -523,7 +523,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
               })
             }
             // Increase selection
-            else if (markerWordIndexEnd + 1 < results[markerResultIndex].words.length) {
+            else if (markerWordIndexEnd + 1 < paragraphs[markerParagraphIndex].words.length) {
               this.setState({
                 edits: undefined,
                 markerWordIndexEnd: markerWordIndexEnd + 1,
@@ -538,20 +538,20 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
             const largestSelectedIndex = Math.max(markerWordIndexStart, markerWordIndexEnd)
             // If shift key is pressed, check if there is another word after markerWordIndexEnd
-            if (largestSelectedIndex + 1 < results[markerResultIndex].words.length) {
-              // Mark next word in current result
+            if (largestSelectedIndex + 1 < paragraphs[markerParagraphIndex].words.length) {
+              // Mark next word in current paragraph
 
-              const currentResultIndex = markerResultIndex
+              const currentParagraphIndex = markerParagraphIndex
               const nextWordIndex = largestSelectedIndex + 1
-              const nextWord = results[currentResultIndex].words[nextWordIndex]
-              this.setCurrentPlayingWord(nextWord, currentResultIndex, nextWordIndex)
-              // Mark first word in next result
-            } else if (markerResultIndex + 1 < results.length) {
-              const nextResultIndex = markerResultIndex + 1
+              const nextWord = paragraphs[currentParagraphIndex].words[nextWordIndex]
+              this.setCurrentPlayingWord(nextWord, currentParagraphIndex, nextWordIndex)
+              // Mark first word in next paragraph
+            } else if (markerParagraphIndex + 1 < paragraphs.length) {
+              const nextParagraphIndex = markerParagraphIndex + 1
               const firstWordIndex = 0
-              const firstWord = results[nextResultIndex].words[firstWordIndex]
+              const firstWord = paragraphs[nextParagraphIndex].words[firstWordIndex]
 
-              this.setCurrentPlayingWord(firstWord, nextResultIndex, firstWordIndex)
+              this.setCurrentPlayingWord(firstWord, nextParagraphIndex, firstWordIndex)
             }
           }
 
@@ -561,19 +561,19 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "Up":
           this.commitEdits(true)
 
-          // Jump to first word in current result
+          // Jump to first word in current paragraph
           if (markerWordIndexStart > 0) {
-            const currentResultIndex = markerResultIndex
+            const currentParagraphIndex = markerParagraphIndex
             const firstWordIndex = 0
-            const firstWord = results[currentResultIndex].words[firstWordIndex]
-            this.setCurrentPlayingWord(firstWord, currentResultIndex, firstWordIndex)
+            const firstWord = paragraphs[currentParagraphIndex].words[firstWordIndex]
+            this.setCurrentPlayingWord(firstWord, currentParagraphIndex, firstWordIndex)
 
-            // Jump to previous result
-          } else if (markerResultIndex > 0) {
-            const previousResultIndex = markerResultIndex - 1
+            // Jump to previous paragraph
+          } else if (markerParagraphIndex > 0) {
+            const previousParagraphIndex = markerParagraphIndex - 1
             const firstWordIndex = 0
-            const firstWord = results[previousResultIndex].words[firstWordIndex]
-            this.setCurrentPlayingWord(firstWord, previousResultIndex, firstWordIndex)
+            const firstWord = paragraphs[previousParagraphIndex].words[firstWordIndex]
+            this.setCurrentPlayingWord(firstWord, previousParagraphIndex, firstWordIndex)
           }
 
           break
@@ -582,22 +582,22 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "Down":
           this.commitEdits(true)
 
-          // Jump to next result if it exists
+          // Jump to next paragraph if it exists
 
-          if (markerResultIndex < results.length - 1) {
-            const nextResultIndex = markerResultIndex + 1
+          if (markerParagraphIndex < paragraphs.length - 1) {
+            const nextParagraphIndex = markerParagraphIndex + 1
             const nextWordIndex = 0
-            const nextWord = results[nextResultIndex].words[nextWordIndex]
+            const nextWord = paragraphs[nextParagraphIndex].words[nextWordIndex]
 
-            this.setCurrentPlayingWord(nextWord, nextResultIndex, nextWordIndex)
+            this.setCurrentPlayingWord(nextWord, nextParagraphIndex, nextWordIndex)
           }
-          // Jump to last word in last result
+          // Jump to last word in last paragraph
           else {
-            const resultIndex = markerResultIndex
-            const lastWordIndex = results[markerResultIndex].words.length - 1
-            const lastWord = results[resultIndex].words[lastWordIndex]
+            const paragraphIndex = markerParagraphIndex
+            const lastWordIndex = paragraphs[markerParagraphIndex].words.length - 1
+            const lastWord = paragraphs[paragraphIndex].words[lastWordIndex]
 
-            this.setCurrentPlayingWord(lastWord, resultIndex, lastWordIndex)
+            this.setCurrentPlayingWord(lastWord, paragraphIndex, lastWordIndex)
           }
 
           break
@@ -610,11 +610,11 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           if (this.state.edits === undefined && markerWordIndexStart === markerWordIndexEnd) {
             // Lower case to capitalised case
             if (currentWord === currentWord.toLowerCase()) {
-              this.updateWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, [currentWord[0].toUpperCase() + currentWord.substring(1)], false)
+              this.updateWords(markerParagraphIndex, markerWordIndexStart, markerWordIndexEnd, [currentWord[0].toUpperCase() + currentWord.substring(1)], false)
             }
             // Lower case
             else {
-              this.updateWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd, [currentWord.toLowerCase()], false)
+              this.updateWords(markerParagraphIndex, markerWordIndexStart, markerWordIndexEnd, [currentWord.toLowerCase()], false)
             }
           }
           break
@@ -637,7 +637,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
         case "Delete":
           this.playerRef.current!.pause()
 
-          this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
+          this.deleteWords(markerParagraphIndex, markerWordIndexStart, markerWordIndexEnd)
           break
 
         // Punctation, when we're not in edit mode
@@ -648,8 +648,8 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           if (this.state.edits === undefined && markerWordIndexStart === markerWordIndexEnd) {
             this.playerRef.current!.pause()
 
-            const wordText = results![markerResultIndex].words[markerWordIndexEnd].word
-            const nextWord = results[markerResultIndex].words[markerWordIndexEnd + 1]
+            const wordText = paragraphs![markerParagraphIndex].words[markerWordIndexEnd].text
+            const nextWord = paragraphs[markerParagraphIndex].words[markerWordIndexEnd + 1]
             const wordTextLastChar = wordText.charAt(wordText.length - 1)
 
             let removePuncation = false
@@ -668,7 +668,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
 
               // Lower case next word if it exist and is not lower case
 
-              if (nextWord !== undefined && (key === "." || key === "!" || key === "?") && nextWord.word[0] === nextWord.word[0].toUpperCase()) {
+              if (nextWord !== undefined && (key === "." || key === "!" || key === "?") && nextWord.text[0] === nextWord.text[0].toUpperCase()) {
                 nextWordToLowerCase = true
               }
             }
@@ -685,13 +685,13 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
               // Check to see if we need to lower case the next word
               if (nextWord !== undefined) {
                 if (key === "." || key === "!" || key === "?") {
-                  if (nextWord.word[0] !== nextWord.word[0].toUpperCase()) {
+                  if (nextWord.text[0] !== nextWord.text[0].toUpperCase()) {
                     nextWordToUpperCase = true
                   } else {
                     // Next word is already uppercase, cancel the effect of nextWordToLowerCase = true from above
                     nextWordToLowerCase = false
                   }
-                } else if (nextWord.word[0] !== nextWord.word[0].toLowerCase()) {
+                } else if (nextWord.text[0] !== nextWord.text[0].toLowerCase()) {
                   nextWordToLowerCase = true
                 }
               }
@@ -708,14 +708,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
             }
 
             if (nextWordToUpperCase) {
-              nextWordText = nextWord.word[0].toUpperCase() + nextWord.word.substring(1)
+              nextWordText = nextWord.text[0].toUpperCase() + nextWord.text.substring(1)
             } else if (nextWordToLowerCase) {
-              nextWordText = nextWord.word[0].toLowerCase() + nextWord.word.substring(1)
+              nextWordText = nextWord.text[0].toLowerCase() + nextWord.text.substring(1)
             }
 
             const words = [firstWordText, nextWordText].filter(word => word)
 
-            this.props.updateWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd + words.length - 1, words, false)
+            this.props.updateWords(markerParagraphIndex, markerWordIndexStart, markerWordIndexEnd + words.length - 1, words, false)
 
             break
           }
@@ -906,7 +906,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
           if (key === "Backspace") {
             // If not in edit mode, or all characters have been removed,  delete the word
             if (edits === undefined) {
-              this.deleteWords(markerResultIndex, markerWordIndexStart, markerWordIndexEnd)
+              this.deleteWords(markerParagraphIndex, markerWordIndexStart, markerWordIndexEnd)
               // If in edit mode, and last element is a space, we pop the array to remove it
             } else if (edits[edits.length - 1] === "") {
               edits.pop()
@@ -968,56 +968,56 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       })
     }
 
-    const pastResults = pastTranscript.results
-    const presentResults = presentTranscript.results
+    const pastParagraphs = pastTranscript.paragraphs
+    const presentParagraphs = presentTranscript.paragraphs
 
-    // Changes in results
-    if (pastResults !== undefined && presentResults !== undefined) {
-      // Create an array with all result ids
+    // Changes in paragraphs
+    if (pastParagraphs !== undefined && presentParagraphs !== undefined) {
+      // Create an array with all paragraph ids
 
-      const pastResultsIds = pastResults.map(result => result.id)
-      const presentResultsIds = presentResults.map(result => result.id)
+      const pastParagraphsIds = pastParagraphs.map(paragraph => paragraph.id)
+      const presentParagraphsIds = presentParagraphs.map(paragraph => paragraph.id)
 
-      const resultsIds = new Set([...pastResultsIds, ...presentResultsIds])
+      const paragraphsIds = new Set([...pastParagraphsIds, ...presentParagraphsIds])
 
-      const updateResults: IResult[] = new Array()
-      const createResults: IResult[] = new Array()
+      const updateParagraphs: IParagraph[] = new Array()
+      const createParagraphs: IParagraph[] = new Array()
       const deleteIds: string[] = new Array()
 
-      for (const resultId of resultsIds) {
-        if (pastResultsIds.includes(resultId) && presentResultsIds.includes(resultId)) {
-          // In both arrays, need to compare them
+      for (const paragraphId of paragraphsIds) {
+        // If in both arrays, need to compare them
+        if (pastParagraphsIds.includes(paragraphId) && presentParagraphsIds.includes(paragraphId)) {
+          const pastParagraph = pastParagraphs.filter(paragraph => paragraph.id === paragraphId)[0]
+          const presentParagraph = presentParagraphs.filter(paragraph => paragraph.id === paragraphId)[0]
 
-          const pastResult = pastResults.filter(result => result.id === resultId)[0]
-          const presentResult = presentResults.filter(result => result.id === resultId)[0]
-
-          if (equal(pastResult, presentResult) === false) {
-            updateResults.push(presentResult)
+          if (equal(pastParagraph, presentParagraph) === false) {
+            updateParagraphs.push(presentParagraph)
           }
-        } else if (pastResultsIds.includes(resultId)) {
-          // Only in past, need to delete
-          deleteIds.push(resultId)
+          // If only in past, need to delete
+        } else if (pastParagraphsIds.includes(paragraphId)) {
+          deleteIds.push(paragraphId)
+          // If only in present, need to add
         } else {
-          const presentResult = presentResults.filter(result => result.id === resultId)[0]
+          const presentParagraph = presentParagraphs.filter(paragraph => paragraph.id === paragraphId)[0]
 
-          createResults.push(presentResult)
-          // Only in present, need to add
+          createParagraphs.push(presentParagraph)
         }
       }
 
-      // Set the value in update Ids
+      // Set the value in update ids
 
-      const resultsCollectionReference = transcriptDocumentReference.collection("results")
+      const paragraphsCollectionReference = transcriptDocumentReference.collection("paragraphs")
 
-      for (const result of updateResults) {
-        batch.update(resultsCollectionReference.doc(result.id), result)
+      for (const paragraph of updateParagraphs) {
+        batch.update(paragraphsCollectionReference.doc(paragraph.id), paragraph)
       }
 
-      for (const result of createResults) {
-        batch.set(resultsCollectionReference.doc(result.id), result)
+      for (const paragraph of createParagraphs) {
+        console.log("Create", paragraph)
+        batch.set(paragraphsCollectionReference.doc(paragraph.id), paragraph)
       }
-      for (const resultId of deleteIds) {
-        batch.delete(resultsCollectionReference.doc(resultId))
+      for (const paragraphId of deleteIds) {
+        batch.delete(paragraphsCollectionReference.doc(paragraphId))
       }
     }
 
@@ -1032,14 +1032,14 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     }
   }
 
-  private deleteWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number) {
-    this.props.deleteWords(resultIndex, wordIndexStart, wordIndexEnd)
+  private deleteWords(paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number) {
+    this.props.deleteWords(paragraphIndex, wordIndexStart, wordIndexEnd)
 
     // Saving marker in undo history
-    this.props.updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)
+    this.props.updateMarkers(paragraphIndex, wordIndexStart, wordIndexEnd)
   }
 
-  private setWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, texts: string[], stopEditing: boolean) {
+  private setWords(paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number, texts: string[], stopEditing: boolean) {
     const words = [...texts]
 
     // If we stop editing, we need to remove the last space if it exists. Otherwise it will be commited
@@ -1047,7 +1047,7 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
       words.splice(-1, 1)
     }
 
-    this.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, true)
+    this.updateWords(paragraphIndex, wordIndexStart, wordIndexEnd, words, true)
 
     this.setState({
       edits: stopEditing ? undefined : [...words, ""], // Add space if we continue to edit
@@ -1055,53 +1055,53 @@ class TranscriptResults extends Component<IReduxStateToProps & IReduxDispatchToP
     })
   }
 
-  private handleSetSpeaker(key: string, markerResultIndex: number) {
+  private handleSetSpeaker(key: string, markerParagraphIndex: number) {
     // Check that the speaker exists, otherwise, ask for their name
 
     if (this.props.transcript.present.speakerNames && this.props.transcript.present.speakerNames[parseInt(key, 10)] !== undefined) {
-      this.props.updateSpeaker(markerResultIndex, parseInt(key, 10))
+      this.props.updateSpeaker(markerParagraphIndex, parseInt(key, 10))
     } else {
       const speakerName = window.prompt(`Navn på person ${key}:`)
 
       if (speakerName) {
-        this.props.updateSpeakerName(parseInt(key, 10), speakerName, markerResultIndex)
+        this.props.updateSpeakerName(parseInt(key, 10), speakerName, markerParagraphIndex)
       }
     }
   }
 
-  private updateWords(resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) {
-    this.props.updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)
-    this.props.updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)
+  private updateWords(paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) {
+    this.props.updateWords(paragraphIndex, wordIndexStart, wordIndexEnd, words, recalculate)
+    this.props.updateMarkers(paragraphIndex, wordIndexStart, wordIndexEnd)
   }
 
-  private joinResults(resultIndex: number, wordIndex: number) {
-    // Calculating where the marker will be in the joined result
+  private joinParagraphs(paragraphIndex: number, wordIndex: number) {
+    // Calculating where the marker will be in the joined paragraph
 
-    if (resultIndex > 0 && wordIndex === 0) {
-      const result = this.props.transcript.present.results[resultIndex - 1]
+    if (paragraphIndex > 0 && wordIndex === 0) {
+      const paragraph = this.props.transcript.present.paragraphs[paragraphIndex - 1]
 
       // Saving marker in undo history
-      this.props.updateMarkers(this.state.markerResultIndex, 0, 0)
+      this.props.updateMarkers(this.state.markerParagraphIndex, 0, 0)
 
       // Setting new marker state
       this.setState({
-        markerResultIndex: resultIndex - 1,
-        markerWordIndexEnd: result.words.length,
-        markerWordIndexStart: result.words.length,
+        markerParagraphIndex: paragraphIndex - 1,
+        markerWordIndexEnd: paragraph.words.length,
+        markerWordIndexStart: paragraph.words.length,
       })
-      this.props.joinResults(resultIndex, wordIndex)
+      this.props.joinParagraphs(paragraphIndex, wordIndex)
     }
   }
 
-  private splitResult(resultIndex: number, wordIndex: number) {
-    this.props.splitResults(resultIndex, wordIndex)
+  private splitParagraph(paragraphIndex: number, wordIndex: number) {
+    this.props.splitParagraphs(paragraphIndex, wordIndex)
 
     // Saving marker in undo history
-    this.props.updateMarkers(resultIndex, wordIndex, wordIndex)
+    this.props.updateMarkers(paragraphIndex, wordIndex, wordIndex)
 
-    // Setting marker to the next result
+    // Setting marker to the next paragraph
     this.setState({
-      markerResultIndex: resultIndex + 1,
+      markerParagraphIndex: paragraphIndex + 1,
       markerWordIndexEnd: 0,
       markerWordIndexStart: 0,
     })
@@ -1119,17 +1119,17 @@ const mapStateToProps = (state: State): IReduxStateToProps => {
 
 const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
   return {
-    deleteWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(deleteWords(resultIndex, wordIndexStart, wordIndexEnd)),
-    joinResults: (resultIndex: number, wordIndex: number) => dispatch(joinResults(resultIndex, wordIndex)),
+    deleteWords: (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(deleteWords(paragraphIndex, wordIndexStart, wordIndexEnd)),
+    joinParagraphs: (paragraphIndex: number, wordIndex: number) => dispatch(joinParagraphs(paragraphIndex, wordIndex)),
     onRedo: () => dispatch(UndoActionCreators.redo()),
     onUndo: () => dispatch(UndoActionCreators.undo()),
-    readResults: (results: IResult[]) => dispatch(readResults(results)),
-    splitResults: (resultIndex: number, wordIndex: number) => dispatch(splitResults(resultIndex, wordIndex)),
-    updateMarkers: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(resultIndex, wordIndexStart, wordIndexEnd)),
-    updateSpeaker: (resultIndex: number, speaker: number) => dispatch(updateSpeaker(resultIndex, speaker)),
-    updateSpeakerName: (speaker: number, name: string, resultIndex?: number) => dispatch(updateSpeakerName(speaker, name, resultIndex)),
+    readParagraphs: (paragraphs: IParagraph[]) => dispatch(readParagraphs(paragraphs)),
+    splitParagraphs: (paragraphIndex: number, wordIndex: number) => dispatch(splitParagraphs(paragraphIndex, wordIndex)),
+    updateMarkers: (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(paragraphIndex, wordIndexStart, wordIndexEnd)),
+    updateSpeaker: (paragraphIndex: number, speaker: number) => dispatch(updateSpeaker(paragraphIndex, speaker)),
+    updateSpeakerName: (speaker: number, name: string, paragraphIndex?: number) => dispatch(updateSpeakerName(speaker, name, paragraphIndex)),
     updateStartTime: (startTime: number) => dispatch(updateStartTime(startTime)),
-    updateWords: (resultIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => dispatch(updateWords(resultIndex, wordIndexStart, wordIndexEnd, words, recalculate)),
+    updateWords: (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => dispatch(updateWords(paragraphIndex, wordIndexStart, wordIndexEnd, words, recalculate)),
   }
 }
 
@@ -1141,4 +1141,4 @@ const enhance = compose(
   ),
 )
 
-export default enhance(TranscriptResults)
+export default enhance(Paragraphs)

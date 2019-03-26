@@ -15,9 +15,7 @@ interface ITranscript {
   speakerNames?: {
     [key: number]: string
   }
-  userIds?: {
-    [key: string]: string
-  }
+  userId?: string
 }
 
 interface IMetadata {

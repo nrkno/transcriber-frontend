@@ -4,11 +4,12 @@ Transcriber is a web app using Google speech-to-text API for transcribing audio 
 
 ## Tech overview
 
-* [React JS](https://reactjs.org)
-* [Google Cloud Storage](https://cloud.google.com/storage/)
-* [Cloud Functions for Firebase](https://firebase.google.com/docs/functions/)
-* [Cloud Speech-to-text](https://cloud.google.com/speech-to-text/)
-* [Cloud Firestore](https://firebase.google.com/docs/firestore/)
+- [React JS](https://reactjs.org)
+- [Redux](https://redux.js.org)
+- [Google Cloud Storage](https://cloud.google.com/storage/)
+- [Cloud Functions for Firebase](https://firebase.google.com/docs/functions/)
+- [Cloud Speech-to-text](https://cloud.google.com/speech-to-text/)
+- [Cloud Firestore](https://firebase.google.com/docs/firestore/)
 
 ## Set up
 
@@ -39,18 +40,25 @@ To track events to [Google Analytics](https://analytics.google.com/analytics/web
 | ---------- | ------------- | ------------- |
 | transcript | upload failed | [file format] |
 | transcript | aborted       |               |
-|            |               |               |
 
 ### Transcript page
 
 | category   | action                | label  |
 | ---------- | --------------------- | ------ |
-| transcript | not found             |        |
 | transcript | export button pressed | [type] |
 | transcript | delete button pressed |        |
 | player     | play button pressed   |        |
 | player     | pause button pressed  |        |
 | player     | volume changed        |        |
+| editor     | start time changed    |        |
+| editor     | speaker name set      |        |
+| editor     | speaker name changed  |        |
+| editor     | paragraphs joined     |        |
+| editor     | paragraphs split      |        |
+| editor     | words changed         |        |
+| editor     | words deleted         |        |
+| editor     | undo                  |        |
+| editor     | redo                  |        |
 
 ## Browsers targeted
 

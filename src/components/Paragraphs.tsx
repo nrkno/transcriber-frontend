@@ -346,6 +346,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
           parseInt(units[3], 10) * 1e7 // Centiseconds
 
         this.props.updateStartTime(nanoseconds)
+
+        ReactGA.event({
+          action: "start time changed",
+          category: "editor",
+        })
       }
     }
   }
@@ -358,6 +363,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
 
       if (newSpeakerName) {
         this.props.updateSpeakerName(speaker, newSpeakerName)
+
+        ReactGA.event({
+          action: "speaker name changed",
+          category: "editor",
+        })
       }
     }
   }
@@ -407,10 +417,20 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
         case "z":
           if (event.getModifierState("Shift")) {
             this.props.onRedo()
+
+            ReactGA.event({
+              action: "redo",
+              category: "editor",
+            })
           } else if (this.state.edits) {
             this.setState({ edits: undefined })
           } else {
             this.props.onUndo()
+
+            ReactGA.event({
+              action: "undo",
+              category: "editor",
+            })
           }
           break
 
@@ -1031,6 +1051,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
 
     // Saving marker in undo history
     this.props.updateMarkers(paragraphIndex, wordIndexStart, wordIndexEnd)
+
+    ReactGA.event({
+      action: "words deleted",
+      category: "editor",
+    })
   }
 
   private setWords(paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number, texts: string[], stopEditing: boolean) {
@@ -1047,6 +1072,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       edits: stopEditing ? undefined : [...words, ""], // Add space if we continue to edit
       markerWordIndexEnd: Math.max(wordIndexStart, wordIndexStart + words.length - 1), // Using max so that end with not be smaller than start and thus not drawn
     })
+
+    ReactGA.event({
+      action: "words changed",
+      category: "editor",
+    })
   }
 
   private handleSetSpeaker(key: string, markerParagraphIndex: number) {
@@ -1059,6 +1089,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
 
       if (speakerName) {
         this.props.updateSpeakerName(parseInt(key, 10), speakerName, markerParagraphIndex)
+
+        ReactGA.event({
+          action: "speaker name set",
+          category: "editor",
+        })
       }
     }
   }
@@ -1084,6 +1119,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
         markerWordIndexStart: paragraph.words.length,
       })
       this.props.joinParagraphs(paragraphIndex, wordIndex)
+
+      ReactGA.event({
+        action: "paragraphs joined",
+        category: "editor",
+      })
     }
   }
 
@@ -1098,6 +1138,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       markerParagraphIndex: paragraphIndex + 1,
       markerWordIndexEnd: 0,
       markerWordIndexStart: 0,
+    })
+
+    ReactGA.event({
+      action: "paragraphs split",
+      category: "editor",
     })
   }
 }

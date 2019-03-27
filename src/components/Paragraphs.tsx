@@ -1013,7 +1013,6 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       }
 
       for (const paragraph of createParagraphs) {
-        console.log("Create", paragraph)
         batch.set(paragraphsCollectionReference.doc(paragraph.id), paragraph)
       }
       for (const paragraphId of deleteIds) {

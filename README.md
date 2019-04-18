@@ -12,7 +12,7 @@ Transcriber is a web app using Google speech-to-text API for transcribing audio 
 
 ## Set up
 
-- Follow the steps in setting up the backend.
+- Follow the steps in setting up the [backend](https://github.com/nrkno/transcriber-backend).
 - Rename `.env.sample` to `.env`
 - In the Firebase Console, Choose "Add Firebase to your web project" copy the values of `apiKey`, `databaseURL`, and the name of your uploads bucket and paste them in to `.env`.
 - Run `npm install` to install dependencies.

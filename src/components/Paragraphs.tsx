@@ -211,21 +211,17 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
           this.props.transcript.present &&
           this.props.transcript.present.paragraphs &&
           this.props.transcript.present.paragraphs.map((paragraph, i) => {
-            const startTime = paragraph.startTime
-
+            const { speaker, startTime } = paragraph
             const formattedStartTime = nanoSecondsToFormattedTime(this.props.transcript.present.metadata.startTime || 0, startTime, true, false)
-            const speaker = paragraph.speaker
 
             return (
               <React.Fragment key={i}>
-                <div key={`startTime-${i}`} className="startTime" onClick={i === 0 ? this.handleChangeStartTime() : ""}>
+                <div key={`startTime-${i}`} className="startTime" onClick={i === 0 ? this.handleChangeStartTime() : undefined}>
                   {formattedStartTime}
-                  {speaker ? (
-                    <>
-                      <span className={`speaker speaker-${speaker}`} onClick={this.handleChangeSpeakerName(speaker)}>
-                        {this.props.transcript.present.speakerNames[speaker][0].toUpperCase()}
-                      </span>
-                    </>
+                  {speaker && this.props.transcript.present.speakerNames ? (
+                    <span className={`speaker speaker-${speaker}`} onClick={this.handleChangeSpeakerName(speaker)}>
+                      {this.props.transcript.present.speakerNames[speaker][0].toUpperCase()}
+                    </span>
                   ) : (
                     <span>&nbsp;</span>
                   )}
@@ -236,9 +232,8 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
                       if (isVisible) {
                         return paragraph.words.map((word, j) => {
                           const isMarked = this.state.markerParagraphIndex === i && this.state.markerWordIndexStart <= j && j <= this.state.markerWordIndexEnd
-                          const isEditing = isMarked && this.state.edits !== undefined
 
-                          if (isEditing) {
+                          if (isMarked && this.state.edits !== undefined) {
                             // Only show the last word
                             if (j < this.state.markerWordIndexEnd) {
                               return
@@ -252,6 +247,7 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
                                   confidence={Math.round(word.confidence * 100)}
                                   showTypewriter={isLastWord}
                                   isMarked={isMarked}
+                                  isNextWordDeleted={false}
                                   paragraphIndex={i}
                                   shouldSelectSpace={!isLastWord}
                                   setCurrentWord={this.setCurrentPlayingWord}
@@ -262,7 +258,6 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
                             })
                           } else {
                             const shouldSelectSpace = this.state.markerParagraphIndex === i && this.state.markerWordIndexStart <= j && j < this.state.markerWordIndexEnd
-
                             const isNextWordDeleted = j + 1 < paragraph.words.length && paragraph.words[j + 1].deleted !== undefined && paragraph.words[j + 1].deleted === true
 
                             return (
@@ -351,6 +346,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
           parseInt(units[3], 10) * 1e7 // Centiseconds
 
         this.props.updateStartTime(nanoseconds)
+
+        ReactGA.event({
+          action: "start time changed",
+          category: "editor",
+        })
       }
     }
   }
@@ -363,6 +363,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
 
       if (newSpeakerName) {
         this.props.updateSpeakerName(speaker, newSpeakerName)
+
+        ReactGA.event({
+          action: "speaker name changed",
+          category: "editor",
+        })
       }
     }
   }
@@ -412,10 +417,20 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
         case "z":
           if (event.getModifierState("Shift")) {
             this.props.onRedo()
+
+            ReactGA.event({
+              action: "redo",
+              category: "editor",
+            })
           } else if (this.state.edits) {
             this.setState({ edits: undefined })
           } else {
             this.props.onUndo()
+
+            ReactGA.event({
+              action: "undo",
+              category: "editor",
+            })
           }
           break
 
@@ -1013,7 +1028,6 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       }
 
       for (const paragraph of createParagraphs) {
-        console.log("Create", paragraph)
         batch.set(paragraphsCollectionReference.doc(paragraph.id), paragraph)
       }
       for (const paragraphId of deleteIds) {
@@ -1037,6 +1051,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
 
     // Saving marker in undo history
     this.props.updateMarkers(paragraphIndex, wordIndexStart, wordIndexEnd)
+
+    ReactGA.event({
+      action: "words deleted",
+      category: "editor",
+    })
   }
 
   private setWords(paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number, texts: string[], stopEditing: boolean) {
@@ -1053,6 +1072,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       edits: stopEditing ? undefined : [...words, ""], // Add space if we continue to edit
       markerWordIndexEnd: Math.max(wordIndexStart, wordIndexStart + words.length - 1), // Using max so that end with not be smaller than start and thus not drawn
     })
+
+    ReactGA.event({
+      action: "words changed",
+      category: "editor",
+    })
   }
 
   private handleSetSpeaker(key: string, markerParagraphIndex: number) {
@@ -1065,6 +1089,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
 
       if (speakerName) {
         this.props.updateSpeakerName(parseInt(key, 10), speakerName, markerParagraphIndex)
+
+        ReactGA.event({
+          action: "speaker name set",
+          category: "editor",
+        })
       }
     }
   }
@@ -1090,6 +1119,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
         markerWordIndexStart: paragraph.words.length,
       })
       this.props.joinParagraphs(paragraphIndex, wordIndex)
+
+      ReactGA.event({
+        action: "paragraphs joined",
+        category: "editor",
+      })
     }
   }
 
@@ -1104,6 +1138,11 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       markerParagraphIndex: paragraphIndex + 1,
       markerWordIndexEnd: 0,
       markerWordIndexStart: 0,
+    })
+
+    ReactGA.event({
+      action: "paragraphs split",
+      category: "editor",
     })
   }
 }

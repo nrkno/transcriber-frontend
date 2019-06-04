@@ -40,8 +40,6 @@ class UploadButton extends Component<IProps, any> {
       // Take the first file
       const [file] = accepted
 
-      console.log(file)
-
       this.props.fileSelected(file)
     }
   }

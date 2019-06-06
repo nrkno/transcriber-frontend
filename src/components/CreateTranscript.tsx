@@ -222,6 +222,7 @@ class CreateTranscript extends React.Component<IProps, IState> {
     const transcriptId = this.state.transcriptId
 
     const transcript: ITranscript = {
+      id: transcriptId,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       metadata,
       name,

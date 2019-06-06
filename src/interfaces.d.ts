@@ -9,6 +9,7 @@ interface ITranscript {
     error?: any
     percent?: number
     progress?: ProgressType
+    lastUpdated?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   }
   metadata?: IMetadata
   paragraphs?: Array<IParagraph>

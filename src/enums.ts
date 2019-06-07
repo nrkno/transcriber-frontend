@@ -8,11 +8,12 @@ export enum ProgressType {
 
 // The status types from UpdateProgress
 export enum UpdateStatusType {
-    UpdatedOk = "UPDATED_OK", // Import from Google Speech successfull, and written to database ok.
-    SpeechRecognitionNotStarted = "SPEECH_RECOGNITION_NOT_STARTED",
-    SpeechRecognitionMissing = "SPEECH_RECOGNITION_MISSING", // The speech data originally recorded on a video.
-    TranscriptionIdMissing = "TRANSCRIPTION_ID_MISSING",
-    TranscriptionMissing = "TRANSCRIPTION_MISSING" // Transcription could not be found in database.
+  UpdatedOk = "UPDATED_OK", // Import from Google Speech successfull, and written to database ok.
+  SpeechRecognitionInProgress = "SPEECH_RECOGNITION_IN_PROGRESS", // Google is not yet finished transcribing the file
+  SpeechRecognitionNotStarted = "SPEECH_RECOGNITION_NOT_STARTED",
+  SpeechRecognitionMissing = "SPEECH_RECOGNITION_MISSING", // The speech data originally recorded on a video.
+  TranscriptionIdMissing = "TRANSCRIPTION_ID_MISSING",
+  TranscriptionMissing = "TRANSCRIPTION_MISSING" // Transcription could not be found in database.
 }
 
 // Use case categories that the audio recognition request can be described by.

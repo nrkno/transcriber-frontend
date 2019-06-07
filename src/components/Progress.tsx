@@ -156,6 +156,7 @@ class Progress extends React.Component<IProps, any> {
       try {
         const result = await updateProgress({transcriptId})
         console.log("UpdateProgress result: ", result)
+        alert("UpdateTranscript response: " + JSON.stringify(result))
       } catch (error) {
         console.error(error)
         ReactGA.exception({

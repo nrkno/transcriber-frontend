@@ -138,6 +138,12 @@ class Progress extends React.Component<IProps, any> {
 
   private handleUpdateButtonClicked = async (transcript: ITranscript) => {
     console.log("Transcript: ", transcript)
+      // FIXME trenger:
+      // kjører update allerede
+      // mangler operations, må trigge ny transkribering
+      // har transkribering startet, hvis ikke unngå kall
+      // når var siste oppdatering fra google-speech
+      // fant ikke transcript med angitt id
     if (transcript.id) {
       const transcriptId = transcript.id
       ReactGA.event({

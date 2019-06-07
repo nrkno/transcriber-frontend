@@ -53,3 +53,13 @@ interface IWord {
   endTime: number
   startTime: number
 }
+
+// -----------------
+// Update Progress
+// -----------------
+interface IUpdateProgressResponse {
+    lastUpdated?: number
+    transcriptionProgressPercent?: number
+    transcriptId?: string
+    updateStatus: UpdateStatusType
+}

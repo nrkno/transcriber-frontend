@@ -9,6 +9,7 @@ interface ITranscript {
     error?: any
     percent?: number
     progress?: ProgressType
+    lastUpdated?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
   }
   metadata?: IMetadata
   paragraphs?: Array<IParagraph>
@@ -51,4 +52,14 @@ interface IWord {
   text: string
   endTime: number
   startTime: number
+}
+
+// -----------------
+// Update Progress
+// -----------------
+interface IUpdateProgressResponse {
+    lastUpdated?: number
+    transcriptionProgressPercent?: number
+    transcriptId?: string
+    updateStatus: UpdateStatusType
 }

@@ -1,6 +1,10 @@
 import * as React from "react"
+import ReactGA from "react-ga"
+import { connect } from "react-redux"
+import { RouteComponentProps } from "react-router"
 import { ProgressType } from "../enums"
 import { ITranscript } from "../interfaces"
+import {functions} from "../firebaseApp";
 
 interface IProps {
   transcript: ITranscript
@@ -15,11 +19,29 @@ class Progress extends React.Component<IProps, any> {
     }
 
     const progress = transcript.status.progress
+    let statusLastUpdated = " "
+    if (transcript.status && transcript.status.lastUpdated) {
+      statusLastUpdated = transcript.status.lastUpdated.toDate().toLocaleString()
+    }
 
     return (
       <main id="transcript">
         <section className="org-bar">
           <span className="org-text-l">{transcript.name}</span>
+          <span>LastUpdated: {statusLastUpdated}</span>
+          <button className="org-btn" onClick={() => this.handleUpdateButtonClicked(transcript)}>
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+              <g fill="none" fillRule="evenodd">
+                <path d="M17 0H3a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V3a3 3 0 0 0-3-3z" fill="#252627" />
+                <text fontFamily="Roboto-Medium, Roboto" fontSize="15" fontWeight="400" fill="#FFF" transform="translate(0 -2)">
+                  <tspan x="4.4" y="16">
+                    u
+                  </tspan>
+                </text>
+              </g>
+            </svg>{" "}
+            update
+          </button>
         </section>
 
         <div>
@@ -112,6 +134,40 @@ class Progress extends React.Component<IProps, any> {
         </div>
       </main>
     )
+  }
+
+  private handleUpdateButtonClicked = async (transcript: ITranscript) => {
+    console.log("Transcript: ", transcript)
+      // FIXME trenger:
+      // kjører update allerede
+      // mangler operations, må trigge ny transkribering
+      // har transkribering startet, hvis ikke unngå kall
+      // når var siste oppdatering fra google-speech
+      // fant ikke transcript med angitt id
+    if (transcript.id) {
+      const transcriptId = transcript.id
+      ReactGA.event({
+        action: "update button pressed",
+        category: "progress",
+        label: transcriptId,
+      })
+      // const transcriptId = this.props.transcriptId
+      const updateProgress = functions.httpsCallable("updateProgress")
+      try {
+        const result = await updateProgress({transcriptId})
+        console.log("UpdateProgress result: ", result)
+        alert("UpdateTranscript response: " + JSON.stringify(result))
+      } catch (error) {
+        console.error(error)
+        ReactGA.exception({
+          description: error.message,
+          fatal: false,
+        })
+      }
+    } else {
+      alert("Transcript has no id yet. Please try again later")
+    }
+
   }
 }
 

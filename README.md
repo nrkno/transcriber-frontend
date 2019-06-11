@@ -13,7 +13,7 @@ Transcriber is a web app using Google speech-to-text API for transcribing audio 
 
 ## Set up
 
-- Follow the steps in setting up the backend.
+- Follow the steps in setting up the [backend](https://github.com/nrkno/transcriber-backend).
 - Rename `.env.sample` to `.env`
 - In the Firebase Console, Choose "Add Firebase to your web project" copy the values of `apiKey`, `databaseURL`, and the name of your uploads bucket and paste them in to `.env`.
 - Run `npm install` to install dependencies.
@@ -23,6 +23,22 @@ Transcriber is a web app using Google speech-to-text API for transcribing audio 
 ```sh
 npm run dev
 ```
+
+### Authentication in development
+
+You need to enable username/password authentication in Firebase Console. Create an user, and set a password.
+Here is how in June 2019:
+* Enable Email/Password provider
+  * https://console.firebase.google.com/u/3/project/<your firebase project>/authentication/providers
+* Add user in Users tab
+  * https://console.firebase.google.com/u/3/project/<your firebase project>/authentication/users
+* Set password on your newly created user
+  * Dropdown menu to the right of the user in Users tab 
+  
+### Update .env
+
+Add username and password to REACT_APP_FIREBASE_DEV_USERNAME and REACT_APP_FIREBASE_DEV_PASSWORD 
+
 
 ## Google Analytics
 

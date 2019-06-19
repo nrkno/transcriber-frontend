@@ -1,7 +1,5 @@
 import * as React from "react"
 import ReactGA from "react-ga"
-import { connect } from "react-redux"
-import { RouteComponentProps } from "react-router"
 import { ProgressType } from "../enums"
 import { ITranscript } from "../interfaces"
 import {functions} from "../firebaseApp";
@@ -28,7 +26,8 @@ class Progress extends React.Component<IProps, any> {
       <main id="transcript">
         <section className="org-bar">
           <span className="org-text-l">{transcript.name}</span>
-          <span>LastUpdated: {statusLastUpdated}</span>
+          <span>Automatic update enabled. LastUpdated: {statusLastUpdated}</span>
+          <!--
           <button className="org-btn" onClick={() => this.handleUpdateButtonClicked(transcript)}>
             <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
               <g fill="none" fillRule="evenodd">
@@ -42,6 +41,7 @@ class Progress extends React.Component<IProps, any> {
             </svg>{" "}
             update
           </button>
+          -->
         </section>
 
         <div>

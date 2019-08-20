@@ -2,7 +2,7 @@ import * as React from "react"
 import ReactDOM from "react-dom"
 
 interface IProps {
-  children: React.ReactChildren;
+  children: React.ReactChildren | React.ReactElement;
 }
 
 class Portal extends React.Component<IProps, any> {

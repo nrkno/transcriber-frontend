@@ -7,6 +7,18 @@ interface IProps {
 }
 
 class FileTypeErrorModalWindow extends React.Component<IProps, any> {
+  public preventScreenScrolling = (e: Event) => {
+    e.preventDefault()
+  }
+
+  public componentDidMount() {
+    document.body.addEventListener("scroll", this.preventScreenScrolling)
+  }
+
+  public componentWillUnmount() {
+    document.body.removeEventListener('scroll', this.preventScreenScrolling)
+  }
+
   public render() {
     const { hideErrorMessage } = this.props
 

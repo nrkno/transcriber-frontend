@@ -1,5 +1,7 @@
 .modal_overlay {
+  min-width: 460px;
   width: 100vw;
+  min-height: 700px;
   height: 100vh;
   position: fixed;
   top: 0;

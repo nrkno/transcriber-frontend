@@ -3,14 +3,15 @@ import ReactGA from "react-ga"
 import { connect } from "react-redux"
 import { RouteComponentProps } from "react-router"
 import { ProgressType } from "../enums"
+import { functions } from "../firebaseApp"
 import { ITranscript } from "../interfaces"
-import {functions} from "../firebaseApp";
 
 interface IProps {
   transcript: ITranscript
+  transcriptId: string
 }
 
-class Progress extends React.Component<IProps, any> {
+class Progress extends React.Component<RouteComponentProps<{}> & IProps, any> {
   public render() {
     const transcript = this.props.transcript
 
@@ -41,6 +42,12 @@ class Progress extends React.Component<IProps, any> {
               </g>
             </svg>{" "}
             update
+          </button>
+          <button className="org-btn" onClick={this.handleDeleteButtonClicked}>
+            <svg width="20" height="20" focusable="false" aria-hidden="true">
+              <use xlinkHref="#icon-garbage" />
+            </svg>{" "}
+            Slett
           </button>
         </section>
 
@@ -136,14 +143,35 @@ class Progress extends React.Component<IProps, any> {
     )
   }
 
+  private handleDeleteButtonClicked = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    ReactGA.event({
+      action: "delete button pressed",
+      category: "transcript",
+    })
+
+    const transcriptId = this.props.transcriptId
+    const deleteTranscript = functions.httpsCallable("deleteTranscript")
+
+    try {
+      this.props.history.push("/transcripts/")
+      await deleteTranscript({ transcriptId })
+    } catch (error) {
+      console.error(error)
+      ReactGA.exception({
+        description: error.message,
+        fatal: false,
+      })
+    }
+  }
+
   private handleUpdateButtonClicked = async (transcript: ITranscript) => {
     console.log("Transcript: ", transcript)
-      // FIXME trenger:
-      // kjører update allerede
-      // mangler operations, må trigge ny transkribering
-      // har transkribering startet, hvis ikke unngå kall
-      // når var siste oppdatering fra google-speech
-      // fant ikke transcript med angitt id
+    // FIXME trenger:
+    // kjører update allerede
+    // mangler operations, må trigge ny transkribering
+    // har transkribering startet, hvis ikke unngå kall
+    // når var siste oppdatering fra google-speech
+    // fant ikke transcript med angitt id
     if (transcript.id) {
       const transcriptId = transcript.id
       ReactGA.event({
@@ -154,7 +182,7 @@ class Progress extends React.Component<IProps, any> {
       // const transcriptId = this.props.transcriptId
       const updateProgress = functions.httpsCallable("updateProgress")
       try {
-        const result = await updateProgress({transcriptId})
+        const result = await updateProgress({ transcriptId })
         console.log("UpdateProgress result: ", result)
         alert("UpdateTranscript response: " + JSON.stringify(result))
       } catch (error) {
@@ -167,7 +195,6 @@ class Progress extends React.Component<IProps, any> {
     } else {
       alert("Transcript has no id yet. Please try again later")
     }
-
   }
 }
 

@@ -7,10 +7,10 @@ import { ProgressType } from "../enums"
 import { ITranscript } from "../interfaces"
 import { selectTranscript } from "../store/actions/transcriptActions"
 import CreateTranscript from "./CreateTranscript"
+import FileTypeErrorModalWindow from "./FileTypeErrorModalWindow"
 import Progress from "./Progress"
 import Transcript from "./Transcript"
 import TranscriptsList from "./TranscriptsList"
-import FileTypeErrorModalWindow from './FileTypeErrorModalWindow';
 
 interface IStateProps {
   transcripts: ITranscript[]
@@ -36,9 +36,7 @@ class Transcripts extends Component<RouteComponentProps<{}> & IStateProps, IStat
       <main id="transcripts">
         {this.props.user.uid ? (
           <>
-          {this.state.hasFileTypeError &&
-            <FileTypeErrorModalWindow hideErrorMessage={this.hideFileTypeErrorMessage}/>
-          }
+            {this.state.hasFileTypeError && <FileTypeErrorModalWindow hideErrorMessage={this.hideFileTypeErrorMessage} />}
             <TranscriptsList
               userId={this.props.user.uid}
               selectedTranscriptId={this.props.match.params.id}
@@ -67,7 +65,7 @@ class Transcripts extends Component<RouteComponentProps<{}> & IStateProps, IStat
                     })
                     return <div>Fant ikke transkripsjon</div>
                   } else if (transcript.status && transcript.status.progress && transcript.status.progress !== ProgressType.Done) {
-                    return <Progress transcript={transcript} />
+                    return <Progress transcript={transcript} transcriptId={this.props.match.params.id} history={this.props.history} />
                   }
                 }
                 return <Transcript transcriptId={this.props.match.params.id} history={this.props.history} />
@@ -90,16 +88,16 @@ class Transcripts extends Component<RouteComponentProps<{}> & IStateProps, IStat
     this.props.history.push(`/transcripts/${transcriptId}`)
   }
 
+  public showFileTypeErrorMessage = () => this.setState({ hasFileTypeError: true })
+
+  public hideFileTypeErrorMessage = () => this.setState({ hasFileTypeError: false })
+
   private transcriptCreated = (transcriptId: string) => {
     // Push the newly created transcript id
     this.props.history.push(`/transcripts/${transcriptId}`)
     // Remove file so that Transcript is shown, and not CreateTranscript
     this.setState({ file: undefined })
   }
-
-  public showFileTypeErrorMessage = () => this.setState({ hasFileTypeError : true});
-
-  public hideFileTypeErrorMessage = () => this.setState({ hasFileTypeError: false });
 }
 
 const mapStateToProps = (state: State): IStateProps => {

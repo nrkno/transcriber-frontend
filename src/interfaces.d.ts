@@ -23,6 +23,7 @@ interface IMetadata {
   audioDuration?: number
   audioTopic?: string
   fileExtension?: string
+  framesPerSecond?: number
   industryNaicsCodeOfAudio?: number | string
   interactionType: InteractionType
   languageCodes: Array<string>

@@ -131,7 +131,8 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
 
     // Check if we need to save to Firebase
 
-    if (Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 1) {
+    if (Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 1
+        || Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 2 ) {
       this.save(prevProps.transcript.present, this.props.transcript.present)
     }
   }

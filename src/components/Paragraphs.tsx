@@ -413,7 +413,7 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       this.props.updateFramesPerSecond(framesPerSecond)
 
       ReactGA.event({
-        action: "framesPerSecond changed",
+        action: "fps changed",
         category: "editor",
       })
     }
@@ -1046,6 +1046,14 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
     if (presentTranscript.metadata && presentTranscript.metadata.startTime !== pastTranscript.metadata.startTime) {
       batch.update(transcriptDocumentReference, {
         "metadata.startTime": presentTranscript.metadata.startTime,
+      })
+    }
+
+    // Check if we have changes in framesPerSecond
+
+    if (presentTranscript.metadata && (presentTranscript.metadata.framesPerSecond !== pastTranscript.metadata.framesPerSecond)) {
+      batch.update(transcriptDocumentReference, {
+        "metadata.framesPerSecond": presentTranscript.metadata.framesPerSecond,
       })
     }
 

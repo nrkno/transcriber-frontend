@@ -6,7 +6,7 @@ import {
     READ_PARAGRAPHS,
     SELECT_TRANSCRIPT,
     SPLIT_PARAGRAPHS,
-    UPDATE_FRAMESPERSECOND,
+    UPDATE_FRAMES_PER_SECOND,
     UPDATE_SPEAKER,
     UPDATE_SPEAKER_NAME,
     UPDATE_START_TIME,
@@ -40,7 +40,7 @@ export const updateStartTime = createAction(UPDATE_START_TIME, action => {
   return (startTime: number) => action({ startTime })
 })
 
-export const updateFramesPerSecond = createAction(UPDATE_FRAMESPERSECOND, action => {
+export const updateFramesPerSecond = createAction(UPDATE_FRAMES_PER_SECOND, action => {
     return (framesPerSecond: number) => action({ framesPerSecond })
 })
 

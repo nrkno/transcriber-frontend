@@ -1,4 +1,12 @@
-import { ProgressType, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Timestamp } from "./enums"
+import {
+  ProgressType,
+  InteractionType,
+  MicrophoneDistance,
+  OriginalMediaType,
+  RecordingDeviceType,
+  Timestamp,
+  UpdateStatusType
+} from "./enums"
 
 interface ITranscript {
   createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
@@ -23,6 +31,7 @@ interface IMetadata {
   audioDuration?: number
   audioTopic?: string
   fileExtension?: string
+  framesPerSecond?: number
   industryNaicsCodeOfAudio?: number | string
   interactionType: InteractionType
   languageCodes: Array<string>

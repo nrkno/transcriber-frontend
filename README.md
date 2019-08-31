@@ -66,6 +66,7 @@ To track events to [Google Analytics](https://analytics.google.com/analytics/web
 | player     | play button pressed   |        |
 | player     | pause button pressed  |        |
 | player     | volume changed        |        |
+| editor     | fps changed           |        |
 | editor     | start time changed    |        |
 | editor     | speaker name set      |        |
 | editor     | speaker name changed  |        |

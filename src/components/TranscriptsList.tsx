@@ -13,6 +13,7 @@ interface IProps {
   handleTranscriptIdSelected: (transcriptId: string) => void
   selectedTranscriptId?: string
   userId: string
+  showFileTypeErrorMessage: () => void
 }
 
 class TranscriptsList extends Component<IProps> {
@@ -114,7 +115,11 @@ class TranscriptsList extends Component<IProps> {
           </tbody>
         </table>
 
-        <UploadButton fileSelected={this.props.handleFileSelected} userId={this.props.userId} />
+        <UploadButton
+          fileSelected={this.props.handleFileSelected}
+          userId={this.props.userId}
+          showFileTypeErrorMessage={this.props.showFileTypeErrorMessage}
+        />
       </div>
     )
   }

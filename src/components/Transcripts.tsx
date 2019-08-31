@@ -7,6 +7,7 @@ import { ProgressType } from "../enums"
 import { ITranscript } from "../interfaces"
 import { selectTranscript } from "../store/actions/transcriptActions"
 import CreateTranscript from "./CreateTranscript"
+import FileTypeErrorModalWindow from "./FileTypeErrorModalWindow"
 import Progress from "./Progress"
 import Transcript from "./Transcript"
 import TranscriptsList from "./TranscriptsList"
@@ -22,17 +23,27 @@ interface IProps {
 
 interface IState {
   file?: File
+  hasFileTypeError: boolean
 }
 
 class Transcripts extends Component<RouteComponentProps<{}> & IStateProps, IState> {
-  public readonly state: IState = {}
+  public readonly state: IState = {
+    hasFileTypeError: false,
+  }
 
   public render() {
     return (
       <main id="transcripts">
         {this.props.user.uid ? (
           <>
-            <TranscriptsList userId={this.props.user.uid} selectedTranscriptId={this.props.match.params.id} handleFileSelected={this.handleFileSelected} handleTranscriptIdSelected={this.handleTranscriptIdSelected} />
+            {this.state.hasFileTypeError && <FileTypeErrorModalWindow hideErrorMessage={this.hideFileTypeErrorMessage} />}
+            <TranscriptsList
+              userId={this.props.user.uid}
+              selectedTranscriptId={this.props.match.params.id}
+              handleFileSelected={this.handleFileSelected}
+              handleTranscriptIdSelected={this.handleTranscriptIdSelected}
+              showFileTypeErrorMessage={this.showFileTypeErrorMessage}
+            />
 
             {(() => {
               if (this.state.file) {
@@ -54,7 +65,7 @@ class Transcripts extends Component<RouteComponentProps<{}> & IStateProps, IStat
                     })
                     return <div>Fant ikke transkripsjon</div>
                   } else if (transcript.status && transcript.status.progress && transcript.status.progress !== ProgressType.Done) {
-                    return <Progress transcript={transcript} />
+                    return <Progress transcript={transcript} transcriptId={this.props.match.params.id} history={this.props.history} />
                   }
                 }
                 return <Transcript transcriptId={this.props.match.params.id} history={this.props.history} />
@@ -76,6 +87,10 @@ class Transcripts extends Component<RouteComponentProps<{}> & IStateProps, IStat
   public handleTranscriptIdSelected = (transcriptId: string) => {
     this.props.history.push(`/transcripts/${transcriptId}`)
   }
+
+  public showFileTypeErrorMessage = () => this.setState({ hasFileTypeError: true })
+
+  public hideFileTypeErrorMessage = () => this.setState({ hasFileTypeError: false })
 
   private transcriptCreated = (transcriptId: string) => {
     // Push the newly created transcript id

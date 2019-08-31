@@ -6,7 +6,7 @@ export const SELECT_TRANSCRIPT = "transcript/SELECT_TRANSCRIPT"
 export const SPLIT_PARAGRAPHS = "transcript/SPLIT_PARAGRAPHS"
 export const UPDATE_SPEAKER = "transcript/UPDATE_SPEAKER"
 export const UPDATE_SPEAKER_NAME = "transcript/UPDATE_SPEAKER_NAME"
-export const UPDATE_START_TIME = "transcript/UPDATE_START_TIME"
+export const UPDATE_TIMECODE = "transcript/UPDATE_TIMECODE"
 export const UPDATE_FRAMES_PER_SECOND = "transcript/UPDATE_FRAMES_PER_SECOND"
 export const UPDATE_WORDS = "transcript/UPDATE_WORDS"
 

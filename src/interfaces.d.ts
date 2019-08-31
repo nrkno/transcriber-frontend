@@ -1,12 +1,4 @@
-import {
-  ProgressType,
-  InteractionType,
-  MicrophoneDistance,
-  OriginalMediaType,
-  RecordingDeviceType,
-  Timestamp,
-  UpdateStatusType
-} from "./enums"
+import { ProgressType, InteractionType, MicrophoneDistance, OriginalMediaType, RecordingDeviceType, Timestamp, UpdateStatusType } from "./enums"
 
 interface ITranscript {
   createdAt?: firebase.firestore.Timestamp | firebase.firestore.FieldValue
@@ -41,7 +33,7 @@ interface IMetadata {
   recordingDeviceName?: string
   recordingDeviceType: RecordingDeviceType
   speechContexts?: Array<ISpeechContext>
-  startTime?: number
+  timecode?: number
 }
 
 interface ISpeechContext {
@@ -67,8 +59,8 @@ interface IWord {
 // Update Progress
 // -----------------
 interface IUpdateProgressResponse {
-    lastUpdated?: number
-    transcriptionProgressPercent?: number
-    transcriptId?: string
-    updateStatus: UpdateStatusType
+  lastUpdated?: number
+  transcriptionProgressPercent?: number
+  transcriptId?: string
+  updateStatus: UpdateStatusType
 }

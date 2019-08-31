@@ -8,22 +8,12 @@ import { withFirestore } from "react-redux-firebase"
 import { compose } from "recompose"
 import { Dispatch } from "redux"
 import { ActionCreators as UndoActionCreators } from "redux-undo"
-import {Button, Form, Modal} from "semantic-ui-react";
+import { Button, Form, Modal } from "semantic-ui-react"
 import { database } from "../firebaseApp"
 import { IParagraph, ITranscript, IWord } from "../interfaces"
 import nanoSecondsToFormattedTime from "../nanoSecondsToFormattedTime"
 import { updateMarkers } from "../store/actions/markersActions"
-import {
-  deleteWords,
-  joinParagraphs,
-  readParagraphs,
-  splitParagraphs,
-  updateFramesPerSecond,
-  updateSpeaker,
-  updateSpeakerName,
-  updateStartTime,
-  updateWords
-} from "../store/actions/transcriptActions"
+import { deleteWords, joinParagraphs, readParagraphs, splitParagraphs, updateFramesPerSecond, updateSpeaker, updateSpeakerName, updateTimecode, updateWords } from "../store/actions/transcriptActions"
 import Player from "./Player"
 import Word from "./Word"
 
@@ -36,7 +26,7 @@ interface IState {
   selectingForward: boolean
   // For Modal
   show: boolean
-  startTime?: string
+  timecode?: string
   framesPerSecond?: number
 }
 
@@ -47,14 +37,14 @@ interface IReduxStateToProps {
         paragraphIndex: number
         wordIndexStart: number
         wordIndexEnd: number
-      }
+      },
     ]
     past: [
       {
         paragraphIndex: number
         wordIndexStart: number
         wordIndexEnd: number
-      }
+      },
     ]
     present: {
       paragraphIndex?: number
@@ -81,7 +71,7 @@ interface IReduxDispatchToProps {
   updateMarkers: (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number) => void
   updateSpeaker: (paragraphIndex: number, speaker: number) => void
   updateSpeakerName: (speaker: number, name: string, paragraphIndex?: number) => void
-  updateStartTime: (startTime: number) => void
+  updateTimecode: (timecode: number) => void
   updateWords: (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => void
 }
 
@@ -131,8 +121,7 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
 
     // Check if we need to save to Firebase
 
-    if (Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 1
-        || Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 2 ) {
+    if (Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 1 || Math.abs(prevProps.transcript.past.length - this.props.transcript.past.length) === 2) {
       this.save(prevProps.transcript.present, this.props.transcript.present)
     }
   }
@@ -222,20 +211,20 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
   }
 
   public showModal = () => () => {
-    let startTime = 0
+    let timecode = 0
     let framesPerSecond = 0
 
-    if (this.props.transcript.present.metadata && this.props.transcript.present.metadata.startTime) {
-      startTime = this.props.transcript.present.metadata.startTime
+    if (this.props.transcript.present.metadata && this.props.transcript.present.metadata.timecode) {
+      timecode = this.props.transcript.present.metadata.timecode
     }
 
     if (this.props.transcript.present.metadata && this.props.transcript.present.metadata.framesPerSecond) {
       framesPerSecond = this.props.transcript.present.metadata.framesPerSecond
     }
 
-    const formattedStartTime = nanoSecondsToFormattedTime(0, startTime, true, true)
+    const formattedTimecode = nanoSecondsToFormattedTime(0, timecode, true, true)
 
-    this.setState({ show: true, startTime: formattedStartTime, framesPerSecond })
+    this.setState({ show: true, timecode: formattedTimecode, framesPerSecond })
   }
 
   public closeModal = () => this.setState({ show: false })
@@ -245,16 +234,16 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       <>
         <Modal size={"mini"} open={this.state.show} onClose={this.closeModal}>
           <Modal.Content>
-            <Form onSubmit={this.handleChangeStartTimeAndFPS}>
+            <Form onSubmit={this.handleChangeTimecodeAndFPS}>
               <Form.Field>
                 <label>Starttid</label>
-                <input placeholder='Starttid' value={this.state.startTime} onChange={this.onChangeStartTime}/>
+                <input placeholder="Starttid" value={this.state.timecode} onChange={this.onChangeTimecode} />
               </Form.Field>
               <Form.Field>
                 <label>FramesPerSecond</label>
-                <input placeholder='FramesPerSecond' value={this.state.framesPerSecond} onChange={this.onChangeFPS}/>
+                <input placeholder="FramesPerSecond" value={this.state.framesPerSecond} onChange={this.onChangeFPS} />
               </Form.Field>
-              <Button type='submit'>OK</Button>
+              <Button type="submit">OK</Button>
             </Form>
           </Modal.Content>
         </Modal>
@@ -264,7 +253,7 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
           this.props.transcript.present.paragraphs &&
           this.props.transcript.present.paragraphs.map((paragraph, i) => {
             const { speaker, startTime } = paragraph
-            const formattedStartTime = nanoSecondsToFormattedTime(this.props.transcript.present.metadata.startTime || 0, startTime, true, false)
+            const formattedStartTime = nanoSecondsToFormattedTime(this.props.transcript.present.metadata.timecode || 0, startTime, true, false)
 
             return (
               <React.Fragment key={i}>
@@ -376,23 +365,23 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
     }
   }
 
-  private onChangeStartTime = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const startTime = event.target.value
-    this.setState({ startTime })
+  private onChangeTimecode = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const timecode = event.target.value
+    this.setState({ timecode })
   }
 
   private onChangeFPS = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const framesPerSecond = event.target.value? parseInt(event.target.value) : 0
+    const framesPerSecond = event.target.value ? parseInt(event.target.value) : 0
     this.setState({ framesPerSecond })
   }
 
-  private handleChangeStartTimeAndFPS = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  private handleChangeTimecodeAndFPS = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
 
-    const { startTime, framesPerSecond } = this.state
+    const { timecode, framesPerSecond } = this.state
 
-    if (startTime) {
-      const units = startTime.split(":")
+    if (timecode) {
+      const units = timecode.split(":")
 
       if (units.length === 4) {
         const nanoseconds =
@@ -401,16 +390,16 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
           parseInt(units[2], 10) * 1e9 + // Seconds
           parseInt(units[3], 10) * 1e7 // Centiseconds
 
-        this.props.updateStartTime(nanoseconds)
+        this.props.updateTimecode(nanoseconds)
 
         ReactGA.event({
-          action: "start time changed",
+          action: "timecode changed",
           category: "editor",
         })
       }
     }
 
-    if(framesPerSecond) {
+    if (framesPerSecond) {
       this.props.updateFramesPerSecond(framesPerSecond)
 
       ReactGA.event({
@@ -419,7 +408,7 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       })
     }
 
-    this.setState({show: false})
+    this.setState({ show: false })
   }
 
   private handleChangeSpeakerName = (speaker: number) => (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
@@ -1042,17 +1031,17 @@ class Paragraphs extends Component<IReduxStateToProps & IReduxDispatchToProps, I
       })
     }
 
-    // Check if we have changes in start time
+    // Check if we have changes in timecode
 
-    if (presentTranscript.metadata && presentTranscript.metadata.startTime !== pastTranscript.metadata.startTime) {
+    if (presentTranscript.metadata && presentTranscript.metadata.timecode !== pastTranscript.metadata.timecode) {
       batch.update(transcriptDocumentReference, {
-        "metadata.startTime": presentTranscript.metadata.startTime,
+        "metadata.timecode": presentTranscript.metadata.timecode,
       })
     }
 
     // Check if we have changes in framesPerSecond
 
-    if (presentTranscript.metadata && (presentTranscript.metadata.framesPerSecond !== pastTranscript.metadata.framesPerSecond)) {
+    if (presentTranscript.metadata && presentTranscript.metadata.framesPerSecond !== pastTranscript.metadata.framesPerSecond) {
       batch.update(transcriptDocumentReference, {
         "metadata.framesPerSecond": presentTranscript.metadata.framesPerSecond,
       })
@@ -1243,7 +1232,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IReduxDispatchToProps => {
     updateMarkers: (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number) => dispatch(updateMarkers(paragraphIndex, wordIndexStart, wordIndexEnd)),
     updateSpeaker: (paragraphIndex: number, speaker: number) => dispatch(updateSpeaker(paragraphIndex, speaker)),
     updateSpeakerName: (speaker: number, name: string, paragraphIndex?: number) => dispatch(updateSpeakerName(speaker, name, paragraphIndex)),
-    updateStartTime: (startTime: number) => dispatch(updateStartTime(startTime)),
+    updateTimecode: (timecode: number) => dispatch(updateTimecode(timecode)),
     updateWords: (paragraphIndex: number, wordIndexStart: number, wordIndexEnd: number, words: string[], recalculate: boolean) => dispatch(updateWords(paragraphIndex, wordIndexStart, wordIndexEnd, words, recalculate)),
   }
 }

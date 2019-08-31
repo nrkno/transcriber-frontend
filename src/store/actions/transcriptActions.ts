@@ -1,17 +1,6 @@
 import { createAction } from "typesafe-actions"
 import { IParagraph, ITranscript } from "../../interfaces"
-import {
-    DELETE_WORDS,
-    JOIN_PARAGRAPHS,
-    READ_PARAGRAPHS,
-    SELECT_TRANSCRIPT,
-    SPLIT_PARAGRAPHS,
-    UPDATE_FRAMES_PER_SECOND,
-    UPDATE_SPEAKER,
-    UPDATE_SPEAKER_NAME,
-    UPDATE_START_TIME,
-    UPDATE_WORDS
-} from "../constants"
+import { DELETE_WORDS, JOIN_PARAGRAPHS, READ_PARAGRAPHS, SELECT_TRANSCRIPT, SPLIT_PARAGRAPHS, UPDATE_FRAMES_PER_SECOND, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_TIMECODE, UPDATE_WORDS } from "../constants"
 
 //////////
 // READ //
@@ -36,12 +25,12 @@ export const updateSpeakerName = createAction(UPDATE_SPEAKER_NAME, action => {
   return (speaker: number, name: string, paragraphIndex?: number) => action({ name, paragraphIndex, speaker })
 })
 
-export const updateStartTime = createAction(UPDATE_START_TIME, action => {
-  return (startTime: number) => action({ startTime })
+export const updateTimecode = createAction(UPDATE_TIMECODE, action => {
+  return (timecode: number) => action({ timecode })
 })
 
 export const updateFramesPerSecond = createAction(UPDATE_FRAMES_PER_SECOND, action => {
-    return (framesPerSecond: number) => action({ framesPerSecond })
+  return (framesPerSecond: number) => action({ framesPerSecond })
 })
 
 //////////

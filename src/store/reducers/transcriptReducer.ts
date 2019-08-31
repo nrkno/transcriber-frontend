@@ -3,7 +3,7 @@ import { ActionType } from "typesafe-actions"
 import { database } from "../../firebaseApp"
 import { IParagraph, ITranscript, IWord } from "../../interfaces"
 import * as transcriptActions from "../actions/transcriptActions"
-import { DELETE_WORDS, JOIN_PARAGRAPHS, READ_PARAGRAPHS, SELECT_TRANSCRIPT, SPLIT_PARAGRAPHS, UPDATE_FRAMES_PER_SECOND, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_START_TIME, UPDATE_WORDS } from "../constants"
+import { DELETE_WORDS, JOIN_PARAGRAPHS, READ_PARAGRAPHS, SELECT_TRANSCRIPT, SPLIT_PARAGRAPHS, UPDATE_FRAMES_PER_SECOND, UPDATE_SPEAKER, UPDATE_SPEAKER_NAME, UPDATE_TIMECODE, UPDATE_WORDS } from "../constants"
 
 export type TranscriptAction = ActionType<typeof transcriptActions>
 
@@ -28,8 +28,8 @@ export default (state: ITranscript = {}, action: TranscriptAction) => {
     case UPDATE_SPEAKER_NAME:
       return updateSpeakerName(state, action.payload.speaker, action.payload.name, action.payload.paragraphIndex)
 
-    case UPDATE_START_TIME:
-      return updateStartTime(state, action.payload.startTime)
+    case UPDATE_TIMECODE:
+      return updateTimecode(state, action.payload.timecode)
 
     case UPDATE_FRAMES_PER_SECOND:
       return updateFramesPerSecond(state, action.payload.framesPerSecond)
@@ -158,10 +158,10 @@ function updateWords(state: ITranscript, paragraphIndex: number, wordIndexStart:
   }
 }
 
-function updateStartTime(state: ITranscript, startTime: number) {
+function updateTimecode(state: ITranscript, timecode: number) {
   const transcript = update(state, {
     metadata: {
-      startTime: { $set: startTime },
+      timecode: { $set: timecode },
     },
   })
 
